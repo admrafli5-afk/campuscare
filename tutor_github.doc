@@ -1,0 +1,317 @@
+
+# 1. Alur Kerja Paling Sederhana
+
+Setiap kali teman kamu selesai kerja, dia melakukan:
+
+```bash
+git add .
+git commit -m "Pesan perubahan"
+git push origin main
+```
+
+Lalu kamu mengambil data terbaru dengan:
+
+```bash
+git pull origin main
+```
+
+Jadi alurnya:
+
+```text
+Teman push ke GitHub
+↓
+Kamu git pull
+↓
+Kode terbaru masuk ke VS Code kamu
+```
+
+---
+
+# 2. Cara Mengambil Update Teman di VS Code
+
+Buka folder repo `campuscare` di VS Code.
+
+Buka terminal:
+
+```text
+Terminal → New Terminal
+```
+
+Lalu ketik:
+
+```bash
+git pull origin main
+```
+
+Kalau berhasil, file terbaru dari teman akan muncul di VS Code kamu.
+
+---
+
+# 3. Setiap Mau Mulai Ngoding, Wajib Pull Dulu
+
+Sebelum kamu mengubah file apa pun, biasakan:
+
+```bash
+git pull origin main
+```
+
+Kenapa?
+
+Supaya kode lokal kamu tidak tertinggal dari GitHub.
+
+Urutan aman:
+
+```bash
+git pull origin main
+# baru mulai ngoding
+git add .
+git commit -m "Update fitur saya"
+git push origin main
+```
+
+---
+
+# 4. Kalau Pakai Branch `dev`
+
+Saran saya untuk tim: jangan langsung kerja di `main`. Lebih aman pakai branch `dev`.
+
+Alurnya:
+
+```bash
+git pull origin dev
+```
+
+Setelah kerja:
+
+```bash
+git add .
+git commit -m "Update fitur"
+git push origin dev
+```
+
+Jadi:
+
+```text
+main = versi aman/final
+dev  = tempat gabungan kerja tim
+```
+
+Untuk awal, kalau tim masih pemula, boleh pakai `main` dulu. Tapi kalau mulai banyak anggota, lebih aman pakai `dev`.
+
+---
+
+# 5. Cara Membuat Branch `dev`
+
+Satu orang saja, misalnya kamu sebagai koordinator, jalankan:
+
+```bash
+git checkout -b dev
+git push origin dev
+```
+
+Setelah itu semua anggota pindah ke `dev`:
+
+```bash
+git checkout dev
+git pull origin dev
+```
+
+Mulai sekarang semua kerja di `dev`, bukan `main`.
+
+---
+
+# 6. Cara Teman Mengupload Perubahan
+
+Setiap teman setelah selesai kerja:
+
+```bash
+git status
+git add .
+git commit -m "Deskripsi perubahan"
+git push origin dev
+```
+
+Contoh:
+
+```bash
+git add .
+git commit -m "Add mobile login screen"
+git push origin dev
+```
+
+---
+
+# 7. Cara Kamu Mengambil Perubahan Teman
+
+Kalau pakai branch `dev`:
+
+```bash
+git pull origin dev
+```
+
+Kalau masih pakai `main`:
+
+```bash
+git pull origin main
+```
+
+---
+
+# 8. Contoh Kasus
+
+Misalnya B selesai membuat halaman login Flutter.
+
+B menjalankan:
+
+```bash
+git add .
+git commit -m "Add Flutter login screen"
+git push origin dev
+```
+
+Lalu kamu mengambil update B:
+
+```bash
+git pull origin dev
+```
+
+Maka folder `mobile/` kamu akan ikut ter-update.
+
+---
+
+# 9. Aturan Supaya Tidak Tabrakan
+
+Karena tim 6 orang, pakai aturan folder:
+
+```text
+A → backend/ dan database/
+B → mobile/
+C → web-dashboard/pages/clinic/
+D → web-dashboard/pages/student-affairs/
+E → docs/ desain dan dokumentasi
+F → docs/ testing dan demo
+```
+
+Jadi jangan sembarang edit folder orang lain.
+
+Contoh:
+
+```text
+B jangan edit backend/
+C jangan edit mobile/
+D jangan edit backend/
+A jangan edit mobile/
+```
+
+Kalau semua patuh folder, kemungkinan conflict kecil.
+
+---
+
+# 10. Kalau Muncul Conflict
+
+Conflict biasanya terjadi kalau dua orang mengubah file yang sama.
+
+Contoh:
+
+```text
+C dan D sama-sama edit web-dashboard/index.html
+```
+
+Maka Git bisa bingung.
+
+Solusinya:
+
+1. buka file yang conflict,
+2. pilih bagian kode yang benar,
+3. hapus tanda conflict seperti:
+
+```text
+<<<<<<< HEAD
+kode kamu
+=======
+kode teman
+>>>>>>> branch
+```
+
+4. lalu commit ulang:
+
+```bash
+git add .
+git commit -m "Resolve conflict"
+git push origin dev
+```
+
+Tapi untuk awal, hindari conflict dengan cara kerja per folder.
+
+---
+
+# 11. Format Kerja Harian yang Saya Sarankan
+
+Setiap anggota, sebelum mulai kerja:
+
+```bash
+git pull origin dev
+```
+
+Setelah selesai kerja:
+
+```bash
+git status
+git add .
+git commit -m "Pesan perubahan"
+git push origin dev
+```
+
+Kamu sebagai koordinator, kalau mau ambil semua update:
+
+```bash
+git pull origin dev
+```
+
+---
+
+# 12. Pesan yang Bisa Kamu Kirim ke Tim
+
+Kirim ini ke anggota:
+
+```text
+Setiap mau mulai kerja:
+git pull origin dev
+
+Setelah selesai kerja:
+git add .
+git commit -m "Tulis perubahan yang dibuat"
+git push origin dev
+
+Jangan edit folder role lain tanpa izin.
+A: backend/ dan database/
+B: mobile/
+C: web-dashboard/pages/clinic/
+D: web-dashboard/pages/student-affairs/
+E: docs/ desain
+F: docs/ testing dan demo
+```
+
+---
+
+# Kesimpulan
+
+Untuk mengambil data terbaru dari upload teman:
+
+```bash
+git pull origin dev
+```
+
+atau kalau belum pakai `dev`:
+
+```bash
+git pull origin main
+```
+
+Saran saya: karena tim kamu 6 orang, gunakan branch **dev** untuk kerja bareng. Jadi alur resminya:
+
+```text
+Teman push ke dev
+Kamu pull dari dev
+Setelah stabil, dev digabung ke main
+```

@@ -9,6 +9,7 @@ import '../queue/queue_qr_screen.dart';
 import '../queue/queue_register_screen.dart';
 import '../queue/queue_status_screen.dart';
 import '../queue/queue_tracking_screen.dart';
+import '../health_profile/health_profile_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final String userName;
@@ -269,7 +270,7 @@ class HomeScreen extends StatelessWidget {
             title: 'Profil Kesehatan',
             subtitle: 'Data alergi, penyakit bawaan, dan kontak darurat',
             icon: Icons.health_and_safety_outlined,
-            onTap: () {},
+            onTap: () => openPage(context, const HealthProfileScreen()),
           ),
           const SizedBox(height: 12),
           MenuCard(

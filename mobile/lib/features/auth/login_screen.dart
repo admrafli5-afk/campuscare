@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../../core/constants/app_colors.dart';
+import '../../core/network/api_client.dart';
+import '../../core/storage/secure_storage_service.dart';
 import '../home/home_screen.dart';
+import 'services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,14 +14,71 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
+  final emailController = TextEditingController(
+    text: 'rafli@student.campuscare.test',
+  );
 
-  void dummyLogin() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
+  final passwordController = TextEditingController(text: '123456');
+
+  final storage = SecureStorageService();
+
+  bool isLoading = false;
+  bool obscurePassword = true;
+
+  Future<void> handleLogin() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      showMessage('Email dan password wajib diisi');
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    final apiClient = ApiClient(storage: storage);
+
+    final authService = AuthService(storage: storage, apiClient: apiClient);
+
+    try {
+      final user = await authService.login(email: email, password: password);
+
+      if (!mounted) return;
+
+      if (user.role != 'student') {
+        await storage.deleteToken();
+        showMessage('Akun ini bukan akun mahasiswa');
+        return;
+      }
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => HomeScreen(userName: user.name)),
+      );
+    } catch (e) {
+      showMessage(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  void showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: AppColors.danger),
     );
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -40,27 +101,47 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: AppColors.primaryGreen,
                     ),
                   ),
+
                   const SizedBox(height: 8),
+
                   const Text(
                     'Smart Clinic & Wellness Hub',
                     style: TextStyle(color: AppColors.textGray, fontSize: 15),
                   ),
+
                   const SizedBox(height: 32),
 
                   TextField(
                     controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
                     decoration: const InputDecoration(
                       labelText: 'Email Mahasiswa',
                       hintText: 'rafli@student.campuscare.test',
                     ),
                   ),
+
                   const SizedBox(height: 16),
 
                   TextField(
                     controller: passwordController,
-                    obscureText: true,
-                    decoration: const InputDecoration(labelText: 'Password'),
+                    obscureText: obscurePassword,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          obscurePassword
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            obscurePassword = !obscurePassword;
+                          });
+                        },
+                      ),
+                    ),
                   ),
+
                   const SizedBox(height: 24),
 
                   SizedBox(
@@ -74,9 +155,25 @@ class _LoginScreenState extends State<LoginScreen> {
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                      onPressed: dummyLogin,
-                      child: const Text('Masuk'),
+                      onPressed: isLoading ? null : handleLogin,
+                      child: isLoading
+                          ? const SizedBox(
+                              width: 22,
+                              height: 22,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text('Masuk'),
                     ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  const Text(
+                    'Gunakan akun mahasiswa untuk masuk ke aplikasi.',
+                    style: TextStyle(color: AppColors.textGray, fontSize: 13),
                   ),
                 ],
               ),

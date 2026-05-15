@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/storage/secure_storage_service.dart';
 import '../auth/login_screen.dart';
+import '../queue/queue_qr_screen.dart';
+import '../queue/queue_register_screen.dart';
+import '../queue/queue_status_screen.dart';
+import '../queue/queue_tracking_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final String userName;
@@ -59,28 +63,102 @@ class HomeScreen extends StatelessWidget {
     }
   }
 
-  Widget menuCard(String title, IconData icon) {
+  void openPage(BuildContext context, Widget page) {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+  }
+
+  Widget menuCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(18),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: AppColors.softMint,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, color: AppColors.primaryGreen),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: AppColors.textDark,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      color: AppColors.textGray,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right, color: AppColors.textGray),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget clinicStatusCard() {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.border),
       ),
-      child: Row(
+      child: const Row(
         children: [
-          Icon(icon, color: AppColors.primaryGreen),
-          const SizedBox(width: 12),
+          Icon(
+            Icons.local_hospital_outlined,
+            color: AppColors.primaryGreen,
+            size: 32,
+          ),
+          SizedBox(width: 14),
           Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(
-                color: AppColors.textDark,
-                fontWeight: FontWeight.w600,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Klinik Sedang Buka',
+                  style: TextStyle(
+                    color: AppColors.textDark,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'Antrean dummy: 5 mahasiswa • Estimasi ±20 menit',
+                  style: TextStyle(color: AppColors.textGray, fontSize: 13),
+                ),
+              ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: AppColors.textGray),
         ],
       ),
     );
@@ -128,25 +206,57 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
           ),
-
+          const SizedBox(height: 16),
+          clinicStatusCard(),
           const SizedBox(height: 20),
-
-          menuCard('Cek Antrean Klinik', Icons.people_alt_outlined),
+          menuCard(
+            title: 'Cek Antrean Klinik',
+            subtitle: 'Lihat jumlah antrean dan estimasi waktu',
+            icon: Icons.people_alt_outlined,
+            onTap: () => openPage(context, const QueueStatusScreen()),
+          ),
           const SizedBox(height: 12),
-
-          menuCard('Daftar Antrean', Icons.add_circle_outline),
+          menuCard(
+            title: 'Daftar Antrean',
+            subtitle: 'Input keluhan dan ambil nomor antrean',
+            icon: Icons.add_circle_outline,
+            onTap: () => openPage(context, const QueueRegisterScreen()),
+          ),
           const SizedBox(height: 12),
-
-          menuCard('QR Antrean', Icons.qr_code_2),
+          menuCard(
+            title: 'QR Antrean',
+            subtitle: 'Tampilkan QR untuk check-in di klinik',
+            icon: Icons.qr_code_2,
+            onTap: () => openPage(context, const QueueQrScreen()),
+          ),
           const SizedBox(height: 12),
-
-          menuCard('Profil Kesehatan', Icons.health_and_safety_outlined),
+          menuCard(
+            title: 'Tracking Antrean',
+            subtitle: 'Pantau status antrean saat ini',
+            icon: Icons.track_changes_outlined,
+            onTap: () => openPage(context, const QueueTrackingScreen()),
+          ),
           const SizedBox(height: 12),
-
-          menuCard('Surat Izin Sakit', Icons.description_outlined),
+          menuCard(
+            title: 'Profil Kesehatan',
+            subtitle: 'Data alergi, penyakit bawaan, dan kontak darurat',
+            icon: Icons.health_and_safety_outlined,
+            onTap: () {},
+          ),
           const SizedBox(height: 12),
-
-          menuCard('Rekomendasi Lift', Icons.accessible_forward_outlined),
+          menuCard(
+            title: 'Surat Izin Sakit',
+            subtitle: 'Lihat surat izin sakit dari klinik',
+            icon: Icons.description_outlined,
+            onTap: () {},
+          ),
+          const SizedBox(height: 12),
+          menuCard(
+            title: 'Rekomendasi Lift',
+            subtitle: 'Lihat rekomendasi fasilitas dari klinik',
+            icon: Icons.accessible_forward_outlined,
+            onTap: () {},
+          ),
         ],
       ),
     );

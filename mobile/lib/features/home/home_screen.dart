@@ -10,6 +10,8 @@ import '../queue/queue_register_screen.dart';
 import '../queue/queue_status_screen.dart';
 import '../queue/queue_tracking_screen.dart';
 import '../health_profile/health_profile_screen.dart';
+import '../letters/sick_letters_screen.dart';
+import '../facility/lift_recommendation_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final String userName;
@@ -277,14 +279,14 @@ class HomeScreen extends StatelessWidget {
             title: 'Surat Izin Sakit',
             subtitle: 'Lihat surat izin sakit dari klinik',
             icon: Icons.description_outlined,
-            onTap: () {},
+            onTap: () => openPage(context, const SickLettersScreen()),
           ),
           const SizedBox(height: 12),
           MenuCard(
             title: 'Rekomendasi Lift',
             subtitle: 'Lihat rekomendasi fasilitas dari klinik',
             icon: Icons.accessible_forward_outlined,
-            onTap: () {},
+            onTap: () => openPage(context, const LiftRecommendationScreen()),
           ),
         ],
       ),

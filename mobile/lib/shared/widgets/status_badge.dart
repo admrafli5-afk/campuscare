@@ -25,6 +25,31 @@ class StatusBadge extends StatelessWidget {
         return 'Terlewat';
       case 'cancelled':
         return 'Dibatalkan';
+
+      case 'draft':
+        return 'Draft';
+      case 'waiting_validation':
+        return 'Menunggu Validasi';
+      case 'approved':
+        return 'Disetujui';
+      case 'rejected':
+        return 'Ditolak';
+      case 'sent_to_student_affairs':
+        return 'Dikirim ke Kemahasiswaan';
+      case 'printed':
+        return 'Dicetak';
+
+      case 'draft_recommendation':
+        return 'Draft Rekomendasi';
+      case 'recommended_by_clinic':
+        return 'Direkomendasikan Klinik';
+      case 'approved_by_campus':
+        return 'Disetujui Kampus';
+      case 'rejected_by_campus':
+        return 'Ditolak Kampus';
+      case 'expired':
+        return 'Kedaluwarsa';
+
       default:
         return status;
     }
@@ -33,20 +58,34 @@ class StatusBadge extends StatelessWidget {
   Color get backgroundColor {
     switch (status) {
       case 'waiting':
+      case 'draft':
+      case 'draft_recommendation':
         return AppColors.softMint;
+
       case 'called':
-        return const Color(0xFFDBEAFE);
       case 'on_the_way':
-        return const Color(0xFFE0F2FE);
+      case 'sent_to_student_affairs':
+      case 'recommended_by_clinic':
+        return const Color(0xFFDBEAFE);
+
       case 'checked_in':
-        return const Color(0xFFDCFCE7);
-      case 'in_checkup':
-        return const Color(0xFFFEF3C7);
       case 'completed':
+      case 'approved':
+      case 'approved_by_campus':
         return const Color(0xFFDCFCE7);
+
+      case 'in_checkup':
+      case 'waiting_validation':
+      case 'printed':
+      case 'expired':
+        return const Color(0xFFFEF3C7);
+
       case 'missed':
       case 'cancelled':
+      case 'rejected':
+      case 'rejected_by_campus':
         return const Color(0xFFFEE2E2);
+
       default:
         return AppColors.softMint;
     }
@@ -55,20 +94,34 @@ class StatusBadge extends StatelessWidget {
   Color get textColor {
     switch (status) {
       case 'waiting':
+      case 'draft':
+      case 'draft_recommendation':
         return AppColors.primaryGreen;
+
       case 'called':
-        return AppColors.info;
       case 'on_the_way':
+      case 'sent_to_student_affairs':
+      case 'recommended_by_clinic':
         return AppColors.info;
+
       case 'checked_in':
-        return AppColors.success;
-      case 'in_checkup':
-        return AppColors.warning;
       case 'completed':
+      case 'approved':
+      case 'approved_by_campus':
         return AppColors.success;
+
+      case 'in_checkup':
+      case 'waiting_validation':
+      case 'printed':
+      case 'expired':
+        return AppColors.warning;
+
       case 'missed':
       case 'cancelled':
+      case 'rejected':
+      case 'rejected_by_campus':
         return AppColors.danger;
+
       default:
         return AppColors.primaryGreen;
     }
@@ -77,6 +130,7 @@ class StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      constraints: const BoxConstraints(maxWidth: 150),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
         color: backgroundColor,
@@ -84,6 +138,8 @@ class StatusBadge extends StatelessWidget {
       ),
       child: Text(
         label,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.center,
         style: TextStyle(
           color: textColor,
           fontSize: 12,

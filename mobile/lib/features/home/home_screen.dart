@@ -12,6 +12,7 @@ import '../queue/queue_tracking_screen.dart';
 import '../health_profile/health_profile_screen.dart';
 import '../letters/sick_letters_screen.dart';
 import '../facility/lift_recommendation_screen.dart';
+import '../history/medical_history_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final String userName;
@@ -275,6 +276,12 @@ class HomeScreen extends StatelessWidget {
             onTap: () => openPage(context, const HealthProfileScreen()),
           ),
           const SizedBox(height: 12),
+          MenuCard(
+            title: 'Riwayat Kesehatan',
+            subtitle: 'Lihat riwayat kunjungan dan pemeriksaan klinik',
+            icon: Icons.history_outlined,
+            onTap: () => openPage(context, const MedicalHistoryScreen()),
+          ),
           MenuCard(
             title: 'Surat Izin Sakit',
             subtitle: 'Lihat surat izin sakit dari klinik',

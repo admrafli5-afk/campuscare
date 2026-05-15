@@ -4,6 +4,7 @@ import '../../core/constants/app_colors.dart';
 import '../../shared/widgets/app_button.dart';
 import '../../shared/widgets/info_banner.dart';
 import 'queue_qr_screen.dart';
+import '../../shared/widgets/app_text_field.dart';
 
 class QueueRegisterScreen extends StatefulWidget {
   const QueueRegisterScreen({super.key});
@@ -143,13 +144,11 @@ class _QueueRegisterScreenState extends State<QueueRegisterScreen> {
 
           formCard(
             children: [
-              sectionTitle('Keluhan'),
-              TextField(
+              AppTextField(
                 controller: complaintController,
+                label: 'Keluhan',
+                hint: 'Contoh: sakit kepala, demam ringan, sakit gigi...',
                 maxLines: 4,
-                decoration: const InputDecoration(
-                  hintText: 'Contoh: sakit kepala, demam ringan, sakit gigi...',
-                ),
               ),
 
               const SizedBox(height: 18),

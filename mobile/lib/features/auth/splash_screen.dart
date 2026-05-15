@@ -36,7 +36,7 @@ class _SplashScreenState extends State<SplashScreen>
       curve: Curves.easeIn,
     );
 
-    scaleAnimation = Tween<double>(begin: 0.85, end: 1).animate(
+    scaleAnimation = Tween<double>(begin: 0.88, end: 1).animate(
       CurvedAnimation(parent: animationController, curve: Curves.easeOutBack),
     );
 
@@ -94,28 +94,23 @@ class _SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
-  Widget logoIcon() {
-    return Container(
-      width: 92,
-      height: 92,
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.16),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Colors.white.withOpacity(0.22)),
-      ),
-      child: const Icon(
-        Icons.health_and_safety_outlined,
-        color: Colors.white,
-        size: 50,
+  Widget logoImage() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: Image.asset(
+        'assets/images/logo_splash_final.png',
+        width: 130,
+        height: 130,
+        fit: BoxFit.cover,
       ),
     );
   }
 
   Widget loadingIndicator() {
     return const SizedBox(
-      width: 26,
-      height: 26,
-      child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white),
+      width: 30,
+      height: 30,
+      child: CircularProgressIndicator(strokeWidth: 3.5, color: Colors.white),
     );
   }
 
@@ -134,34 +129,41 @@ class _SplashScreenState extends State<SplashScreen>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    logoIcon(),
-                    const SizedBox(height: 24),
+                    logoImage(),
+
+                    const SizedBox(height: 14),
+
                     const Text(
-                      'CampusCare',
+                      'SatyaCare',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 34,
+                        fontSize: 50,
                         fontWeight: FontWeight.bold,
-                        letterSpacing: 0.2,
+                        letterSpacing: 1,
                       ),
                     ),
+
                     const SizedBox(height: 8),
-                    const Text(
-                      'Smart Clinic & Wellness Hub',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 15,
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: 34),
+
+                    // const Text(
+                    //   'Smart Clinic Management System',
+                    //   textAlign: TextAlign.center,
+                    //   style: TextStyle(
+                    //     color: Colors.white70,
+                    //     fontSize: 18,
+                    //     height: 1.4,
+                    //   ),
+                    // ),
+
+                    // const SizedBox(height: 34),
                     loadingIndicator(),
-                    const SizedBox(height: 14),
-                    const Text(
-                      'Memeriksa sesi login...',
-                      style: TextStyle(color: Colors.white70, fontSize: 13),
-                    ),
+
+                    const SizedBox(height: 60),
+
+                    // const Text(
+                    //   'Memeriksa sesi login...',
+                    //   style: TextStyle(color: Colors.white70, fontSize: 18),
+                    // ),
                   ],
                 ),
               ),

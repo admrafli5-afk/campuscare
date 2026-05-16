@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Klinik - CampusCare</title>
+
+  <link rel="stylesheet" href="../../assets/css/variables.css" />
+  <link rel="stylesheet" href="../../assets/css/global.css" />
+  <link rel="stylesheet" href="../../assets/css/clinic.css" />
+</head>
+<body>
+  <div class="clinic-layout">
+    <aside class="sidebar">
+      <div class="sidebar-brand">CampusCare</div>
+      <nav class="sidebar-menu">
+        <a class="active" href="./dashboard.html">Dashboard</a>
+        <a href="./queue.html">Antrean</a>
+        <a href="./qr-checkin.html">QR Check-in</a>
+        <a href="./health-check.html">Pemeriksaan</a>
+        <a href="./emergency.html">Emergency</a>
+        <a href="./sick-letter.html">Surat Sakit</a>
+        <a href="./lift-recommendation.html">Rekomendasi Lift</a>
+        <a href="./patient-history.html">Riwayat Pasien</a>
+        <a href="./statistics.html">Statistik</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="navbar">
+        <strong>Dashboard Klinik</strong>
+        <div>
+          <span id="userName">Petugas Klinik</span>
+          <button id="logoutButton" class="btn btn-danger" style="margin-left: 12px;">Logout</button>
+        </div>
+      </header>
+
+      <section class="content">
+        <h1 class="page-title">Halo, <span id="welcomeName">Petugas Klinik</span></h1>
+        <p class="page-subtitle">Pantau aktivitas layanan klinik kampus hari ini.</p>
+
+        <div class="stat-grid">
+          <div class="card">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Pasien Hari Ini</div>
+          </div>
+          <div class="card">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Antrean Menunggu</div>
+          </div>
+          <div class="card">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Sudah Check-in</div>
+          </div>
+          <div class="card">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Kasus Darurat</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../../assets/js/config.js"></script>
+  <script src="../../assets/js/api.js"></script>
+  <script src="../../assets/js/clinic/dashboard.js"></script>
+</body>
+</html>

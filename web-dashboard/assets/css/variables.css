@@ -1,0 +1,20 @@
+:root {
+    --primary-green: #047857;
+    --leaf-green: #22C55E;
+    --soft-mint: #D1FAE5;
+    --background: #F8FAFC;
+    --surface: #FFFFFF;
+    --text-dark: #0F172A;
+    --text-gray: #64748B;
+    --border: #E2E8F0;
+    --danger: #DC2626;
+    --warning: #F97316;
+    --success: #16A34A;
+    --info: #2563EB;
+  
+    --radius-md: 14px;
+    --radius-lg: 18px;
+    --radius-xl: 24px;
+  
+    --shadow-sm: 0 8px 20px rgba(15, 23, 42, 0.06);
+  }

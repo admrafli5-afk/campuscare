@@ -1,0 +1,122 @@
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--soft-mint), var(--background));
+    padding: 24px;
+  }
+  
+  .login-card {
+    width: 100%;
+    max-width: 420px;
+  }
+  
+  .login-title {
+    color: var(--primary-green);
+    font-size: 32px;
+    margin: 0;
+  }
+  
+  .login-subtitle {
+    color: var(--text-gray);
+    margin-bottom: 28px;
+  }
+  
+  .error-message {
+    display: none;
+    background: #FEE2E2;
+    color: var(--danger);
+    padding: 12px;
+    border-radius: var(--radius-md);
+    margin-bottom: 16px;
+  }
+  
+  .clinic-layout {
+    display: flex;
+    min-height: 100vh;
+  }
+  
+  .sidebar {
+    width: 260px;
+    background: var(--primary-green);
+    color: white;
+    padding: 24px 18px;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+  }
+  
+  .sidebar-brand {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 28px;
+  }
+  
+  .sidebar-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .sidebar-menu a {
+    padding: 12px 14px;
+    border-radius: 12px;
+    color: rgba(255,255,255,0.85);
+  }
+  
+  .sidebar-menu a.active,
+  .sidebar-menu a:hover {
+    background: rgba(255,255,255,0.14);
+    color: white;
+  }
+  
+  .main-content {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+    min-height: 100vh;
+  }
+  
+  .navbar {
+    height: 72px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .content {
+    padding: 28px;
+  }
+  
+  .page-title {
+    font-size: 26px;
+    margin: 0;
+    font-weight: 800;
+  }
+  
+  .page-subtitle {
+    margin-top: 6px;
+    color: var(--text-gray);
+  }
+  
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-top: 24px;
+  }
+  
+  .stat-number {
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--primary-green);
+  }
+  
+  .stat-label {
+    color: var(--text-gray);
+    margin-top: 6px;
+  }

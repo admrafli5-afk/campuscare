@@ -32,7 +32,7 @@ function getToken() {
   
     const headers = {
       "Content-Type": "application/json",
-      "Accept": "application/json",
+      Accept: "application/json",
       ...(options.headers || {}),
     };
   
@@ -40,12 +40,30 @@ function getToken() {
       headers.Authorization = `Bearer ${token}`;
     }
   
-    const response = await fetch(`${API_BASE_URL}${path}`, {
-      ...options,
-      headers,
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}${path}`, {
+        ...options,
+        headers,
+      });
   
-    return response.json();
+      const contentType = response.headers.get("content-type") || "";
+  
+      if (contentType.includes("application/json")) {
+        return await response.json();
+      }
+  
+      return {
+        success: false,
+        message: `Response bukan JSON. Status: ${response.status}`,
+        errors: [],
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: "Tidak dapat terhubung ke server. Pastikan backend berjalan.",
+        errors: [error.message],
+      };
+    }
   }
   
   function logoutWeb() {

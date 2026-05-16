@@ -39,7 +39,7 @@ class QueueService {
       throw Exception(response['message'] ?? 'Gagal mendaftar antrean');
     }
 
-    final data = response['data'];
+    final data = response['data']?['queue'] ?? response['data'];
 
     if (data == null || data is! Map<String, dynamic>) {
       throw Exception('Response antrean tidak valid');

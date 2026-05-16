@@ -1,5 +1,6 @@
 class QueueModel {
   final int? id;
+  final int? studentId;
   final String queueNumber;
   final String complaint;
   final String serviceType;
@@ -10,6 +11,7 @@ class QueueModel {
 
   QueueModel({
     this.id,
+    this.studentId,
     required this.queueNumber,
     required this.complaint,
     required this.serviceType,
@@ -21,12 +23,17 @@ class QueueModel {
 
   factory QueueModel.fromJson(Map<String, dynamic> json) {
     return QueueModel(
-      id: json['id'],
+      id: int.tryParse(json['id']?.toString() ?? ''),
+      studentId: int.tryParse(json['student_id']?.toString() ?? ''),
       queueNumber:
           json['queue_number']?.toString() ??
           json['queueNumber']?.toString() ??
           '-',
-      complaint: json['complaint']?.toString() ?? '-',
+      complaint:
+          json['complaint']?.toString() ??
+          json['keluhan']?.toString() ??
+          json['description']?.toString() ??
+          '-',
       serviceType:
           json['service_type']?.toString() ??
           json['serviceType']?.toString() ??
@@ -51,6 +58,7 @@ class QueueModel {
   factory QueueModel.dummy() {
     return QueueModel(
       id: 1,
+      studentId: 1,
       queueNumber: 'A001',
       complaint: 'Sakit kepala dan demam ringan',
       serviceType: 'Pemeriksaan Umum',

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/network/api_client.dart';
+import '../../core/storage/secure_storage_service.dart';
 import '../../shared/widgets/app_button.dart';
+import '../../shared/widgets/app_text_field.dart';
 import '../../shared/widgets/info_banner.dart';
 import 'queue_qr_screen.dart';
-import '../../shared/widgets/app_text_field.dart';
+import 'services/queue_service.dart';
 
 class QueueRegisterScreen extends StatefulWidget {
   const QueueRegisterScreen({super.key});
@@ -15,9 +18,11 @@ class QueueRegisterScreen extends StatefulWidget {
 
 class _QueueRegisterScreenState extends State<QueueRegisterScreen> {
   final complaintController = TextEditingController();
+  final storage = SecureStorageService();
 
   String selectedService = 'Pemeriksaan Umum';
   String selectedPriority = 'light';
+  bool isLoading = false;
 
   @override
   void dispose() {
@@ -25,22 +30,48 @@ class _QueueRegisterScreenState extends State<QueueRegisterScreen> {
     super.dispose();
   }
 
-  void submitDummyQueue() {
+  Future<void> submitQueue() async {
     final complaint = complaintController.text.trim();
 
     if (complaint.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Keluhan wajib diisi'),
-          backgroundColor: AppColors.danger,
-        ),
-      );
+      showMessage('Keluhan wajib diisi');
       return;
     }
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const QueueQrScreen()),
+    setState(() {
+      isLoading = true;
+    });
+
+    final apiClient = ApiClient(storage: storage);
+    final queueService = QueueService(apiClient: apiClient);
+
+    try {
+      final queue = await queueService.registerQueue(
+        complaint: complaint,
+        serviceType: selectedService,
+        priorityLevel: selectedPriority,
+      );
+
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => QueueQrScreen(queue: queue)),
+      );
+    } catch (e) {
+      showMessage(e.toString().replaceFirst('Exception: ', ''));
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  void showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: AppColors.danger),
     );
   }
 
@@ -54,21 +85,6 @@ class _QueueRegisterScreenState extends State<QueueRegisterScreen> {
           fontWeight: FontWeight.bold,
           fontSize: 15,
         ),
-      ),
-    );
-  }
-
-  Widget formCard({required List<Widget> children}) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: children,
       ),
     );
   }
@@ -134,70 +150,82 @@ class _QueueRegisterScreenState extends State<QueueRegisterScreen> {
           const SizedBox(height: 16),
 
           const InfoBanner(
-            title: 'Mode Dummy',
+            title: 'Antrean Digital',
             message:
-                'Pendaftaran antrean ini belum tersimpan ke database. Integrasi API dilakukan saat Checkpoint 2 resmi dibuka.',
-            icon: Icons.eco_outlined,
+                'Data antrean akan dikirim ke backend dan QR dibuat dari token antrean asli.',
+            icon: Icons.qr_code_2,
           ),
 
           const SizedBox(height: 20),
 
-          formCard(
-            children: [
-              AppTextField(
-                controller: complaintController,
-                label: 'Keluhan',
-                hint: 'Contoh: sakit kepala, demam ringan, sakit gigi...',
-                maxLines: 4,
-              ),
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppTextField(
+                  controller: complaintController,
+                  label: 'Keluhan',
+                  hint: 'Contoh: sakit kepala, demam ringan, sakit gigi...',
+                  maxLines: 4,
+                ),
 
-              const SizedBox(height: 18),
+                const SizedBox(height: 18),
 
-              sectionTitle('Jenis Layanan'),
-              DropdownButtonFormField<String>(
-                value: selectedService,
-                decoration: const InputDecoration(),
-                items: const [
-                  DropdownMenuItem(
-                    value: 'Pemeriksaan Umum',
-                    child: Text('Pemeriksaan Umum'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Konsultasi Ringan',
-                    child: Text('Konsultasi Ringan'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'Cedera Ringan',
-                    child: Text('Cedera Ringan'),
-                  ),
-                ],
-                onChanged: (value) {
-                  if (value == null) return;
-                  setState(() {
-                    selectedService = value;
-                  });
-                },
-              ),
+                sectionTitle('Jenis Layanan'),
+                DropdownButtonFormField<String>(
+                  value: selectedService,
+                  decoration: const InputDecoration(),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'Pemeriksaan Umum',
+                      child: Text('Pemeriksaan Umum'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Konsultasi Ringan',
+                      child: Text('Konsultasi Ringan'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Cedera Ringan',
+                      child: Text('Cedera Ringan'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value == null) return;
+                    setState(() {
+                      selectedService = value;
+                    });
+                  },
+                ),
 
-              const SizedBox(height: 18),
+                const SizedBox(height: 18),
 
-              sectionTitle('Kategori Keluhan'),
-              DropdownButtonFormField<String>(
-                value: selectedPriority,
-                decoration: const InputDecoration(),
-                items: const [
-                  DropdownMenuItem(value: 'light', child: Text('Ringan')),
-                  DropdownMenuItem(value: 'medium', child: Text('Sedang')),
-                  DropdownMenuItem(value: 'priority', child: Text('Prioritas')),
-                ],
-                onChanged: (value) {
-                  if (value == null) return;
-                  setState(() {
-                    selectedPriority = value;
-                  });
-                },
-              ),
-            ],
+                sectionTitle('Kategori Keluhan'),
+                DropdownButtonFormField<String>(
+                  value: selectedPriority,
+                  decoration: const InputDecoration(),
+                  items: const [
+                    DropdownMenuItem(value: 'light', child: Text('Ringan')),
+                    DropdownMenuItem(value: 'medium', child: Text('Sedang')),
+                    DropdownMenuItem(
+                      value: 'priority',
+                      child: Text('Prioritas'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value == null) return;
+                    setState(() {
+                      selectedPriority = value;
+                    });
+                  },
+                ),
+              ],
+            ),
           ),
 
           const SizedBox(height: 20),
@@ -232,9 +260,10 @@ class _QueueRegisterScreenState extends State<QueueRegisterScreen> {
           const SizedBox(height: 24),
 
           AppButton(
-            text: 'Ambil Nomor Antrean Dummy',
+            text: 'Ambil Nomor Antrean',
             icon: Icons.qr_code_2,
-            onPressed: submitDummyQueue,
+            isLoading: isLoading,
+            onPressed: submitQueue,
           ),
         ],
       ),

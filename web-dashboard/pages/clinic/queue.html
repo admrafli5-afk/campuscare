@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Antrean Klinik - CampusCare</title>
+
+  <link rel="stylesheet" href="../../assets/css/variables.css" />
+  <link rel="stylesheet" href="../../assets/css/global.css" />
+  <link rel="stylesheet" href="../../assets/css/clinic.css" />
+</head>
+<body>
+  <div class="clinic-layout">
+    <aside class="sidebar">
+      <div class="sidebar-brand">CampusCare</div>
+      <nav class="sidebar-menu">
+        <a href="./dashboard.html">Dashboard</a>
+        <a class="active" href="./queue.html">Antrean</a>
+        <a href="./qr-checkin.html">QR Check-in</a>
+        <a href="./health-check.html">Pemeriksaan</a>
+        <a href="./emergency.html">Emergency</a>
+        <a href="./sick-letter.html">Surat Sakit</a>
+        <a href="./lift-recommendation.html">Rekomendasi Lift</a>
+        <a href="./patient-history.html">Riwayat Pasien</a>
+        <a href="./statistics.html">Statistik</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="navbar">
+        <strong>Antrean Klinik</strong>
+        <div>
+          <span id="userName">Petugas Klinik</span>
+          <button id="logoutButton" class="btn btn-danger" style="margin-left: 12px;">Logout</button>
+        </div>
+      </header>
+
+      <section class="content">
+        <h1 class="page-title">Antrean Hari Ini</h1>
+        <p class="page-subtitle">Pantau daftar mahasiswa yang mendaftar antrean klinik hari ini.</p>
+
+        <div class="stat-grid">
+          <div class="card">
+            <div id="totalQueue" class="stat-number">0</div>
+            <div class="stat-label">Total Antrean</div>
+          </div>
+          <div class="card">
+            <div id="waitingQueue" class="stat-number">0</div>
+            <div class="stat-label">Menunggu</div>
+          </div>
+          <div class="card">
+            <div id="checkedInQueue" class="stat-number">0</div>
+            <div class="stat-label">Hadir</div>
+          </div>
+          <div class="card">
+            <div id="completedQueue" class="stat-number">0</div>
+            <div class="stat-label">Selesai</div>
+          </div>
+        </div>
+
+        <br />
+
+        <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px;">
+            <h2 style="margin:0;">Daftar Antrean</h2>
+            <button id="refreshButton" class="btn btn-primary">Refresh</button>
+          </div>
+
+          <div id="loadingState">Memuat data antrean...</div>
+          <div id="errorState" class="error-message"></div>
+
+          <table class="table" id="queueTable" style="display:none;">
+            <thead>
+              <tr>
+                <th>No. Antrean</th>
+                <th>Nama</th>
+                <th>NIM</th>
+                <th>Keluhan</th>
+                <th>Estimasi</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="queueTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../../assets/js/config.js"></script>
+  <script src="../../assets/js/api.js"></script>
+  <script src="../../assets/js/clinic/queue.js"></script>
+</body>
+</html>

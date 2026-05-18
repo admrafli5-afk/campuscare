@@ -24,14 +24,15 @@ class _QueueTrackingScreenState extends State<QueueTrackingScreen> {
   bool isLoading = true;
   String? errorMessage;
   QueueModel? queue;
+  List<QueueModel> histories = [];
 
   @override
   void initState() {
     super.initState();
-    loadCurrentQueue();
+    loadQueueData();
   }
 
-  Future<void> loadCurrentQueue() async {
+  Future<void> loadQueueData() async {
     setState(() {
       isLoading = true;
       errorMessage = null;
@@ -41,12 +42,14 @@ class _QueueTrackingScreenState extends State<QueueTrackingScreen> {
     final queueService = QueueService(apiClient: apiClient);
 
     try {
-      final result = await queueService.getMyCurrentQueue();
+      final currentResult = await queueService.getMyCurrentQueue();
+      final historyResult = await queueService.getMyQueueHistory();
 
       if (!mounted) return;
 
       setState(() {
-        queue = result;
+        queue = currentResult;
+        histories = historyResult;
         isLoading = false;
       });
     } catch (e) {
@@ -79,6 +82,58 @@ class _QueueTrackingScreenState extends State<QueueTrackingScreen> {
 
   bool isActiveStep(String currentStatus, String stepStatus) {
     return currentStatus == stepStatus;
+  }
+
+  String formatDate(String? rawDate) {
+    if (rawDate == null || rawDate.isEmpty || rawDate == 'null') {
+      return '-';
+    }
+
+    try {
+      final date = DateTime.parse(rawDate).toLocal();
+
+      final day = date.day.toString().padLeft(2, '0');
+      final month = monthName(date.month);
+      final year = date.year.toString();
+
+      final hour = date.hour.toString().padLeft(2, '0');
+      final minute = date.minute.toString().padLeft(2, '0');
+
+      return '$day $month $year, $hour:$minute';
+    } catch (_) {
+      return rawDate;
+    }
+  }
+
+  String monthName(int month) {
+    switch (month) {
+      case 1:
+        return 'Jan';
+      case 2:
+        return 'Feb';
+      case 3:
+        return 'Mar';
+      case 4:
+        return 'Apr';
+      case 5:
+        return 'Mei';
+      case 6:
+        return 'Jun';
+      case 7:
+        return 'Jul';
+      case 8:
+        return 'Agu';
+      case 9:
+        return 'Sep';
+      case 10:
+        return 'Okt';
+      case 11:
+        return 'Nov';
+      case 12:
+        return 'Des';
+      default:
+        return '';
+    }
   }
 
   Widget timelineItem({
@@ -161,7 +216,6 @@ class _QueueTrackingScreenState extends State<QueueTrackingScreen> {
             style: TextStyle(color: AppColors.textGray),
           ),
           const SizedBox(height: 8),
-
           Row(
             children: [
               Expanded(
@@ -177,9 +231,7 @@ class _QueueTrackingScreenState extends State<QueueTrackingScreen> {
               StatusBadge(status: queue.status),
             ],
           ),
-
           const SizedBox(height: 12),
-
           Text(
             queue.serviceType,
             style: const TextStyle(
@@ -187,16 +239,17 @@ class _QueueTrackingScreenState extends State<QueueTrackingScreen> {
               fontWeight: FontWeight.w700,
             ),
           ),
-
           const SizedBox(height: 4),
-
           Text(
             queue.complaint,
             style: const TextStyle(color: AppColors.textGray, height: 1.35),
           ),
-
+          const SizedBox(height: 10),
+          Text(
+            'Dibuat: ${formatDate(queue.createdAt)}',
+            style: const TextStyle(color: AppColors.textGray, fontSize: 12.5),
+          ),
           const SizedBox(height: 14),
-
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
@@ -222,13 +275,11 @@ class _QueueTrackingScreenState extends State<QueueTrackingScreen> {
               ],
             ),
           ),
-
           const SizedBox(height: 16),
-
           AppButton(
             text: 'Refresh Status',
             icon: Icons.refresh,
-            onPressed: loadCurrentQueue,
+            onPressed: loadQueueData,
           ),
         ],
       ),
@@ -240,23 +291,19 @@ class _QueueTrackingScreenState extends State<QueueTrackingScreen> {
 
     return RefreshIndicator(
       color: AppColors.primaryGreen,
-      onRefresh: loadCurrentQueue,
+      onRefresh: loadQueueData,
       child: ListView(
         padding: const EdgeInsets.all(20),
         children: [
           activeQueueCard(queue),
-
           const SizedBox(height: 16),
-
           const InfoBanner(
             title: 'Status Real-time',
             message:
                 'Tarik layar ke bawah atau tekan Refresh Status setelah petugas melakukan check-in QR.',
             icon: Icons.notifications_active_outlined,
           ),
-
           const SizedBox(height: 24),
-
           const Text(
             'Perjalanan Antrean',
             style: TextStyle(
@@ -265,9 +312,7 @@ class _QueueTrackingScreenState extends State<QueueTrackingScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-
           const SizedBox(height: 16),
-
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
@@ -317,7 +362,7 @@ class _QueueTrackingScreenState extends State<QueueTrackingScreen> {
                 timelineItem(
                   title: 'Selesai',
                   description:
-                      'Pemeriksaan selesai dan riwayat kunjungan diperbarui.',
+                      'Pemeriksaan selesai dan riwayat antrean tersimpan.',
                   active: isActiveStep(status, 'completed'),
                   completed: false,
                   icon: Icons.check_circle_outline,
@@ -326,6 +371,105 @@ class _QueueTrackingScreenState extends State<QueueTrackingScreen> {
               ],
             ),
           ),
+          const SizedBox(height: 24),
+          historySection(),
+        ],
+      ),
+    );
+  }
+
+  Widget historySection() {
+    if (histories.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: const Text(
+          'Belum ada riwayat antrean.',
+          style: TextStyle(color: AppColors.textGray),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Riwayat Antrean',
+          style: TextStyle(
+            color: AppColors.textDark,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 14),
+        ...histories.map(historyCard),
+      ],
+    );
+  }
+
+  Widget historyCard(QueueModel history) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: AppColors.softMint,
+              borderRadius: BorderRadius.circular(17),
+            ),
+            child: const Icon(
+              Icons.receipt_long_outlined,
+              color: AppColors.primaryGreen,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  history.queueNumber,
+                  style: const TextStyle(
+                    color: AppColors.textDark,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  history.complaint,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: AppColors.textGray,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  formatDate(history.createdAt),
+                  style: const TextStyle(
+                    color: AppColors.textGray,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          StatusBadge(status: history.status),
         ],
       ),
     );
@@ -334,28 +478,46 @@ class _QueueTrackingScreenState extends State<QueueTrackingScreen> {
   Widget emptyQueueView() {
     return RefreshIndicator(
       color: AppColors.primaryGreen,
-      onRefresh: loadCurrentQueue,
+      onRefresh: loadQueueData,
       child: ListView(
         padding: const EdgeInsets.all(20),
-        children: const [
-          SizedBox(height: 120),
-          Icon(Icons.event_busy_outlined, color: AppColors.textGray, size: 64),
-          SizedBox(height: 16),
-          Text(
-            'Belum Ada Antrean Aktif',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: AppColors.textDark,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+        children: [
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: const Column(
+              children: [
+                Icon(
+                  Icons.event_available_outlined,
+                  color: AppColors.primaryGreen,
+                  size: 58,
+                ),
+                SizedBox(height: 14),
+                Text(
+                  'Belum Ada Antrean Aktif',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: AppColors.textDark,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Kamu sedang tidak memiliki antrean aktif. Riwayat antrean sebelumnya tetap bisa dilihat di bawah.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: AppColors.textGray, height: 1.4),
+                ),
+              ],
             ),
           ),
-          SizedBox(height: 8),
-          Text(
-            'Silakan daftar antrean terlebih dahulu untuk melihat tracking antrean.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.textGray, height: 1.4),
-          ),
+          const SizedBox(height: 22),
+          historySection(),
         ],
       ),
     );
@@ -368,17 +530,13 @@ class _QueueTrackingScreenState extends State<QueueTrackingScreen> {
     if (isLoading) {
       body = const LoadingView(message: 'Memuat tracking antrean...');
     } else if (errorMessage != null) {
-      body = ErrorView(message: errorMessage!, onRetry: loadCurrentQueue);
+      body = ErrorView(message: errorMessage!, onRetry: loadQueueData);
     } else if (queue == null) {
       body = emptyQueueView();
     } else {
       body = trackingContent(queue!);
     }
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(title: const Text('Tracking Antrean')),
-      body: body,
-    );
+    return Scaffold(backgroundColor: AppColors.background, body: body);
   }
 }

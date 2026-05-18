@@ -9,4 +9,5 @@ class ApiConstants {
   static const String queuePublicStatus = '$baseUrl/queue/public-status';
   static const String queueRegister = '$baseUrl/queue/register';
   static const String queueMyCurrent = '$baseUrl/queue/my-current';
+  static const String queueMyHistory = '$baseUrl/queue/my-history';
 }

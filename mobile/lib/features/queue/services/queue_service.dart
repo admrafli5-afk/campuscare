@@ -1,6 +1,6 @@
-import '../../../../core/constants/api_constants.dart';
-import '../../../../core/network/api_client.dart';
-import '../../../../models/queue_model.dart';
+import '../../../core/constants/api_constants.dart';
+import '../../../core/network/api_client.dart';
+import '../../../models/queue_model.dart';
 
 class QueueService {
   final ApiClient apiClient;
@@ -17,7 +17,13 @@ class QueueService {
       throw Exception(response['message'] ?? 'Gagal mengambil status antrean');
     }
 
-    return response['data'] ?? {};
+    final data = response['data'];
+
+    if (data == null || data is! Map<String, dynamic>) {
+      return {};
+    }
+
+    return data;
   }
 
   Future<QueueModel> registerQueue({
@@ -69,5 +75,31 @@ class QueueService {
     }
 
     return QueueModel.fromJson(data);
+  }
+
+  Future<List<QueueModel>> getMyQueueHistory() async {
+    final response = await apiClient.get(
+      ApiConstants.queueMyHistory,
+      withAuth: true,
+    );
+
+    if (response['success'] != true) {
+      throw Exception(response['message'] ?? 'Gagal mengambil riwayat antrean');
+    }
+
+    final data = response['data'];
+
+    if (data == null) {
+      return [];
+    }
+
+    if (data is! List) {
+      throw Exception('Response riwayat antrean tidak valid');
+    }
+
+    return data
+        .whereType<Map<String, dynamic>>()
+        .map((item) => QueueModel.fromJson(item))
+        .toList();
   }
 }

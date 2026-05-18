@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Surat Izin Sakit - CampusCare</title>
+
+  <link rel="stylesheet" href="../../assets/css/variables.css" />
+  <link rel="stylesheet" href="../../assets/css/global.css" />
+  <link rel="stylesheet" href="../../assets/css/clinic.css" />
+</head>
+<body>
+  <div class="clinic-layout">
+    <aside class="sidebar">
+      <div class="sidebar-brand">CampusCare</div>
+      <nav class="sidebar-menu">
+        <a href="./dashboard.html">Dashboard</a>
+        <a href="./queue.html">Antrean</a>
+        <a href="./qr-checkin.html">QR Check-in</a>
+        <a href="./health-check.html">Pemeriksaan</a>
+        <a href="./emergency.html">Emergency</a>
+        <a class="active" href="./sick-letter.html">Surat Sakit</a>
+        <a href="./lift-recommendation.html">Rekomendasi Lift</a>
+        <a href="./patient-history.html">Riwayat Pasien</a>
+        <a href="./statistics.html">Statistik</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="navbar">
+        <strong>Surat Izin Sakit</strong>
+
+        <div>
+          <span id="userName">Petugas Klinik</span>
+          <button id="logoutButton" class="btn btn-danger" style="margin-left: 12px;">
+            Logout
+          </button>
+        </div>
+      </header>
+
+      <section class="content">
+        <h1 class="page-title">Pembuatan Surat Izin Sakit</h1>
+        <p class="page-subtitle">
+          Buat surat izin sakit berdasarkan hasil pemeriksaan klinik mahasiswa.
+        </p>
+
+        <div class="card">
+          <div id="errorMessage" class="error-message"></div>
+          <div id="successMessage" class="badge badge-success" style="display:none; margin-bottom: 16px;"></div>
+
+          <form id="sickLetterForm">
+            <label>Pilih Pasien</label>
+            <select id="queueSelect" class="input">
+              <option value="">Memuat pasien...</option>
+            </select>
+
+            <br /><br />
+
+            <div class="form-grid">
+              <div>
+                <label>Tanggal Mulai Izin</label>
+                <input id="startDate" class="input" type="date" />
+              </div>
+
+              <div>
+                <label>Tanggal Selesai Izin</label>
+                <input id="endDate" class="input" type="date" />
+              </div>
+
+              <div class="full">
+                <label>Diagnosis / Keterangan Sakit</label>
+                <textarea
+                  id="diagnosis"
+                  class="input"
+                  rows="3"
+                  placeholder="Contoh: Demam, sakit kepala, dan perlu istirahat"
+                ></textarea>
+              </div>
+
+              <div class="full">
+                <label>Catatan Dokter / Petugas Klinik</label>
+                <textarea
+                  id="notes"
+                  class="input"
+                  rows="4"
+                  placeholder="Contoh: Mahasiswa disarankan istirahat dan tidak mengikuti aktivitas akademik sementara"
+                ></textarea>
+              </div>
+            </div>
+
+            <br />
+
+            <button id="saveButton" class="btn btn-primary" type="submit">
+              Buat Surat Sakit
+            </button>
+
+            <button id="previewButton" class="btn" type="button" style="margin-left: 8px;">
+              Preview Surat
+            </button>
+
+            <button id="refreshButton" class="btn" type="button" style="margin-left: 8px;">
+              Refresh Pasien
+            </button>
+          </form>
+        </div>
+
+        <br />
+
+        <div id="previewCard" class="card" style="display:none;">
+          <h2 style="text-align:center; margin-bottom: 4px;">SURAT IZIN SAKIT</h2>
+          <p style="text-align:center; color: var(--text-gray); margin-top: 0;">
+            CampusCare - Klinik Kampus
+          </p>
+
+          <hr style="border: none; border-top: 1px solid var(--border); margin: 20px 0;" />
+
+          <p>
+            Yang bertanda tangan di bawah ini menerangkan bahwa mahasiswa berikut:
+          </p>
+
+          <table class="table">
+            <tbody>
+              <tr>
+                <th>Nama</th>
+                <td id="previewName">-</td>
+              </tr>
+              <tr>
+                <th>NIM</th>
+                <td id="previewNim">-</td>
+              </tr>
+              <tr>
+                <th>Nomor Antrean</th>
+                <td id="previewQueueNumber">-</td>
+              </tr>
+              <tr>
+                <th>Diagnosis</th>
+                <td id="previewDiagnosis">-</td>
+              </tr>
+              <tr>
+                <th>Periode Izin</th>
+                <td id="previewPeriod">-</td>
+              </tr>
+              <tr>
+                <th>Catatan</th>
+                <td id="previewNotes">-</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p style="margin-top: 20px;">
+            Demikian surat ini dibuat untuk digunakan sebagaimana mestinya.
+          </p>
+
+          <div style="margin-top: 36px; text-align:right;">
+            <p>Petugas Klinik,</p>
+            <br /><br />
+            <p id="previewOfficerName">Petugas Klinik</p>
+          </div>
+        </div>
+
+        <br />
+
+        <div class="card">
+          <h2>Riwayat Surat Sakit</h2>
+          <p style="color: var(--text-gray);">
+            Data riwayat akan aktif setelah endpoint CP3 tersedia dari backend.
+          </p>
+
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Nama</th>
+                <th>NIM</th>
+                <th>Periode</th>
+                <th>Diagnosis</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="letterTableBody">
+              <tr>
+                <td colspan="5">Belum ada data surat sakit.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../../assets/js/config.js"></script>
+  <script src="../../assets/js/api.js"></script>
+  <script src="../../assets/js/clinic/sick-letter.js"></script>
+</body>
+</html>

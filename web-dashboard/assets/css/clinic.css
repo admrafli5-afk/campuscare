@@ -120,3 +120,182 @@
     color: var(--text-gray);
     margin-top: 6px;
   }
+
+
+  .action-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  
+  .btn-sm {
+    padding: 7px 10px;
+    font-size: 12px;
+    border-radius: 10px;
+  }
+  
+  .btn-secondary {
+    background: #E2E8F0;
+    color: var(--text-dark);
+  }
+  
+  .btn-warning {
+    background: var(--warning);
+    color: white;
+  }
+  
+  .btn-info {
+    background: var(--info);
+    color: white;
+  }
+  
+  .btn-success {
+    background: var(--success);
+    color: white;
+  }
+
+  /* ===== Queue Table Improvement ===== */
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+.table th {
+  color: var(--text-dark);
+  font-weight: 800;
+  font-size: 14px;
+  white-space: nowrap;
+  padding: 14px 12px;
+  background: #F8FAFC;
+}
+
+.table td {
+  padding: 14px 12px;
+  font-size: 14px;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--border);
+}
+
+.table tbody tr:hover {
+  background: #F8FAFC;
+}
+
+.table td:nth-child(4) {
+  max-width: 240px;
+  line-height: 1.4;
+}
+
+.table td:nth-child(7) {
+  min-width: 260px;
+}
+
+/* ===== Badge Status ===== */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 11px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.badge-success {
+  background: #DCFCE7;
+  color: var(--success);
+}
+
+.badge-warning {
+  background: #FFEDD5;
+  color: var(--warning);
+}
+
+.badge-info {
+  background: #DBEAFE;
+  color: var(--info);
+}
+
+.badge-danger {
+  background: #FEE2E2;
+  color: var(--danger);
+}
+
+/* ===== Action Buttons ===== */
+
+.action-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 240px;
+}
+
+.btn-sm {
+  padding: 8px 11px;
+  font-size: 12px;
+  border-radius: 10px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.btn-secondary {
+  background: #E2E8F0;
+  color: var(--text-dark);
+}
+
+.btn-warning {
+  background: var(--warning);
+  color: white;
+}
+
+.btn-info {
+  background: var(--info);
+  color: white;
+}
+
+.btn-success {
+  background: var(--success);
+  color: white;
+}
+
+/* ===== Queue Card Header ===== */
+
+.queue-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.queue-card-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+/* ===== Responsive ===== */
+
+@media (max-width: 900px) {
+  .table {
+    min-width: 760px;
+  }
+
+  .queue-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .action-group {
+    min-width: 220px;
+  }
+}

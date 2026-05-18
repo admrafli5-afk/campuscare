@@ -2,21 +2,11 @@ const pool = require('../config/db');
 const { successResponse, errorResponse } = require('../utils/response');
 const { generateQrToken } = require('../services/qrToken.service');
 const {
+
   getEstimatedMinutesByPriority,
   classifyPriorityByComplaint,
   calculateEstimatedWaitingMinutes,
 } = require('../services/queue.service');
-
-/**
- * Generate queue number safely.
- * 
- * Masalah sebelumnya:
- * Backend bisa membuat A001/A002/A003 lagi ketika antrean aktif kosong,
- * padahal queue_number lama masih ada di database.
- *
- * Solusi:
- * Ambil queue_number terbesar yang pernah ada, lalu tambah 1.
- */
 async function generateSafeQueueNumber() {
   const [lastQueueRows] = await pool.query(`
     SELECT queue_number
@@ -39,7 +29,6 @@ async function generateSafeQueueNumber() {
 
   return `A${String(nextNumber).padStart(3, '0')}`;
 }
-
 async function getPublicQueueStatus(req, res) {
   try {
     const [activeRows] = await pool.query(
@@ -70,8 +59,7 @@ async function getPublicQueueStatus(req, res) {
 
     return successResponse(res, 'Status antrean klinik berhasil diambil', {
       clinic_status: 'open',
-      currently_serving:
-        servingRows.length > 0 ? servingRows[0].queue_number : null,
+      currently_serving: servingRows.length > 0 ? servingRows[0].queue_number : null,
       active_queue_count: activeRows[0].active_queue_count,
       estimated_wait_minutes: estimatedWaitMinutes,
       crowd_level: crowdLevel,
@@ -79,12 +67,7 @@ async function getPublicQueueStatus(req, res) {
     });
   } catch (error) {
     console.error(error);
-    return errorResponse(
-      res,
-      'Gagal mengambil status antrean',
-      [error.message],
-      500
-    );
+    return errorResponse(res, 'Gagal mengambil status antrean', [error.message], 500);
   }
 }
 
@@ -92,7 +75,7 @@ async function registerQueue(req, res) {
   try {
     const { complaint, service_type } = req.body;
 
-    if (!complaint || complaint.trim() === '') {
+    if (!complaint) {
       return errorResponse(res, 'Keluhan wajib diisi', [], 400);
     }
 
@@ -126,10 +109,7 @@ async function registerQueue(req, res) {
       );
     }
 
-    const cleanComplaint = complaint.trim();
-    const selectedServiceType = service_type || 'Pemeriksaan Umum';
-
-    const priorityLevel = classifyPriorityByComplaint(cleanComplaint);
+    const priorityLevel = classifyPriorityByComplaint(complaint);
 
     if (priorityLevel === 'emergency') {
       return errorResponse(
@@ -154,8 +134,8 @@ async function registerQueue(req, res) {
       [
         studentId,
         queueNumber,
-        cleanComplaint,
-        selectedServiceType,
+        complaint,
+        service_type || 'Pemeriksaan Umum',
         priorityLevel,
         estimatedMinutes,
         qrToken,
@@ -167,14 +147,11 @@ async function registerQueue(req, res) {
       'Antrean berhasil dibuat',
       {
         id: result.insertId,
-        student_id: studentId,
         queue_number: queueNumber,
-        complaint: cleanComplaint,
-        service_type: selectedServiceType,
-        priority_level: priorityLevel,
-        estimated_minutes: estimatedMinutes,
         qr_token: qrToken,
         status: 'waiting',
+        priority_level: priorityLevel,
+        estimated_minutes: estimatedMinutes,
         arrival_recommendation:
           estimatedMinutes > 15
             ? 'Kamu boleh tetap mengikuti kegiatan. Datang ke klinik sekitar 10 menit sebelum estimasi panggilan.'
@@ -204,7 +181,6 @@ async function getMyCurrentQueue(req, res) {
     const [rows] = await pool.query(
       `SELECT 
         id,
-        student_id,
         queue_number,
         complaint,
         service_type,
@@ -232,12 +208,7 @@ async function getMyCurrentQueue(req, res) {
     return successResponse(res, 'Antrean aktif berhasil diambil', rows[0]);
   } catch (error) {
     console.error(error);
-    return errorResponse(
-      res,
-      'Gagal mengambil antrean aktif',
-      [error.message],
-      500
-    );
+    return errorResponse(res, 'Gagal mengambil antrean aktif', [error.message], 500);
   }
 }
 
@@ -246,13 +217,11 @@ async function getTodayQueues(req, res) {
     const [rows] = await pool.query(
       `SELECT 
         q.id,
-        q.student_id,
         q.queue_number,
         q.complaint,
         q.service_type,
         q.priority_level,
         q.estimated_minutes,
-        q.qr_token,
         q.status,
         q.created_at,
         q.called_at,
@@ -273,12 +242,7 @@ async function getTodayQueues(req, res) {
     return successResponse(res, 'Data antrean hari ini berhasil diambil', rows);
   } catch (error) {
     console.error(error);
-    return errorResponse(
-      res,
-      'Gagal mengambil antrean hari ini',
-      [error.message],
-      500
-    );
+    return errorResponse(res, 'Gagal mengambil antrean hari ini', [error.message], 500);
   }
 }
 
@@ -294,11 +258,6 @@ async function checkInQueue(req, res) {
       `SELECT 
         q.id,
         q.queue_number,
-        q.complaint,
-        q.service_type,
-        q.priority_level,
-        q.estimated_minutes,
-        q.qr_token,
         q.status,
         q.student_id,
         u.name AS student_name,
@@ -338,16 +297,10 @@ async function checkInQueue(req, res) {
     return successResponse(res, 'Check-in berhasil', {
       ...queue,
       status: 'checked_in',
-      checked_in_at: new Date(),
     });
   } catch (error) {
     console.error(error);
-    return errorResponse(
-      res,
-      'Gagal melakukan check-in',
-      [error.message],
-      500
-    );
+    return errorResponse(res, 'Gagal melakukan check-in', [error.message], 500);
   }
 }
 
@@ -411,20 +364,61 @@ async function updateQueueStatus(req, res) {
     });
   } catch (error) {
     console.error(error);
+    return errorResponse(res, 'Gagal memperbarui status antrean', [error.message], 500);
+  }
+}
+async function getMyQueueHistory(req, res) {
+  try {
+    const [studentRows] = await pool.query(
+      `SELECT id FROM students WHERE user_id = ? LIMIT 1`,
+      [req.user.id]
+    );
+
+    if (studentRows.length === 0) {
+      return errorResponse(res, 'Data mahasiswa tidak ditemukan', [], 404);
+    }
+
+    const studentId = studentRows[0].id;
+
+    const [rows] = await pool.query(
+      `SELECT 
+        id,
+        student_id,
+        queue_number,
+        complaint,
+        service_type,
+        priority_level,
+        estimated_minutes,
+        qr_token,
+        status,
+        created_at,
+        called_at,
+        checked_in_at,
+        completed_at
+       FROM queues
+       WHERE student_id = ?
+       ORDER BY created_at DESC
+       LIMIT 20`,
+      [studentId]
+    );
+
+    return successResponse(res, 'Riwayat antrean berhasil diambil', rows);
+  } catch (error) {
+    console.error(error);
     return errorResponse(
       res,
-      'Gagal memperbarui status antrean',
+      'Gagal mengambil riwayat antrean',
       [error.message],
       500
     );
   }
 }
-
 module.exports = {
   getPublicQueueStatus,
   registerQueue,
   getMyCurrentQueue,
   getTodayQueues,
   checkInQueue,
+  getMyQueueHistory,
   updateQueueStatus,
 };

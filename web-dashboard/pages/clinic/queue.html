@@ -13,6 +13,7 @@
   <div class="clinic-layout">
     <aside class="sidebar">
       <div class="sidebar-brand">CampusCare</div>
+
       <nav class="sidebar-menu">
         <a href="./dashboard.html">Dashboard</a>
         <a class="active" href="./queue.html">Antrean</a>
@@ -29,29 +30,41 @@
     <main class="main-content">
       <header class="navbar">
         <strong>Antrean Klinik</strong>
+
         <div>
           <span id="userName">Petugas Klinik</span>
-          <button id="logoutButton" class="btn btn-danger" style="margin-left: 12px;">Logout</button>
+          <button
+            id="logoutButton"
+            class="btn btn-danger"
+            style="margin-left: 12px;"
+          >
+            Logout
+          </button>
         </div>
       </header>
 
       <section class="content">
         <h1 class="page-title">Antrean Hari Ini</h1>
-        <p class="page-subtitle">Pantau daftar mahasiswa yang mendaftar antrean klinik hari ini.</p>
+        <p class="page-subtitle">
+          Pantau daftar mahasiswa yang mendaftar antrean klinik hari ini.
+        </p>
 
         <div class="stat-grid">
           <div class="card">
             <div id="totalQueue" class="stat-number">0</div>
             <div class="stat-label">Total Antrean</div>
           </div>
+
           <div class="card">
             <div id="waitingQueue" class="stat-number">0</div>
             <div class="stat-label">Menunggu</div>
           </div>
+
           <div class="card">
             <div id="checkedInQueue" class="stat-number">0</div>
             <div class="stat-label">Hadir</div>
           </div>
+
           <div class="card">
             <div id="completedQueue" class="stat-number">0</div>
             <div class="stat-label">Selesai</div>
@@ -61,15 +74,25 @@
         <br />
 
         <div class="card">
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px;">
-            <h2 style="margin:0;">Daftar Antrean</h2>
-            <button id="refreshButton" class="btn btn-primary">Refresh</button>
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              gap: 12px;
+              margin-bottom: 16px;
+            "
+          >
+            <h2 style="margin: 0;">Daftar Antrean</h2>
+            <button id="refreshButton" class="btn btn-primary">
+              Refresh
+            </button>
           </div>
 
           <div id="loadingState">Memuat data antrean...</div>
           <div id="errorState" class="error-message"></div>
 
-          <table class="table" id="queueTable" style="display:none;">
+          <table class="table" id="queueTable" style="display: none;">
             <thead>
               <tr>
                 <th>No. Antrean</th>
@@ -78,9 +101,15 @@
                 <th>Keluhan</th>
                 <th>Estimasi</th>
                 <th>Status</th>
+                <th>Aksi</th>
               </tr>
             </thead>
-            <tbody id="queueTableBody"></tbody>
+
+            <tbody id="queueTableBody">
+              <tr>
+                <td colspan="7">Belum ada antrean hari ini.</td>
+              </tr>
+            </tbody>
           </table>
         </div>
       </section>

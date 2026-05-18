@@ -1,7 +1,7 @@
 class ApiConstants {
   // Untuk HP fisik, gunakan IP laptop.
   // Pastikan HP dan laptop berada di jaringan WiFi/hotspot yang sama.
-  static const String baseUrl = 'http://192.168.1.39:5000/api';
+  static const String baseUrl = 'http://192.168.1.5:5000/api';
 
   static const String login = '$baseUrl/auth/login';
   static const String me = '$baseUrl/auth/me';

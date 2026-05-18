@@ -46,9 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
           actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.pop(context, false);
-              },
+              onPressed: () => Navigator.pop(context, false),
               child: const Text('Batal'),
             ),
             ElevatedButton.icon(
@@ -59,9 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              onPressed: () {
-                Navigator.pop(context, true);
-              },
+              onPressed: () => Navigator.pop(context, true),
               icon: const Icon(Icons.logout_rounded, size: 18),
               label: const Text('Logout'),
             ),
@@ -144,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.toString().replaceFirst('Exception: ', '')),
-          backgroundColor: AppColors.danger,
+          backgroundColor: Colors.red,
         ),
       );
     } finally {
@@ -180,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget homeContent() {
     return SafeArea(
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 130),
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 128),
         children: [
           Row(
             children: [
@@ -191,20 +187,175 @@ class _HomeScreenState extends State<HomeScreen> {
                     const Text(
                       'Satya Care',
                       style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 30,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textDark,
+                        height: 1,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Halo, ${widget.userName} 👋',
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
                         color: AppColors.textDark,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Halo, ${widget.userName}',
-                      style: const TextStyle(
-                        fontSize: 16,
+                    const SizedBox(height: 3),
+                    const Text(
+                      'Pantau layanan klinik kampus hari ini.',
+                      style: TextStyle(
+                        fontSize: 13.5,
                         color: AppColors.textGray,
                       ),
                     ),
                   ],
+                ),
+              ),
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.border),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.notifications_none_rounded,
+                  color: AppColors.primaryGreen,
+                  size: 25,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 22),
+
+          const _ClinicStatusCard(),
+
+          const SizedBox(height: 18),
+
+          _QueueHeroCard(
+            onRegisterTap: () => openFeature(const QueueRegisterScreen()),
+            onStatusTap: () => openTab(1),
+          ),
+
+          const SizedBox(height: 24),
+
+          const Text(
+            'Layanan Satya Care',
+            style: TextStyle(
+              fontSize: 21,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textDark,
+            ),
+          ),
+
+          const SizedBox(height: 14),
+
+          Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: _ServiceGridCard(
+                      title: 'Profil Kesehatan',
+                      subtitle: 'Alergi dan kontak darurat.',
+                      icon: Icons.health_and_safety_outlined,
+                      onTap: () => openTab(4),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _ServiceGridCard(
+                      title: 'Riwayat Kesehatan',
+                      subtitle: 'Kunjungan dan pemeriksaan.',
+                      icon: Icons.history_outlined,
+                      onTap: () => openFeature(const MedicalHistoryScreen()),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _ServiceGridCard(
+                      title: 'Surat Izin Sakit',
+                      subtitle: 'Dokumen digital klinik.',
+                      icon: Icons.description_outlined,
+                      onTap: () => openFeature(const SickLettersScreen()),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _ServiceGridCard(
+                      title: 'Rekomendasi Lift',
+                      subtitle: 'Akses fasilitas kampus.',
+                      icon: Icons.accessible_forward_outlined,
+                      onTap: () =>
+                          openFeature(const LiftRecommendationScreen()),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget profileContent() {
+    return SafeArea(
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 128),
+        children: [
+          Row(
+            children: [
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Profil',
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textDark,
+                        height: 1,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Kelola data diri dan layanan kesehatanmu.',
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        color: AppColors.textGray,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: const Icon(
+                  Icons.notifications_none_rounded,
+                  color: AppColors.primaryGreen,
                 ),
               ),
             ],
@@ -220,228 +371,25 @@ class _HomeScreenState extends State<HomeScreen> {
               border: Border.all(color: AppColors.border),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
-                  blurRadius: 16,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 62,
-                  height: 62,
-                  decoration: BoxDecoration(
-                    color: AppColors.softMint,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Icon(
-                    Icons.local_hospital_outlined,
-                    color: AppColors.primaryGreen,
-                    size: 30,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Klinik Sedang Buka',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textDark,
-                        ),
-                      ),
-                      SizedBox(height: 6),
-                      Text(
-                        'Silahkan ambil QR antrean untuk pemeriksaan lebih lanjut.',
-                        style: TextStyle(
-                          color: AppColors.textGray,
-                          height: 1.45,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 22),
-
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.primaryGreen,
-              borderRadius: BorderRadius.circular(30),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primaryGreen.withOpacity(0.22),
+                  color: Colors.black.withOpacity(0.035),
                   blurRadius: 18,
                   offset: const Offset(0, 8),
                 ),
               ],
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Antrean Digital',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 18),
-
-                Row(
-                  children: [
-                    Expanded(
-                      child: _MainActionCard(
-                        title: 'Daftar',
-                        subtitle: 'Ambil nomor',
-                        icon: Icons.add_circle_outline,
-                        onTap: () => openFeature(const QueueRegisterScreen()),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _MainActionCard(
-                        title: 'Cek',
-                        subtitle: 'Status antrean',
-                        icon: Icons.people_alt_outlined,
-                        onTap: () => openTab(1),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 26),
-
-          const Text(
-            'Fitur Lainnya',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textDark,
-            ),
-          ),
-
-          const SizedBox(height: 14),
-
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: AppColors.border),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.025),
-                  blurRadius: 14,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: _SmallFeatureItem(
-                    title: 'Profil',
-                    icon: Icons.health_and_safety_outlined,
-                    onTap: () => openTab(4),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _SmallFeatureItem(
-                    title: 'Riwayat',
-                    icon: Icons.history_outlined,
-                    onTap: () => openFeature(const MedicalHistoryScreen()),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _SmallFeatureItem(
-                    title: 'Surat',
-                    icon: Icons.description_outlined,
-                    onTap: () => openFeature(const SickLettersScreen()),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _SmallFeatureItem(
-                    title: 'Lift',
-                    icon: Icons.accessible_forward_outlined,
-                    onTap: () => openFeature(const LiftRecommendationScreen()),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget profileContent() {
-    return SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 130),
-        children: [
-          const Text(
-            'Profil',
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textDark,
-            ),
-          ),
-
-          const SizedBox(height: 4),
-
-          Text(
-            widget.userName,
-            style: const TextStyle(fontSize: 16, color: AppColors.textGray),
-          ),
-
-          const SizedBox(height: 24),
-
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: AppColors.border),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
-                  blurRadius: 16,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
             child: Row(
               children: [
                 Container(
-                  width: 64,
-                  height: 64,
+                  width: 78,
+                  height: 78,
                   decoration: BoxDecoration(
                     color: AppColors.softMint,
-                    borderRadius: BorderRadius.circular(22),
+                    borderRadius: BorderRadius.circular(26),
                   ),
                   child: const Icon(
-                    Icons.person_outline_rounded,
+                    Icons.person_rounded,
                     color: AppColors.primaryGreen,
-                    size: 34,
+                    size: 42,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -454,13 +402,31 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: const TextStyle(
                           color: AppColors.textDark,
                           fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 5),
                       const Text(
                         'Mahasiswa Satya Care',
-                        style: TextStyle(color: AppColors.textGray),
+                        style: TextStyle(
+                          color: AppColors.textGray,
+                          fontSize: 13.5,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: const [
+                          _SmallBadge(
+                            text: 'Mahasiswa Aktif',
+                            icon: Icons.check_circle,
+                          ),
+                          _SmallBadge(
+                            text: 'Data Kesehatan',
+                            icon: Icons.verified_user,
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -471,41 +437,46 @@ class _HomeScreenState extends State<HomeScreen> {
 
           const SizedBox(height: 18),
 
-          _ProfileMenuCard(
-            title: 'Profil Kesehatan',
-            subtitle: 'Data alergi, penyakit bawaan, dan kontak darurat.',
-            icon: Icons.health_and_safety_outlined,
-            onTap: () => openFeature(const HealthProfileScreen()),
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(26),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Column(
+              children: [
+                _ProfileMenuCard(
+                  title: 'Profil Kesehatan',
+                  subtitle: 'Alergi, penyakit bawaan, dan kontak darurat.',
+                  icon: Icons.health_and_safety_outlined,
+                  onTap: () => openFeature(const HealthProfileScreen()),
+                ),
+                const _DividerLine(),
+                _ProfileMenuCard(
+                  title: 'Riwayat Kesehatan',
+                  subtitle: 'Lihat riwayat kunjungan dan pemeriksaan klinik.',
+                  icon: Icons.history_outlined,
+                  onTap: () => openFeature(const MedicalHistoryScreen()),
+                ),
+                const _DividerLine(),
+                _ProfileMenuCard(
+                  title: 'Surat Izin Sakit',
+                  subtitle: 'Lihat surat izin sakit digital dari klinik.',
+                  icon: Icons.description_outlined,
+                  onTap: () => openFeature(const SickLettersScreen()),
+                ),
+                const _DividerLine(),
+                _ProfileMenuCard(
+                  title: 'Rekomendasi Lift',
+                  subtitle: 'Lihat rekomendasi akses fasilitas kampus.',
+                  icon: Icons.accessible_forward_outlined,
+                  onTap: () => openFeature(const LiftRecommendationScreen()),
+                ),
+              ],
+            ),
           ),
 
-          const SizedBox(height: 14),
-
-          _ProfileMenuCard(
-            title: 'Riwayat Kesehatan',
-            subtitle: 'Lihat riwayat kunjungan dan pemeriksaan klinik.',
-            icon: Icons.history_outlined,
-            onTap: () => openFeature(const MedicalHistoryScreen()),
-          ),
-
-          const SizedBox(height: 14),
-
-          _ProfileMenuCard(
-            title: 'Surat Izin Sakit',
-            subtitle: 'Lihat surat izin sakit digital dari klinik.',
-            icon: Icons.description_outlined,
-            onTap: () => openFeature(const SickLettersScreen()),
-          ),
-
-          const SizedBox(height: 14),
-
-          _ProfileMenuCard(
-            title: 'Rekomendasi Lift',
-            subtitle: 'Lihat rekomendasi akses fasilitas kampus.',
-            icon: Icons.accessible_forward_outlined,
-            onTap: () => openFeature(const LiftRecommendationScreen()),
-          ),
-
-          const SizedBox(height: 24),
+          const SizedBox(height: 18),
 
           Material(
             color: const Color(0xFFFFE4E6),
@@ -514,7 +485,7 @@ class _HomeScreenState extends State<HomeScreen> {
               borderRadius: BorderRadius.circular(22),
               onTap: () => showLogoutConfirmation(context),
               child: Container(
-                padding: const EdgeInsets.all(18),
+                padding: const EdgeInsets.all(17),
                 child: const Row(
                   children: [
                     Icon(Icons.logout_rounded, color: Colors.red),
@@ -524,8 +495,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         'Logout',
                         style: TextStyle(
                           color: Colors.red,
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 16.5,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ),
@@ -554,7 +525,6 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: AppColors.background,
       resizeToAvoidBottomInset: true,
       body: currentBody(),
-
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: isKeyboardOpen
           ? null
@@ -563,7 +533,6 @@ class _HomeScreenState extends State<HomeScreen> {
               isLoading: isCheckingQueue,
               onTap: handleQrButtonTap,
             ),
-
       bottomNavigationBar: isKeyboardOpen
           ? null
           : _QrBottomBar(
@@ -580,13 +549,247 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _MainActionCard extends StatelessWidget {
+class _ClinicStatusCard extends StatelessWidget {
+  const _ClinicStatusCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(17),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(26),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.035),
+            blurRadius: 16,
+            offset: const Offset(0, 7),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 58,
+                height: 58,
+                decoration: BoxDecoration(
+                  color: AppColors.softMint,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Icon(
+                  Icons.local_hospital_outlined,
+                  color: AppColors.primaryGreen,
+                  size: 30,
+                ),
+              ),
+              const SizedBox(width: 14),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Klinik Sedang Buka',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textDark,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Kami siap melayani Anda',
+                      style: TextStyle(
+                        color: AppColors.textGray,
+                        fontSize: 13.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 7,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.softMint,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: const Text(
+                  'Buka',
+                  style: TextStyle(
+                    color: AppColors.primaryGreen,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Container(height: 1, color: AppColors.border),
+          const SizedBox(height: 12),
+          const Row(
+            children: [
+              Icon(
+                Icons.schedule_outlined,
+                color: AppColors.textGray,
+                size: 18,
+              ),
+              SizedBox(width: 7),
+              Text(
+                '08.00 - 16.00 WIB',
+                style: TextStyle(
+                  color: AppColors.textGray,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Spacer(),
+              Icon(
+                Icons.people_alt_outlined,
+                color: AppColors.textGray,
+                size: 18,
+              ),
+              SizedBox(width: 7),
+              Text(
+                'Real-time',
+                style: TextStyle(
+                  color: AppColors.textGray,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QueueHeroCard extends StatelessWidget {
+  final VoidCallback onRegisterTap;
+  final VoidCallback onStatusTap;
+
+  const _QueueHeroCard({
+    required this.onRegisterTap,
+    required this.onStatusTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF06734F), AppColors.primaryGreen],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryGreen.withOpacity(0.25),
+            blurRadius: 20,
+            offset: const Offset(0, 9),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: -10,
+            top: -6,
+            child: Icon(
+              Icons.medical_services_outlined,
+              color: Colors.white.withOpacity(0.10),
+              size: 92,
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Antrean Digital',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 23,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'Ambil nomor antrean dan pantau status pemeriksaan kapan saja.',
+                style: TextStyle(
+                  color: Colors.white70,
+                  height: 1.35,
+                  fontSize: 13.5,
+                ),
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 52,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: AppColors.primaryGreen,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(17),
+                          ),
+                        ),
+                        onPressed: onRegisterTap,
+                        icon: const Icon(Icons.confirmation_number_outlined),
+                        label: const Text(
+                          'Ambil Antrean',
+                          style: TextStyle(fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  SizedBox(
+                    height: 52,
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        side: BorderSide(color: Colors.white.withOpacity(0.55)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(17),
+                        ),
+                      ),
+                      onPressed: onStatusTap,
+                      icon: const Icon(Icons.manage_search_rounded),
+                      label: const Text(
+                        'Cek',
+                        style: TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ServiceGridCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
   final VoidCallback onTap;
 
-  const _MainActionCard({
+  const _ServiceGridCard({
     required this.title,
     required this.subtitle,
     required this.icon,
@@ -595,42 +798,64 @@ class _MainActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white.withOpacity(0.16),
-      borderRadius: BorderRadius.circular(24),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(24),
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          height: 132,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.20),
-                  borderRadius: BorderRadius.circular(16),
+    return SizedBox(
+      height: 148,
+      child: Material(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(22),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(22),
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(color: AppColors.border),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.025),
+                  blurRadius: 12,
+                  offset: const Offset(0, 5),
                 ),
-                child: Icon(icon, color: Colors.white, size: 27),
-              ),
-              const Spacer(),
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 17,
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: AppColors.softMint,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Icon(icon, color: AppColors.primaryGreen, size: 23),
                 ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: const TextStyle(color: Colors.white70, fontSize: 12.5),
-              ),
-            ],
+                const Spacer(),
+                Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: AppColors.textDark,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    height: 1.15,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: AppColors.textGray,
+                    fontSize: 11.5,
+                    height: 1.25,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -638,50 +863,34 @@ class _MainActionCard extends StatelessWidget {
   }
 }
 
-class _SmallFeatureItem extends StatelessWidget {
-  final String title;
+class _SmallBadge extends StatelessWidget {
+  final String text;
   final IconData icon;
-  final VoidCallback onTap;
 
-  const _SmallFeatureItem({
-    required this.title,
-    required this.icon,
-    required this.onTap,
-  });
+  const _SmallBadge({required this.text, required this.icon});
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.softMint,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: SizedBox(
-          height: 70,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, color: AppColors.primaryGreen, size: 24),
-                const SizedBox(height: 6),
-                Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AppColors.textDark,
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w700,
-                    height: 1,
-                  ),
-                ),
-              ],
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.softMint,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: AppColors.primaryGreen, size: 14),
+          const SizedBox(width: 5),
+          Text(
+            text,
+            style: const TextStyle(
+              color: AppColors.primaryGreen,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w800,
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -704,26 +913,20 @@ class _ProfileMenuCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.surface,
-      borderRadius: BorderRadius.circular(24),
       child: InkWell(
-        borderRadius: BorderRadius.circular(24),
         onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppColors.border),
-          ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
           child: Row(
             children: [
               Container(
-                width: 54,
-                height: 54,
+                width: 52,
+                height: 52,
                 decoration: BoxDecoration(
                   color: AppColors.softMint,
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(17),
                 ),
-                child: Icon(icon, color: AppColors.primaryGreen, size: 27),
+                child: Icon(icon, color: AppColors.primaryGreen, size: 26),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -734,8 +937,8 @@ class _ProfileMenuCard extends StatelessWidget {
                       title,
                       style: const TextStyle(
                         color: AppColors.textDark,
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -743,7 +946,8 @@ class _ProfileMenuCard extends StatelessWidget {
                       subtitle,
                       style: const TextStyle(
                         color: AppColors.textGray,
-                        height: 1.35,
+                        fontSize: 12.8,
+                        height: 1.32,
                       ),
                     ),
                   ],
@@ -757,6 +961,19 @@ class _ProfileMenuCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _DividerLine extends StatelessWidget {
+  const _DividerLine();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(left: 82),
+      height: 1,
+      color: AppColors.border,
     );
   }
 }
@@ -775,12 +992,12 @@ class _CenterQrButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Transform.translate(
-      offset: const Offset(0, 8),
+      offset: const Offset(0, 7),
       child: GestureDetector(
         onTap: isLoading ? null : onTap,
         child: Container(
-          width: 86,
-          height: 86,
+          width: 74,
+          height: 74,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: LinearGradient(
@@ -790,20 +1007,20 @@ class _CenterQrButton extends StatelessWidget {
                   ? [AppColors.leafGreen, AppColors.primaryGreen]
                   : [AppColors.primaryGreen, AppColors.leafGreen],
             ),
-            border: Border.all(color: Colors.white, width: 6),
+            border: Border.all(color: Colors.white, width: 5),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primaryGreen.withOpacity(0.35),
-                blurRadius: 20,
-                offset: const Offset(0, 8),
+                color: AppColors.primaryGreen.withOpacity(0.30),
+                blurRadius: 18,
+                offset: const Offset(0, 7),
               ),
             ],
           ),
           child: isLoading
               ? const Center(
                   child: SizedBox(
-                    width: 26,
-                    height: 26,
+                    width: 23,
+                    height: 23,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.4,
                       color: Colors.white,
@@ -816,15 +1033,15 @@ class _CenterQrButton extends StatelessWidget {
                     Icon(
                       Icons.qr_code_2_rounded,
                       color: Colors.white,
-                      size: 30,
+                      size: 27,
                     ),
-                    SizedBox(height: 2),
+                    SizedBox(height: 1),
                     Text(
                       'QR',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                   ],
@@ -860,8 +1077,8 @@ class _QrBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 92,
-      padding: const EdgeInsets.fromLTRB(20, 10, 20, 14),
+      height: 86,
+      padding: const EdgeInsets.fromLTRB(18, 9, 18, 12),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
@@ -869,8 +1086,8 @@ class _QrBottomBar extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
-            blurRadius: 24,
-            offset: const Offset(0, -6),
+            blurRadius: 22,
+            offset: const Offset(0, -5),
           ),
         ],
       ),
@@ -892,9 +1109,7 @@ class _QrBottomBar extends StatelessWidget {
               onTap: onQueueTap,
             ),
           ),
-
-          const SizedBox(width: 86),
-
+          const SizedBox(width: 74),
           Expanded(
             child: _BottomItem(
               icon: Icons.track_changes_outlined,
@@ -935,23 +1150,23 @@ class _BottomItem extends StatelessWidget {
     final color = active ? AppColors.primaryGreen : AppColors.textGray;
 
     return InkWell(
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(16),
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
+        padding: const EdgeInsets.symmetric(vertical: 5),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: color, size: 25),
-            const SizedBox(height: 4),
+            Icon(icon, color: color, size: 23),
+            const SizedBox(height: 3),
             Text(
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 color: color,
-                fontSize: 11.5,
-                fontWeight: active ? FontWeight.bold : FontWeight.w600,
+                fontSize: 11,
+                fontWeight: active ? FontWeight.w800 : FontWeight.w600,
               ),
             ),
           ],

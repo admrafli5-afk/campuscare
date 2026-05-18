@@ -5,6 +5,7 @@ import '../../core/network/api_client.dart';
 import '../../core/storage/secure_storage_service.dart';
 import '../../shared/widgets/error_view.dart';
 import '../../shared/widgets/loading_view.dart';
+import '../queue/queue_register_screen.dart';
 import 'services/queue_service.dart';
 
 class QueueStatusScreen extends StatefulWidget {
@@ -79,60 +80,113 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
     }
   }
 
-  IconData crowdIcon(String? level) {
+  String recommendationTitle(String? level) {
     switch (level) {
       case 'sepi':
-        return Icons.sentiment_satisfied_alt_outlined;
+        return 'Klinik sedang sepi!';
       case 'sedang':
-        return Icons.people_alt_outlined;
+        return 'Antrean cukup stabil';
       case 'ramai':
-        return Icons.groups_2_outlined;
+        return 'Klinik sedang ramai';
       default:
-        return Icons.info_outline;
+        return 'Pantau antrean klinik';
     }
   }
 
-  Widget summaryCard({
+  String recommendationMessage(String? level) {
+    switch (level) {
+      case 'sepi':
+        return 'Waktu yang tepat untuk berkunjung. Kamu bisa mengambil antrean sekarang.';
+      case 'sedang':
+        return 'Masih aman untuk mengambil antrean. Tetap pantau estimasi tunggu.';
+      case 'ramai':
+        return 'Pertimbangkan waktu kedatangan dan pantau status antrean secara berkala.';
+      default:
+        return 'Cek status antrean sebelum datang ke klinik.';
+    }
+  }
+
+  Widget statCard({
     required String title,
     required String value,
+    required String subtitle,
     required IconData icon,
   }) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: AppColors.softMint,
-                borderRadius: BorderRadius.circular(14),
+    return Container(
+      height: 176,
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: AppColors.border),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.025),
+            blurRadius: 12,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: AppColors.softMint,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Icon(icon, color: AppColors.primaryGreen, size: 22),
+          ),
+
+          const SizedBox(height: 18),
+
+          SizedBox(
+            height: 34,
+            width: double.infinity,
+            child: FittedBox(
+              alignment: Alignment.centerLeft,
+              fit: BoxFit.scaleDown,
+              child: Text(
+                value,
+                maxLines: 1,
+                style: const TextStyle(
+                  color: AppColors.textDark,
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
-              child: Icon(icon, color: AppColors.primaryGreen, size: 23),
             ),
-            const SizedBox(height: 14),
-            Text(
-              value,
-              style: const TextStyle(
-                color: AppColors.textDark,
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
+          ),
+
+          const SizedBox(height: 7),
+
+          Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: AppColors.textDark,
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+              height: 1.1,
             ),
-            const SizedBox(height: 4),
-            Text(
-              title,
-              style: const TextStyle(color: AppColors.textGray, fontSize: 13),
+          ),
+
+          const SizedBox(height: 4),
+
+          Text(
+            subtitle,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: AppColors.textGray,
+              fontSize: 11.2,
+              height: 1.25,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -146,20 +200,75 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
     final estimatedWaitMinutes =
         data['estimated_wait_minutes']?.toString() ?? '0';
     final crowdLevel = data['crowd_level']?.toString();
-    final note =
-        data['note']?.toString() ??
-        'Estimasi dapat berubah sesuai kondisi klinik.';
+
+    final servingText =
+        currentlyServing == null ||
+            currentlyServing == 'null' ||
+            currentlyServing.isEmpty
+        ? '-'
+        : currentlyServing;
 
     return RefreshIndicator(
       color: AppColors.primaryGreen,
       onRefresh: loadQueueStatus,
       child: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 140),
         children: [
+          Row(
+            children: [
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Cek Antrean Klinik',
+                      style: TextStyle(
+                        color: AppColors.textDark,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    SizedBox(height: 5),
+                    Text(
+                      'Data antrean diperbarui secara real-time.',
+                      style: TextStyle(
+                        color: AppColors.textGray,
+                        fontSize: 13.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              InkWell(
+                onTap: loadQueueStatus,
+                borderRadius: BorderRadius.circular(15),
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: const Icon(
+                    Icons.refresh_rounded,
+                    color: AppColors.primaryGreen,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 18),
+
           Container(
-            padding: const EdgeInsets.all(22),
+            padding: const EdgeInsets.all(19),
             decoration: BoxDecoration(
-              color: AppColors.primaryGreen,
+              gradient: const LinearGradient(
+                colors: [Color(0xFF06734F), AppColors.primaryGreen],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
               borderRadius: BorderRadius.circular(28),
               boxShadow: [
                 BoxShadow(
@@ -184,28 +293,66 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
                     size: 32,
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 15),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         clinicStatusLabel(clinicStatus),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 21,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 19,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                       const SizedBox(height: 6),
-                      Text(
-                        'Data antrean diambil langsung dari backend.',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.82),
-                          height: 1.35,
-                        ),
+                      Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF7CFFB2),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 7),
+                          Expanded(
+                            child: Text(
+                              'Kondisi saat ini: ${crowdLabel(crowdLevel)}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.18),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: const Text(
+                    'Live',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ],
@@ -216,16 +363,22 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
 
           Row(
             children: [
-              summaryCard(
-                title: 'Antrean Aktif',
-                value: activeQueueCount,
-                icon: Icons.people_alt_outlined,
+              Expanded(
+                child: statCard(
+                  title: 'Antrean Aktif',
+                  value: activeQueueCount,
+                  subtitle: 'Saat ini',
+                  icon: Icons.people_alt_outlined,
+                ),
               ),
               const SizedBox(width: 12),
-              summaryCard(
-                title: 'Estimasi Tunggu',
-                value: '±$estimatedWaitMinutes m',
-                icon: Icons.schedule_outlined,
+              Expanded(
+                child: statCard(
+                  title: 'Estimasi Tunggu',
+                  value: '±$estimatedWaitMinutes m',
+                  subtitle: 'Perkiraan waktu',
+                  icon: Icons.schedule_outlined,
+                ),
               ),
             ],
           ),
@@ -234,21 +387,22 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
 
           Row(
             children: [
-              summaryCard(
-                title: 'Sedang Dilayani',
-                value:
-                    currentlyServing == null ||
-                        currentlyServing == 'null' ||
-                        currentlyServing.isEmpty
-                    ? '-'
-                    : currentlyServing,
-                icon: Icons.medical_services_outlined,
+              Expanded(
+                child: statCard(
+                  title: 'Sedang Dilayani',
+                  value: servingText,
+                  subtitle: 'Pasien',
+                  icon: Icons.medical_services_outlined,
+                ),
               ),
               const SizedBox(width: 12),
-              summaryCard(
-                title: 'Kondisi Klinik',
-                value: crowdLabel(crowdLevel),
-                icon: crowdIcon(crowdLevel),
+              Expanded(
+                child: statCard(
+                  title: 'Kondisi Klinik',
+                  value: crowdLabel(crowdLevel),
+                  subtitle: 'Tingkat keramaian',
+                  icon: Icons.sentiment_satisfied_alt_outlined,
+                ),
               ),
             ],
           ),
@@ -258,57 +412,109 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(22),
-              border: Border.all(color: AppColors.border),
+              color: AppColors.softMint,
+              borderRadius: BorderRadius.circular(24),
             ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Column(
               children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: AppColors.softMint,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: const Icon(
-                    Icons.info_outline,
-                    color: AppColors.primaryGreen,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.75),
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: const Icon(
+                        Icons.volunteer_activism_outlined,
+                        color: AppColors.primaryGreen,
+                        size: 30,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            recommendationTitle(crowdLevel),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: AppColors.primaryGreen,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            recommendationMessage(crowdLevel),
+                            style: const TextStyle(
+                              color: AppColors.primaryGreen,
+                              fontSize: 13.2,
+                              height: 1.35,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                SizedBox(
+                  height: 50,
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryGreen,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const QueueRegisterScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.confirmation_number_outlined),
+                    label: const Text(
+                      'Ambil Antrean Sekarang',
+                      style: TextStyle(fontWeight: FontWeight.w800),
+                    ),
                   ),
                 ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Text(
-                    note,
-                    style: const TextStyle(
-                      color: AppColors.textGray,
-                      height: 1.45,
+
+                const SizedBox(height: 10),
+
+                SizedBox(
+                  height: 48,
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primaryGreen,
+                      side: const BorderSide(color: AppColors.primaryGreen),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    onPressed: loadQueueStatus,
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: const Text(
+                      'Refresh Status',
+                      style: TextStyle(fontWeight: FontWeight.w800),
                     ),
                   ),
                 ),
               ],
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          SizedBox(
-            height: 52,
-            child: OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primaryGreen,
-                side: const BorderSide(color: AppColors.primaryGreen),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              onPressed: loadQueueStatus,
-              icon: const Icon(Icons.refresh),
-              label: const Text(
-                'Refresh Status',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
             ),
           ),
         ],
@@ -328,10 +534,6 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
       body = statusContent();
     }
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(title: const Text('Cek Antrean Klinik')),
-      body: body,
-    );
+    return Scaffold(backgroundColor: AppColors.background, body: body);
   }
 }

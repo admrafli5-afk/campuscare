@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const healthCheckRoutes = require('./routes/healthCheck.routes');
 const sickLetterRoutes = require('./routes/sickLetter.routes');
+const emergencyCaseRoutes = require('./routes/emergencyCase.routes');
 require('dotenv').config();
 
 const { successResponse } = require('./utils/response');
@@ -30,6 +31,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/queue', queueRoutes);
 app.use('/api/health-checks', healthCheckRoutes);
 app.use('/api/sick-letters', sickLetterRoutes);
+app.use('/api/emergency-cases', emergencyCaseRoutes);
 
 const PORT = process.env.PORT || 5000;
 

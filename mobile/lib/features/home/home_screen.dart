@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_colors.dart';
+import '../../core/network/api_client.dart';
 import '../../core/storage/secure_storage_service.dart';
 import '../auth/login_screen.dart';
 import '../facility/lift_recommendation_screen.dart';
@@ -11,6 +12,7 @@ import '../queue/queue_qr_screen.dart';
 import '../queue/queue_register_screen.dart';
 import '../queue/queue_status_screen.dart';
 import '../queue/queue_tracking_screen.dart';
+import '../queue/services/queue_service.dart';
 
 class HomeScreen extends StatefulWidget {
   final String userName;
@@ -24,6 +26,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int selectedIndex = 0;
   Widget? customPage;
+  bool isCheckingQueue = false;
 
   Future<void> showLogoutConfirmation(BuildContext context) async {
     final result = await showDialog<bool>(
@@ -101,6 +104,56 @@ class _HomeScreenState extends State<HomeScreen> {
       customPage = page;
       selectedIndex = -1;
     });
+  }
+
+  Future<void> handleQrButtonTap() async {
+    if (isCheckingQueue) return;
+
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    setState(() {
+      isCheckingQueue = true;
+    });
+
+    final storage = SecureStorageService();
+    final apiClient = ApiClient(storage: storage);
+    final queueService = QueueService(apiClient: apiClient);
+
+    try {
+      final currentQueue = await queueService.getMyCurrentQueue();
+
+      if (!mounted) return;
+
+      if (currentQueue == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Kamu belum punya antrean aktif. Silakan daftar antrean dulu.',
+            ),
+          ),
+        );
+
+        openFeature(const QueueRegisterScreen());
+        return;
+      }
+
+      openTab(2);
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceFirst('Exception: ', '')),
+          backgroundColor: AppColors.danger,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isCheckingQueue = false;
+        });
+      }
+    }
   }
 
   Widget currentBody() {
@@ -505,7 +558,11 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: isKeyboardOpen
           ? null
-          : _CenterQrButton(active: isQrActive, onTap: () => openTab(2)),
+          : _CenterQrButton(
+              active: isQrActive,
+              isLoading: isCheckingQueue,
+              onTap: handleQrButtonTap,
+            ),
 
       bottomNavigationBar: isKeyboardOpen
           ? null
@@ -707,15 +764,20 @@ class _ProfileMenuCard extends StatelessWidget {
 class _CenterQrButton extends StatelessWidget {
   final VoidCallback onTap;
   final bool active;
+  final bool isLoading;
 
-  const _CenterQrButton({required this.onTap, required this.active});
+  const _CenterQrButton({
+    required this.onTap,
+    required this.active,
+    required this.isLoading,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Transform.translate(
       offset: const Offset(0, 8),
       child: GestureDetector(
-        onTap: onTap,
+        onTap: isLoading ? null : onTap,
         child: Container(
           width: 86,
           height: 86,
@@ -737,21 +799,36 @@ class _CenterQrButton extends StatelessWidget {
               ),
             ],
           ),
-          child: const Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.qr_code_2_rounded, color: Colors.white, size: 30),
-              SizedBox(height: 2),
-              Text(
-                'QR',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
+          child: isLoading
+              ? const Center(
+                  child: SizedBox(
+                    width: 26,
+                    height: 26,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.4,
+                      color: Colors.white,
+                    ),
+                  ),
+                )
+              : const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.qr_code_2_rounded,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'QR',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
         ),
       ),
     );

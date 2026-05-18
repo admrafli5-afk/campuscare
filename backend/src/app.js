@@ -1,12 +1,16 @@
 const express = require('express');
 const cors = require('cors');
+const healthCheckRoutes = require('./routes/healthCheck.routes');
+const sickLetterRoutes = require('./routes/sickLetter.routes');
 require('dotenv').config();
 
 const { successResponse } = require('./utils/response');
 const authRoutes = require('./routes/auth.routes');
 const queueRoutes = require('./routes/queue.routes');
 
+
 const app = express();
+
 
 app.use(cors());
 app.use(express.json());
@@ -21,8 +25,11 @@ app.get('/', (req, res) => {
   });
 });
 
+
 app.use('/api/auth', authRoutes);
 app.use('/api/queue', queueRoutes);
+app.use('/api/health-checks', healthCheckRoutes);
+app.use('/api/sick-letters', sickLetterRoutes);
 
 const PORT = process.env.PORT || 5000;
 

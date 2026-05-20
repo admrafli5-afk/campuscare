@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="stylesheet" href="../../assets/css/variables.css">
+  <link rel="stylesheet" href="../../assets/css/global.css">
+  <link rel="stylesheet" href="../../assets/css/student-affairs.css">
+
+  <title>Detail Surat</title>
+
+  <style>
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .detail-item {
+      margin-bottom: 18px;
+    }
+
+    .detail-label {
+      font-size: 14px;
+      color: var(--text-gray);
+      margin-bottom: 6px;
+    }
+
+    .detail-value {
+      font-weight: 600;
+      font-size: 17px;
+    }
+
+    .badge {
+      padding: 8px 14px;
+      border-radius: 999px;
+      display: inline-block;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .badge-warning {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 14px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 18px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-success {
+      background: #22c55e;
+      color: white;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    @media(max-width: 700px) {
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+  </style>
+
+</head>
+<body>
+
+<div class="container">
+
+  <aside class="sidebar">
+
+    <div class="logo">CampusCare</div>
+
+    <div class="menu">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="#">Mahasiswa</a>
+      <a href="letters.html">Surat</a>
+      <a href="#">Approval</a>
+      <a href="#">Laporan</a>
+      <a href="login.html">Logout</a>
+    </div>
+
+  </aside>
+
+  <main class="content">
+
+    <div class="topbar">
+
+      <h1>Detail Surat Mahasiswa</h1>
+
+      <a href="letters.html">
+        <button class="btn btn-secondary">
+          Kembali
+        </button>
+      </a>
+
+    </div>
+
+    <div class="card">
+
+      <div class="detail-grid">
+
+        <div>
+
+          <div class="detail-item">
+            <div class="detail-label">Nama Mahasiswa</div>
+            <div class="detail-value">Rafli Akbar</div>
+          </div>
+
+          <div class="detail-item">
+            <div class="detail-label">NIM</div>
+            <div class="detail-value">221401001</div>
+          </div>
+
+          <div class="detail-item">
+            <div class="detail-label">Program Studi</div>
+            <div class="detail-value">Teknik Informatika</div>
+          </div>
+
+          <div class="detail-item">
+            <div class="detail-label">Jenis Surat</div>
+            <div class="detail-value">Surat Aktif Kuliah</div>
+          </div>
+
+        </div>
+
+        <div>
+
+          <div class="detail-item">
+            <div class="detail-label">Tanggal Pengajuan</div>
+            <div class="detail-value">18 Mei 2026</div>
+          </div>
+
+          <div class="detail-item">
+            <div class="detail-label">Status</div>
+
+            <span class="badge badge-warning">
+              Pending
+            </span>
+          </div>
+
+          <div class="detail-item">
+            <div class="detail-label">Keperluan</div>
+
+            <div class="detail-value">
+              Digunakan untuk pengajuan beasiswa kampus.
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="btn-group">
+
+        <button class="btn btn-success">
+          Approve Surat
+        </button>
+
+        <button class="btn btn-danger">
+          Reject Surat
+        </button>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</div>
+
+</body>
+</html>

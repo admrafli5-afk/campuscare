@@ -8,6 +8,8 @@ require('dotenv').config();
 const { successResponse } = require('./utils/response');
 const authRoutes = require('./routes/auth.routes');
 const queueRoutes = require('./routes/queue.routes');
+const medicalHistoryRoutes = require('./routes/medicalHistory.routes');
+const analyticsRoutes = require('./routes/analytics.routes');
 
 
 const app = express();
@@ -32,6 +34,8 @@ app.use('/api/queue', queueRoutes);
 app.use('/api/health-checks', healthCheckRoutes);
 app.use('/api/sick-letters', sickLetterRoutes);
 app.use('/api/emergency-cases', emergencyCaseRoutes);
+app.use('/api/students', medicalHistoryRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 const PORT = process.env.PORT || 5000;
 

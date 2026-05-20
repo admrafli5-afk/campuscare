@@ -1,51 +1,168 @@
-class MedicalHistoryModel {
-  final String visitDate;
+class MedicalHistoryItem {
+  final String type;
+  final String title;
+  final String queueNumber;
   final String complaint;
+  final String chiefComplaint;
   final String diagnosis;
-  final String serviceType;
+  final String treatment;
+  final String actionTaken;
+  final String medicine;
+  final String note;
   final String status;
-  final String officer;
-  final String notes;
+  final String date;
 
-  MedicalHistoryModel({
-    required this.visitDate,
+  final String temperature;
+  final String bloodPressure;
+  final String pulse;
+  final String respiration;
+
+  MedicalHistoryItem({
+    required this.type,
+    required this.title,
+    required this.queueNumber,
     required this.complaint,
+    required this.chiefComplaint,
     required this.diagnosis,
-    required this.serviceType,
+    required this.treatment,
+    required this.actionTaken,
+    required this.medicine,
+    required this.note,
     required this.status,
-    required this.officer,
-    required this.notes,
+    required this.date,
+    required this.temperature,
+    required this.bloodPressure,
+    required this.pulse,
+    required this.respiration,
   });
 
-  static List<MedicalHistoryModel> dummyList() {
-    return [
-      MedicalHistoryModel(
-        visitDate: '16 Mei 2026',
-        complaint: 'Demam ringan dan sakit kepala',
-        diagnosis: 'Gejala flu ringan',
-        serviceType: 'Pemeriksaan Umum',
-        status: 'completed',
-        officer: 'Petugas Klinik CampusCare',
-        notes: 'Disarankan istirahat cukup dan minum air putih.',
-      ),
-      MedicalHistoryModel(
-        visitDate: '10 Mei 2026',
-        complaint: 'Sakit gigi',
-        diagnosis: 'Nyeri gigi ringan',
-        serviceType: 'Konsultasi Ringan',
-        status: 'completed',
-        officer: 'Petugas Klinik CampusCare',
-        notes: 'Disarankan konsultasi lanjutan ke dokter gigi jika berlanjut.',
-      ),
-      MedicalHistoryModel(
-        visitDate: '02 Mei 2026',
-        complaint: 'Nyeri perut ringan',
-        diagnosis: 'Gangguan pencernaan ringan',
-        serviceType: 'Pemeriksaan Umum',
-        status: 'completed',
-        officer: 'Petugas Klinik CampusCare',
-        notes: 'Disarankan menjaga pola makan.',
-      ),
-    ];
+  factory MedicalHistoryItem.fromJson(
+    Map<String, dynamic> json, {
+    String fallbackType = 'health_check',
+  }) {
+    final type = json['type']?.toString() ?? fallbackType;
+
+    final queue = json['queue'];
+    final queueMap = queue is Map<String, dynamic>
+        ? queue
+        : <String, dynamic>{};
+
+    return MedicalHistoryItem(
+      type: type,
+      title: _resolveTitle(type, json),
+
+      queueNumber:
+          json['queue_number']?.toString() ??
+          json['queueNumber']?.toString() ??
+          queueMap['queue_number']?.toString() ??
+          queueMap['queueNumber']?.toString() ??
+          '-',
+
+      complaint:
+          json['complaint']?.toString() ??
+          json['keluhan']?.toString() ??
+          json['main_complaint']?.toString() ??
+          json['chief_complaint']?.toString() ??
+          queueMap['complaint']?.toString() ??
+          '-',
+
+      chiefComplaint:
+          json['chief_complaint']?.toString() ??
+          json['main_complaint']?.toString() ??
+          json['complaint']?.toString() ??
+          queueMap['complaint']?.toString() ??
+          '-',
+
+      diagnosis:
+          json['diagnosis']?.toString() ??
+          json['diagnose']?.toString() ??
+          json['result']?.toString() ??
+          json['health_result']?.toString() ??
+          '-',
+
+      treatment:
+          json['treatment']?.toString() ??
+          json['handling']?.toString() ??
+          json['action']?.toString() ??
+          json['action_taken']?.toString() ??
+          '-',
+
+      actionTaken:
+          json['action_taken']?.toString() ??
+          json['actionTaken']?.toString() ??
+          json['treatment']?.toString() ??
+          json['handling']?.toString() ??
+          '-',
+
+      medicine:
+          json['medicine']?.toString() ??
+          json['medication']?.toString() ??
+          json['prescription']?.toString() ??
+          '-',
+
+      note:
+          json['notes']?.toString() ??
+          json['note']?.toString() ??
+          json['doctor_note']?.toString() ??
+          json['staff_note']?.toString() ??
+          json['description']?.toString() ??
+          '-',
+
+      status:
+          json['status']?.toString() ?? queueMap['status']?.toString() ?? '-',
+
+      date:
+          json['checked_at']?.toString() ??
+          json['created_at']?.toString() ??
+          json['completed_at']?.toString() ??
+          json['issued_at']?.toString() ??
+          json['date']?.toString() ??
+          '',
+
+      temperature:
+          json['temperature']?.toString() ??
+          json['body_temperature']?.toString() ??
+          '-',
+
+      bloodPressure:
+          json['blood_pressure']?.toString() ??
+          json['bloodPressure']?.toString() ??
+          '-',
+
+      pulse: json['pulse']?.toString() ?? json['heart_rate']?.toString() ?? '-',
+
+      respiration:
+          json['respiration']?.toString() ??
+          json['respiratory_rate']?.toString() ??
+          '-',
+    );
+  }
+
+  static String _resolveTitle(String type, Map<String, dynamic> json) {
+    final customTitle = json['title']?.toString();
+
+    if (customTitle != null && customTitle.isNotEmpty) {
+      return customTitle;
+    }
+
+    switch (type) {
+      case 'health_check':
+      case 'health_checks':
+        return 'Pemeriksaan Klinik';
+      case 'sick_letter':
+      case 'sick_letters':
+        return 'Surat Izin Sakit';
+      case 'emergency_case':
+      case 'emergency_cases':
+        return 'Kasus Darurat';
+      case 'queue':
+      case 'queues':
+        return 'Riwayat Antrean';
+      case 'student_health_profile':
+      case 'student_health_profiles':
+        return 'Profil Kesehatan';
+      default:
+        return 'Riwayat Kesehatan';
+    }
   }
 }

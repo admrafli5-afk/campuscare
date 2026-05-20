@@ -1,285 +1,357 @@
-const allowedClinicRoles = [
-    "clinic_staff",
-    "clinic_admin",
-    "supervisor",
-    "super_admin",
-  ];
-  
-  const userNameElement = document.getElementById("userName");
-  const logoutButton = document.getElementById("logoutButton");
-  
-  const healthCheckForm = document.getElementById("healthCheckForm");
-  const queueSelect = document.getElementById("queueSelect");
-  const refreshButton = document.getElementById("refreshButton");
-  const saveButton = document.getElementById("saveButton");
-  
-  const temperatureInput = document.getElementById("temperature");
-  const bloodPressureInput = document.getElementById("bloodPressure");
-  const pulseInput = document.getElementById("pulse");
-  const respirationInput = document.getElementById("respiration");
-  const chiefComplaintInput = document.getElementById("chiefComplaint");
-  const notesInput = document.getElementById("notes");
-  const actionTakenInput = document.getElementById("actionTaken");
-  
-  const errorMessage = document.getElementById("errorMessage");
-  const successMessage = document.getElementById("successMessage");
-  const patientTableBody = document.getElementById("patientTableBody");
-  
-  let checkedInQueues = [];
-  
+document.addEventListener('DOMContentLoaded', () => {
+  const queueSelect = document.getElementById('queueSelect');
+  const patientTableBody = document.getElementById('patientTableBody');
+  const healthCheckForm = document.getElementById('healthCheckForm');
+
+  const errorMessage = document.getElementById('errorMessage');
+  const successMessage = document.getElementById('successMessage');
+
+  const temperatureInput = document.getElementById('temperature');
+  const bloodPressureInput = document.getElementById('bloodPressure');
+  const pulseInput = document.getElementById('pulse');
+  const respirationInput = document.getElementById('respiration');
+  const chiefComplaintInput = document.getElementById('chiefComplaint');
+  const notesInput = document.getElementById('notes');
+  const actionTakenInput = document.getElementById('actionTaken');
+
+  const refreshButton = document.getElementById('refreshButton');
+  const saveButton = document.getElementById('saveButton');
+  const logoutButton = document.getElementById('logoutButton');
+
+  const HC_API_BASE_URL =
+    typeof API_BASE_URL !== 'undefined'
+      ? API_BASE_URL
+      : 'http://localhost:5000/api';
+
+  function getHealthCheckToken() {
+    return (
+      localStorage.getItem('campuscare_web_token') ||
+      localStorage.getItem('token') ||
+      localStorage.getItem('authToken') ||
+      localStorage.getItem('accessToken') ||
+      ''
+    );
+  }
+
   function showError(message) {
-    errorMessage.style.display = "block";
+    if (!errorMessage) return;
+
+    errorMessage.style.display = 'block';
     errorMessage.textContent = message;
-    successMessage.style.display = "none";
+
+    if (successMessage) {
+      successMessage.style.display = 'none';
+      successMessage.textContent = '';
+    }
   }
-  
+
   function showSuccess(message) {
-    successMessage.style.display = "inline-block";
+    if (!successMessage) return;
+
+    successMessage.style.display = 'inline-block';
     successMessage.textContent = message;
-    errorMessage.style.display = "none";
+
+    if (errorMessage) {
+      errorMessage.style.display = 'none';
+      errorMessage.textContent = '';
+    }
   }
-  
-  function hideMessages() {
-    errorMessage.style.display = "none";
-    errorMessage.textContent = "";
-    successMessage.style.display = "none";
-    successMessage.textContent = "";
+
+  function clearMessage() {
+    if (errorMessage) {
+      errorMessage.style.display = 'none';
+      errorMessage.textContent = '';
+    }
+
+    if (successMessage) {
+      successMessage.style.display = 'none';
+      successMessage.textContent = '';
+    }
   }
-  
-  function mapQueueStatus(status) {
-    const statuses = {
-      waiting: "Menunggu",
-      called: "Dipanggil",
-      on_the_way: "Menuju Klinik",
-      checked_in: "Hadir",
-      in_checkup: "Sedang Diperiksa",
-      completed: "Selesai",
-      missed: "Terlewat",
-      cancelled: "Dibatalkan",
-      emergency: "Darurat",
-    };
-  
-    return statuses[status] || status || "-";
-  }
-  
-  async function protectClinicPage() {
-    const token = getToken();
-  
+
+  async function requestHealthCheckApi(path, options = {}) {
+    const token = getHealthCheckToken();
+
     if (!token) {
-      window.location.href = "./login.html";
-      return false;
+      throw new Error(
+        'Token tidak ditemukan. Silakan logout lalu login ulang sebagai petugas klinik.'
+      );
     }
-  
-    try {
-      const result = await apiRequest("/auth/me", {
-        method: "GET",
-      });
-  
-      if (!result.success) {
-        removeToken();
-        window.location.href = "./login.html";
-        return false;
-      }
-  
-      const user = result.data;
-  
-      if (!allowedClinicRoles.includes(user.role)) {
-        removeToken();
-        window.location.href = "./login.html";
-        return false;
-      }
-  
-      setUser(user);
-  
-      if (userNameElement) {
-        userNameElement.textContent = user.name;
-      }
-  
-      return true;
-    } catch (error) {
-      removeToken();
-      window.location.href = "./login.html";
-      return false;
+
+    const response = await fetch(`${HC_API_BASE_URL}${path}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+        ...(options.headers || {}),
+      },
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok || data.success === false) {
+      throw new Error(data.message || 'Terjadi kesalahan pada server');
     }
+
+    return data;
   }
-  
-  function normalizeQueueData(data) {
-    if (Array.isArray(data)) return data;
-    if (data && Array.isArray(data.queues)) return data.queues;
-    if (data && Array.isArray(data.items)) return data.items;
+
+  function getResponseArray(response) {
+    if (Array.isArray(response)) return response;
+    if (Array.isArray(response.data)) return response.data;
+    if (Array.isArray(response.data?.queues)) return response.data.queues;
+    if (Array.isArray(response.data?.items)) return response.data.items;
+    if (Array.isArray(response.queues)) return response.queues;
+
     return [];
   }
-  
-  function getQueueId(queue) {
-    return queue.id || queue.queue_id || queue.queueId;
+
+  function normalizeQueue(queue) {
+    return {
+      id: queue.id,
+      student_id:
+        queue.student_id ||
+        queue.studentId ||
+        queue.student?.id ||
+        queue.student?.student_id ||
+        '',
+      queue_number:
+        queue.queue_number ||
+        queue.queueNumber ||
+        '-',
+      student_name:
+        queue.student_name ||
+        queue.studentName ||
+        queue.name ||
+        queue.student?.name ||
+        '-',
+      nim:
+        queue.nim ||
+        queue.student_nim ||
+        queue.studentNim ||
+        queue.student?.nim ||
+        '-',
+      complaint:
+        queue.complaint ||
+        queue.keluhan ||
+        queue.description ||
+        '-',
+      status: queue.status || '-',
+    };
   }
-  
-  function getQueueLabel(queue) {
-    const number = queue.queue_number || queue.queueNumber || "-";
-    const name = queue.student_name || queue.studentName || queue.name || "Tanpa Nama";
-    const nim = queue.nim || "-";
-  
-    return `${number} - ${name} (${nim})`;
+
+  function isReadyForHealthCheck(status) {
+    return ['checked_in', 'in_checkup', 'called'].includes(status);
   }
-  
-  function renderQueueOptions() {
-    queueSelect.innerHTML = "";
-  
-    if (checkedInQueues.length === 0) {
-      queueSelect.innerHTML = `<option value="">Belum ada pasien check-in</option>`;
+
+  function renderQueueSelect(queues) {
+    if (!queueSelect) return;
+
+    if (queues.length === 0) {
+      queueSelect.innerHTML = `
+        <option value="">Belum ada pasien check-in</option>
+      `;
       return;
     }
-  
-    queueSelect.innerHTML = `<option value="">Pilih pasien</option>`;
-  
-    checkedInQueues.forEach((queue) => {
-      const option = document.createElement("option");
-      option.value = getQueueId(queue);
-      option.textContent = getQueueLabel(queue);
-      queueSelect.appendChild(option);
-    });
+
+    queueSelect.innerHTML = queues
+      .map((queue) => {
+        return `
+          <option
+            value="${queue.id}"
+            data-queue-id="${queue.id}"
+            data-student-id="${queue.student_id}"
+          >
+            ${queue.queue_number} - ${queue.student_name} (${queue.nim})
+          </option>
+        `;
+      })
+      .join('');
   }
-  
-  function renderPatientTable() {
-    patientTableBody.innerHTML = "";
-  
-    if (checkedInQueues.length === 0) {
+
+  function renderPatientTable(queues) {
+    if (!patientTableBody) return;
+
+    if (queues.length === 0) {
       patientTableBody.innerHTML = `
         <tr>
-          <td colspan="5">Belum ada pasien yang sudah check-in.</td>
+          <td colspan="5">Belum ada pasien yang siap diperiksa.</td>
         </tr>
       `;
       return;
     }
-  
-    checkedInQueues.forEach((queue) => {
-      const row = document.createElement("tr");
-  
-      row.innerHTML = `
-        <td>${queue.queue_number || queue.queueNumber || "-"}</td>
-        <td>${queue.student_name || queue.studentName || queue.name || "-"}</td>
-        <td>${queue.nim || "-"}</td>
-        <td>${queue.complaint || queue.symptoms || queue.chief_complaint || "-"}</td>
-        <td>${mapQueueStatus(queue.status)}</td>
-      `;
-  
-      patientTableBody.appendChild(row);
-    });
+
+    patientTableBody.innerHTML = queues
+      .map((queue) => {
+        return `
+          <tr>
+            <td>${queue.queue_number}</td>
+            <td>${queue.student_name}</td>
+            <td>${queue.nim}</td>
+            <td>${queue.complaint}</td>
+            <td>${queue.status}</td>
+          </tr>
+        `;
+      })
+      .join('');
   }
-  
+
   async function loadCheckedInPatients() {
-    hideMessages();
-  
-    queueSelect.innerHTML = `<option value="">Memuat pasien...</option>`;
-    patientTableBody.innerHTML = `
-      <tr>
-        <td colspan="5">Memuat data pasien...</td>
-      </tr>
-    `;
-  
+    clearMessage();
+
+    if (queueSelect) {
+      queueSelect.innerHTML = `
+        <option value="">Memuat pasien...</option>
+      `;
+    }
+
+    if (patientTableBody) {
+      patientTableBody.innerHTML = `
+        <tr>
+          <td colspan="5">Memuat data pasien...</td>
+        </tr>
+      `;
+    }
+
     try {
-      const result = await apiRequest("/queue/today", {
-        method: "GET",
+      console.log('Mengambil data antrean dari:', `${HC_API_BASE_URL}/queue/today`);
+
+      const response = await requestHealthCheckApi('/queue/today', {
+        method: 'GET',
       });
-  
-      if (!result.success) {
-        showError(result.message || "Gagal memuat data pasien.");
-        return;
-      }
-  
-      const queues = normalizeQueueData(result.data);
-  
-      checkedInQueues = queues.filter((queue) => {
-        return queue.status === "checked_in" || queue.status === "in_checkup";
-      });
-  
-      renderQueueOptions();
-      renderPatientTable();
+
+      console.log('Response queue today:', response);
+
+      const rawQueues = getResponseArray(response);
+
+      const queues = rawQueues
+        .map(normalizeQueue)
+        .filter((queue) => isReadyForHealthCheck(queue.status));
+
+      console.log('Pasien siap diperiksa:', queues);
+
+      renderQueueSelect(queues);
+      renderPatientTable(queues);
     } catch (error) {
-      showError("Tidak dapat terhubung ke server. Pastikan backend berjalan.");
+      console.error(error);
+      showError(error.message);
+
+      if (queueSelect) {
+        queueSelect.innerHTML = `
+          <option value="">Gagal memuat pasien</option>
+        `;
+      }
+
+      if (patientTableBody) {
+        patientTableBody.innerHTML = `
+          <tr>
+            <td colspan="5">Gagal memuat data pasien.</td>
+          </tr>
+        `;
+      }
     }
   }
-  
-  function resetFormFields() {
-    queueSelect.value = "";
-    temperatureInput.value = "";
-    bloodPressureInput.value = "";
-    pulseInput.value = "";
-    respirationInput.value = "";
-    chiefComplaintInput.value = "";
-    notesInput.value = "";
-    actionTakenInput.value = "";
-  }
-  
-  async function handleSubmit(event) {
-    event.preventDefault();
-    hideMessages();
-  
-    const queueId = queueSelect.value;
-  
-    if (!queueId) {
-      showError("Pilih pasien terlebih dahulu.");
-      return;
-    }
-  
-    if (!chiefComplaintInput.value.trim()) {
-      showError("Keluhan utama wajib diisi.");
-      return;
-    }
-  
-    saveButton.disabled = true;
-    saveButton.textContent = "Menyimpan...";
-  
+
+  async function updateQueueToInCheckup(queueId) {
+    if (!queueId) return;
+
     try {
-      const result = await apiRequest("/health-checks", {
-        method: "POST",
+      await requestHealthCheckApi(`/queue/${queueId}/status`, {
+        method: 'PATCH',
         body: JSON.stringify({
-          queue_id: Number(queueId),
-          temperature: temperatureInput.value ? Number(temperatureInput.value) : null,
-          blood_pressure: bloodPressureInput.value.trim(),
-          pulse: pulseInput.value ? Number(pulseInput.value) : null,
-          respiration: respirationInput.value ? Number(respirationInput.value) : null,
-          chief_complaint: chiefComplaintInput.value.trim(),
-          notes: notesInput.value.trim(),
-          action_taken: actionTakenInput.value.trim(),
+          status: 'in_checkup',
         }),
       });
-  
-      if (!result.success) {
-        showError(result.message || "Gagal menyimpan pemeriksaan.");
-        return;
-      }
-  
-      showSuccess("Pemeriksaan awal berhasil disimpan.");
-      resetFormFields();
+
+      console.log('Status antrean berhasil diubah ke in_checkup');
+    } catch (error) {
+      console.warn(
+        'Pemeriksaan tersimpan, tapi status antrean gagal diubah:',
+        error.message
+      );
+    }
+  }
+
+  async function submitHealthCheck(event) {
+    event.preventDefault();
+    clearMessage();
+
+    const selectedOption = queueSelect.options[queueSelect.selectedIndex];
+
+    if (!selectedOption || !selectedOption.value) {
+      showError('Pilih pasien terlebih dahulu.');
+      return;
+    }
+
+    const studentId = Number(selectedOption.dataset.studentId);
+    const queueId = Number(selectedOption.dataset.queueId || selectedOption.value);
+
+    if (!studentId) {
+      showError('student_id wajib diisi. Data antrean belum membawa student_id.');
+      return;
+    }
+
+    const payload = {
+      student_id: studentId,
+      queue_id: queueId || null,
+      temperature: temperatureInput.value ? Number(temperatureInput.value) : null,
+      blood_pressure: bloodPressureInput.value.trim(),
+      pulse: pulseInput.value ? Number(pulseInput.value) : null,
+      respiration: respirationInput.value ? Number(respirationInput.value) : null,
+      chief_complaint: chiefComplaintInput.value.trim(),
+      notes: notesInput.value.trim(),
+      action_taken: actionTakenInput.value.trim(),
+    };
+
+    console.log('Payload health check:', payload);
+
+    try {
+      saveButton.disabled = true;
+      saveButton.textContent = 'Menyimpan...';
+
+      await requestHealthCheckApi('/health-checks', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+
+      await updateQueueToInCheckup(queueId);
+
+      showSuccess(
+        'Pemeriksaan berhasil disimpan. Status pasien berubah menjadi sedang diperiksa.'
+      );
+
+      healthCheckForm.reset();
+
       await loadCheckedInPatients();
     } catch (error) {
-      showError("Tidak dapat terhubung ke server. Pastikan backend berjalan.");
+      console.error(error);
+      showError(error.message);
     } finally {
       saveButton.disabled = false;
-      saveButton.textContent = "Simpan Pemeriksaan";
+      saveButton.textContent = 'Simpan Pemeriksaan';
     }
   }
-  
+
+  if (healthCheckForm) {
+    healthCheckForm.addEventListener('submit', submitHealthCheck);
+  }
+
+  if (refreshButton) {
+    refreshButton.addEventListener('click', loadCheckedInPatients);
+  }
+
   if (logoutButton) {
-    logoutButton.addEventListener("click", function () {
-      removeToken();
-      window.location.href = "./login.html";
+    logoutButton.addEventListener('click', () => {
+      localStorage.removeItem('campuscare_web_token');
+      localStorage.removeItem('campuscare_web_user');
+      localStorage.removeItem('token');
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('accessToken');
+
+      window.location.href = '../auth/login.html';
     });
   }
-  
-  if (refreshButton) {
-    refreshButton.addEventListener("click", loadCheckedInPatients);
-  }
-  
-  if (healthCheckForm) {
-    healthCheckForm.addEventListener("submit", handleSubmit);
-  }
-  
-  (async function initHealthCheckPage() {
-    const isAllowed = await protectClinicPage();
-  
-    if (isAllowed) {
-      loadCheckedInPatients();
-    }
-  })();
+
+  loadCheckedInPatients();
+});

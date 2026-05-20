@@ -28,6 +28,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget? customPage;
   bool isCheckingQueue = false;
 
+  bool get shouldShowBackButton => customPage != null || selectedIndex != 0;
+
   Future<void> showLogoutConfirmation(BuildContext context) async {
     final result = await showDialog<bool>(
       context: context,
@@ -82,6 +84,24 @@ class _HomeScreenState extends State<HomeScreen> {
       MaterialPageRoute(builder: (_) => const LoginScreen()),
       (route) => false,
     );
+  }
+
+  void backToHome() {
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    setState(() {
+      selectedIndex = 0;
+      customPage = null;
+    });
+  }
+
+  Future<bool> handleBackButton() async {
+    if (shouldShowBackButton) {
+      backToHome();
+      return false;
+    }
+
+    return true;
   }
 
   void openTab(int index) {
@@ -171,6 +191,20 @@ class _HomeScreenState extends State<HomeScreen> {
       default:
         return homeContent();
     }
+  }
+
+  Widget bodyWithBackButton() {
+    return Stack(
+      children: [
+        currentBody(),
+        if (shouldShowBackButton)
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 12,
+            left: 16,
+            child: _FloatingBackButton(onTap: backToHome),
+          ),
+      ],
+    );
   }
 
   Widget homeContent() {
@@ -319,6 +353,8 @@ class _HomeScreenState extends State<HomeScreen> {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 18, 20, 128),
         children: [
+          const SizedBox(height: 54),
+
           Row(
             children: [
               const Expanded(
@@ -521,30 +557,73 @@ class _HomeScreenState extends State<HomeScreen> {
     final bool isTrackingActive = selectedIndex == 3 && customPage == null;
     final bool isProfileActive = selectedIndex == 4 && customPage == null;
 
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      resizeToAvoidBottomInset: true,
-      body: currentBody(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: isKeyboardOpen
-          ? null
-          : _CenterQrButton(
-              active: isQrActive,
-              isLoading: isCheckingQueue,
-              onTap: handleQrButtonTap,
-            ),
-      bottomNavigationBar: isKeyboardOpen
-          ? null
-          : _QrBottomBar(
-              isHomeActive: isHomeActive,
-              isQueueActive: isQueueActive,
-              isTrackingActive: isTrackingActive,
-              isProfileActive: isProfileActive,
-              onHomeTap: () => openTab(0),
-              onQueueTap: () => openTab(1),
-              onTrackingTap: () => openTab(3),
-              onProfileTap: () => openTab(4),
-            ),
+    return WillPopScope(
+      onWillPop: handleBackButton,
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        resizeToAvoidBottomInset: true,
+        body: bodyWithBackButton(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: isKeyboardOpen
+            ? null
+            : _CenterQrButton(
+                active: isQrActive,
+                isLoading: isCheckingQueue,
+                onTap: handleQrButtonTap,
+              ),
+        bottomNavigationBar: isKeyboardOpen
+            ? null
+            : _QrBottomBar(
+                isHomeActive: isHomeActive,
+                isQueueActive: isQueueActive,
+                isTrackingActive: isTrackingActive,
+                isProfileActive: isProfileActive,
+                onHomeTap: () => openTab(0),
+                onQueueTap: () => openTab(1),
+                onTrackingTap: () => openTab(3),
+                onProfileTap: () => openTab(4),
+              ),
+      ),
+    );
+  }
+}
+
+class _FloatingBackButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _FloatingBackButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.surface,
+      borderRadius: BorderRadius.circular(16),
+      elevation: 0,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Container(
+          width: 46,
+          height: 46,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 14,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: const Icon(
+            Icons.arrow_back_rounded,
+            color: AppColors.textDark,
+            size: 24,
+          ),
+        ),
+      ),
     );
   }
 }

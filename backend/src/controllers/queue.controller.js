@@ -217,6 +217,7 @@ async function getTodayQueues(req, res) {
     const [rows] = await pool.query(
       `SELECT 
         q.id,
+        q.student_id,
         q.queue_number,
         q.complaint,
         q.service_type,

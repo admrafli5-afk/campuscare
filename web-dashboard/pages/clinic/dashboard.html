@@ -3,62 +3,288 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Dashboard Klinik - CampusCare</title>
 
   <link rel="stylesheet" href="../../assets/css/variables.css" />
   <link rel="stylesheet" href="../../assets/css/global.css" />
   <link rel="stylesheet" href="../../assets/css/clinic.css" />
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
 </head>
+
 <body>
-  <div class="clinic-layout">
+  <div class="app-layout">
+
+    <!-- SIDEBAR -->
     <aside class="sidebar">
-      <div class="sidebar-brand">CampusCare</div>
+
+      <div class="brand">
+        <div class="brand-logo">
+          <i class="fa-solid fa-leaf"></i>
+        </div>
+
+        <div>
+          <h1>CampusCare</h1>
+          <p>Sehat, Aman, Berkarya</p>
+        </div>
+      </div>
+
       <nav class="sidebar-menu">
-        <a class="active" href="./dashboard.html">Dashboard</a>
-        <a href="./queue.html">Antrean</a>
-        <a href="./qr-checkin.html">QR Check-in</a>
-        <a href="./health-check.html">Pemeriksaan</a>
-        <a href="./emergency.html">Emergency</a>
-        <a href="./sick-letter.html">Surat Sakit</a>
-        <a href="./lift-recommendation.html">Rekomendasi Lift</a>
-        <a href="./patient-history.html">Riwayat Pasien</a>
-        <a href="./statistics.html">Statistik</a>
+
+        <a href="./dashboard.html" class="menu-item active">
+          <i class="fa-solid fa-house"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="./queue.html" class="menu-item">
+          <i class="fa-solid fa-users"></i>
+          <span>Antrean</span>
+        </a>
+
+        <a href="./qr-checkin.html" class="menu-item">
+          <i class="fa-solid fa-qrcode"></i>
+          <span>QR Check-in</span>
+        </a>
+
+        <a href="./health-check.html" class="menu-item">
+          <i class="fa-solid fa-stethoscope"></i>
+          <span>Pemeriksaan</span>
+        </a>
+
+        <a href="./emergency.html" class="menu-item">
+          <i class="fa-solid fa-truck-medical"></i>
+          <span>Emergency</span>
+        </a>
+
+        <a href="./sick-letter.html" class="menu-item">
+          <i class="fa-solid fa-file-medical"></i>
+          <span>Surat Sakit</span>
+        </a>
+
+        <a href="./lift-recommendation.html" class="menu-item">
+          <i class="fa-solid fa-elevator"></i>
+          <span>Rekomendasi Lift</span>
+        </a>
+
+        <a href="./patient-history.html" class="menu-item">
+          <i class="fa-solid fa-hospital-user"></i>
+          <span>Riwayat Pasien</span>
+        </a>
+
+        <a href="./statistics.html" class="menu-item">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Statistik</span>
+        </a>
+
       </nav>
+
+      <div class="sidebar-footer">
+
+        <div class="footer-icon">
+          <i class="fa-solid fa-seedling"></i>
+        </div>
+
+        <div>
+          <h3>CampusCare</h3>
+          <p>Klinik Sehat, Kampus Hebat</p>
+        </div>
+
+      </div>
+
     </aside>
 
+    <!-- MAIN -->
     <main class="main-content">
-      <header class="navbar">
-        <strong>Dashboard Klinik</strong>
-        <div>
-          <span id="userName">Petugas Klinik</span>
-          <button id="logoutButton" class="btn btn-danger" style="margin-left: 12px;">Logout</button>
+
+      <!-- TOPBAR -->
+      <header class="topbar">
+
+        <div class="topbar-left">
+
+          <div class="topbar-icon">
+            <i class="fa-solid fa-hospital"></i>
+          </div>
+
+          <div>
+            <h2>Dashboard Klinik</h2>
+            <p>Monitoring layanan kesehatan kampus</p>
+          </div>
+
         </div>
+
+        <div class="topbar-right">
+
+          <div class="user-profile">
+
+            <div class="avatar">
+              <i class="fa-solid fa-user-nurse"></i>
+            </div>
+
+            <div>
+              <h4 id="userName">Petugas Klinik</h4>
+              <p>Staf Klinik</p>
+            </div>
+
+            <i class="fa-solid fa-chevron-down chevron"></i>
+
+          </div>
+
+          <button id="logoutButton" class="logout-btn">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            <span>Logout</span>
+          </button>
+
+        </div>
+
       </header>
 
+      <!-- CONTENT -->
       <section class="content">
-        <h1 class="page-title">Halo, <span id="welcomeName">Petugas Klinik</span></h1>
-        <p class="page-subtitle">Pantau aktivitas layanan klinik kampus hari ini.</p>
 
-        <div class="stat-grid">
-          <div class="card">
-            <div class="stat-number">0</div>
-            <div class="stat-label">Pasien Hari Ini</div>
+        <div class="page-header">
+
+          <div>
+            <h1>Dashboard Klinik</h1>
+            <p>
+              Pantau seluruh aktivitas layanan kesehatan mahasiswa hari ini.
+            </p>
           </div>
-          <div class="card">
-            <div class="stat-number">0</div>
-            <div class="stat-label">Antrean Menunggu</div>
+
+          <div class="date-card">
+
+            <div class="date-icon">
+              <i class="fa-regular fa-calendar"></i>
+            </div>
+
+            <div>
+              <h4 id="todayDate">Hari Ini</h4>
+              <p id="todayDay">CampusCare</p>
+            </div>
+
           </div>
-          <div class="card">
-            <div class="stat-number">0</div>
-            <div class="stat-label">Sudah Check-in</div>
-          </div>
-          <div class="card">
-            <div class="stat-number">0</div>
-            <div class="stat-label">Kasus Darurat</div>
-          </div>
+
         </div>
+
+        <!-- STATISTICS -->
+        <div class="stats-grid">
+
+          <div class="stat-card green">
+
+            <div class="stat-icon">
+              <i class="fa-solid fa-users"></i>
+            </div>
+
+            <div>
+              <h2 id="totalPatients">0</h2>
+              <h4>Pasien Hari Ini</h4>
+              <p>Total kunjungan</p>
+            </div>
+
+          </div>
+
+          <div class="stat-card yellow">
+
+            <div class="stat-icon">
+              <i class="fa-regular fa-clock"></i>
+            </div>
+
+            <div>
+              <h2 id="waitingQueue">0</h2>
+              <h4>Antrean Menunggu</h4>
+              <p>Belum dipanggil</p>
+            </div>
+
+          </div>
+
+          <div class="stat-card blue">
+
+            <div class="stat-icon">
+              <i class="fa-solid fa-user-check"></i>
+            </div>
+
+            <div>
+              <h2 id="checkedInPatients">0</h2>
+              <h4>Sudah Check-in</h4>
+              <p>Mahasiswa hadir</p>
+            </div>
+
+          </div>
+
+          <div class="stat-card emerald">
+
+            <div class="stat-icon">
+              <i class="fa-solid fa-truck-medical"></i>
+            </div>
+
+            <div>
+              <h2 id="emergencyCases">0</h2>
+              <h4>Kasus Darurat</h4>
+              <p>Hari ini</p>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- TABLE CARD -->
+        <div class="table-card fade-in">
+
+          <div class="table-header">
+
+            <div class="table-title">
+
+              <div class="table-icon">
+                <i class="fa-solid fa-chart-line"></i>
+              </div>
+
+              <h2>Ringkasan Aktivitas Klinik</h2>
+
+            </div>
+
+            <div class="table-actions">
+
+              <button class="refresh-btn" type="button">
+                <i class="fa-solid fa-rotate-right"></i>
+                Refresh
+              </button>
+
+            </div>
+
+          </div>
+
+          <div class="empty-state">
+
+            <i
+              class="fa-solid fa-hospital"
+              style="font-size: 48px; color: #10b981;"
+            ></i>
+
+            <h3>Dashboard Siap Digunakan</h3>
+
+            <p>
+              Statistik layanan kesehatan kampus akan muncul di sini.
+            </p>
+
+          </div>
+
+        </div>
+
       </section>
+
     </main>
+
   </div>
 
   <script src="../../assets/js/config.js"></script>

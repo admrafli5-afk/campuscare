@@ -2,12 +2,33 @@ const pool = require('../config/db');
 const { successResponse, errorResponse } = require('../utils/response');
 const { generateQrToken } = require('../services/qrToken.service');
 const {
-  generateQueueNumber,
+
   getEstimatedMinutesByPriority,
   classifyPriorityByComplaint,
   calculateEstimatedWaitingMinutes,
 } = require('../services/queue.service');
+async function generateSafeQueueNumber() {
+  const [lastQueueRows] = await pool.query(`
+    SELECT queue_number
+    FROM queues
+    WHERE queue_number LIKE 'A%'
+    ORDER BY CAST(SUBSTRING(queue_number, 2) AS UNSIGNED) DESC
+    LIMIT 1
+  `);
 
+  let nextNumber = 1;
+
+  if (lastQueueRows.length > 0) {
+    const lastQueueNumber = lastQueueRows[0].queue_number;
+    const lastNumber = parseInt(lastQueueNumber.replace('A', ''), 10);
+
+    if (!Number.isNaN(lastNumber)) {
+      nextNumber = lastNumber + 1;
+    }
+  }
+
+  return `A${String(nextNumber).padStart(3, '0')}`;
+}
 async function getPublicQueueStatus(req, res) {
   try {
     const [activeRows] = await pool.query(
@@ -99,7 +120,7 @@ async function registerQueue(req, res) {
       );
     }
 
-    const queueNumber = await generateQueueNumber();
+    const queueNumber = await generateSafeQueueNumber();
     const qrToken = generateQrToken(queueNumber);
 
     const currentEstimatedWaiting = await calculateEstimatedWaitingMinutes();
@@ -346,12 +367,58 @@ async function updateQueueStatus(req, res) {
     return errorResponse(res, 'Gagal memperbarui status antrean', [error.message], 500);
   }
 }
+async function getMyQueueHistory(req, res) {
+  try {
+    const [studentRows] = await pool.query(
+      `SELECT id FROM students WHERE user_id = ? LIMIT 1`,
+      [req.user.id]
+    );
 
+    if (studentRows.length === 0) {
+      return errorResponse(res, 'Data mahasiswa tidak ditemukan', [], 404);
+    }
+
+    const studentId = studentRows[0].id;
+
+    const [rows] = await pool.query(
+      `SELECT 
+        id,
+        student_id,
+        queue_number,
+        complaint,
+        service_type,
+        priority_level,
+        estimated_minutes,
+        qr_token,
+        status,
+        created_at,
+        called_at,
+        checked_in_at,
+        completed_at
+       FROM queues
+       WHERE student_id = ?
+       ORDER BY created_at DESC
+       LIMIT 20`,
+      [studentId]
+    );
+
+    return successResponse(res, 'Riwayat antrean berhasil diambil', rows);
+  } catch (error) {
+    console.error(error);
+    return errorResponse(
+      res,
+      'Gagal mengambil riwayat antrean',
+      [error.message],
+      500
+    );
+  }
+}
 module.exports = {
   getPublicQueueStatus,
   registerQueue,
   getMyCurrentQueue,
   getTodayQueues,
   checkInQueue,
+  getMyQueueHistory,
   updateQueueStatus,
 };

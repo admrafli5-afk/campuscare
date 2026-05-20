@@ -23,6 +23,13 @@ router.get(
 );
 
 router.get(
+  '/my-history',
+  authMiddleware,
+  roleMiddleware(['student']),
+  queueController.getMyQueueHistory
+);
+
+router.get(
   '/today',
   authMiddleware,
   roleMiddleware(['clinic_staff', 'clinic_admin', 'supervisor', 'super_admin']),

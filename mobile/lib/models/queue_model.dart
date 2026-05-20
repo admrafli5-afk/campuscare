@@ -8,6 +8,10 @@ class QueueModel {
   final String status;
   final int estimatedMinutes;
   final String qrToken;
+  final String? createdAt;
+  final String? calledAt;
+  final String? checkedInAt;
+  final String? completedAt;
 
   QueueModel({
     this.id,
@@ -19,6 +23,10 @@ class QueueModel {
     required this.status,
     required this.estimatedMinutes,
     required this.qrToken,
+    this.createdAt,
+    this.calledAt,
+    this.checkedInAt,
+    this.completedAt,
   });
 
   factory QueueModel.fromJson(Map<String, dynamic> json) {
@@ -52,6 +60,10 @@ class QueueModel {
           0,
       qrToken:
           json['qr_token']?.toString() ?? json['qrToken']?.toString() ?? '',
+      createdAt: json['created_at']?.toString(),
+      calledAt: json['called_at']?.toString(),
+      checkedInAt: json['checked_in_at']?.toString(),
+      completedAt: json['completed_at']?.toString(),
     );
   }
 
@@ -66,6 +78,7 @@ class QueueModel {
       status: 'waiting',
       estimatedMinutes: 20,
       qrToken: 'CC-QUEUE-DUMMY-A001',
+      createdAt: '2026-05-18 10:00:00',
     );
   }
 }

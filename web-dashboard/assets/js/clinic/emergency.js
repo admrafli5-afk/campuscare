@@ -1,4 +1,4 @@
-const allowedClinicRoles = [
+﻿const allowedClinicRoles = [
     "clinic_staff",
     "clinic_admin",
     "supervisor",
@@ -415,9 +415,7 @@ const allowedClinicRoles = [
   async function updateEmergencyStatus(emergencyId, status) {
     hideError();
   
-    const confirmation = confirm(
-      `Ubah status emergency menjadi "${mapEmergencyStatus(status)}"?`
-    );
+    const confirmation = await showConfirmDialog(`Ubah status emergency menjadi "${mapEmergencyStatus(status)}"?`, { title: "Konfirmasi Status Emergency", confirmText: "Ya, ubah status", cancelText: "Batal", type: "warning" });
   
     if (!confirmation) {
       return;

@@ -1,4 +1,4 @@
-const allowedClinicRoles = [
+﻿const allowedClinicRoles = [
     "clinic_staff",
     "clinic_admin",
     "supervisor",
@@ -431,9 +431,7 @@ const allowedClinicRoles = [
   async function updateLiftStatus(liftId, status) {
     hideError();
   
-    const confirmation = confirm(
-      `Ubah status rekomendasi lift menjadi "${mapLiftStatus(status)}"?`
-    );
+    const confirmation = await showConfirmDialog(`Ubah status rekomendasi lift menjadi "${mapLiftStatus(status)}"?`, { title: "Konfirmasi Rekomendasi Lift", confirmText: "Ya, ubah status", cancelText: "Batal", type: "warning" });
   
     if (!confirmation) {
       return;

@@ -1095,3 +1095,373 @@ tbody tr:hover {
     transform: translateY(0);
   }
 }
+/* CampusCare Logo Image */
+.brand-logo img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  display: block;
+}
+
+.login-logo img,
+.logo-icon img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  display: block;
+}
+
+
+
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 4px 24px;
+}
+
+.brand-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.brand-logo img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  display: block;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.brand-text h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #ffffff;
+}
+
+.brand-text p {
+  margin: 6px 0 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.82);
+}
+/* CampusCare Brand Logo */
+.brand-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.brand-logo img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Sidebar footer logo */
+.footer-icon img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
+}
+
+/* Sidebar without footer */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-menu {
+  flex: 1;
+  padding-bottom: 24px;
+}
+
+.sidebar-footer {
+  display: none !important;
+}
+
+
+/* ======================================================
+   CLINIC STATISTICS CHART
+====================================================== */
+
+.statistics-visual-card {
+  overflow: hidden;
+}
+
+.statistics-chart-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--green-700);
+  background: var(--green-50);
+  border: 1px solid var(--green-100);
+  padding: 9px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.statistics-chart-summary i {
+  font-size: 10px;
+  color: var(--green-500);
+}
+
+.clinic-stat-chart {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 88% 12%, rgba(16, 185, 129, 0.12), transparent 32%),
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.clinic-stat-chart::after {
+  content: "";
+  position: absolute;
+  right: -70px;
+  bottom: -90px;
+  width: 260px;
+  height: 180px;
+  border-radius: 50%;
+  background: rgba(16, 185, 129, 0.08);
+  pointer-events: none;
+}
+
+.chart-info {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 26px;
+  position: relative;
+  z-index: 2;
+}
+
+.chart-info h3 {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--dark);
+  margin: 0;
+  letter-spacing: -0.4px;
+}
+
+.chart-info p {
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.chart-period-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 15px;
+  border-radius: 14px;
+  color: var(--green-700);
+  background: var(--green-50);
+  border: 1px solid var(--green-100);
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.chart-body {
+  position: relative;
+  min-height: 315px;
+  padding: 22px 18px 0;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(226, 232, 240, 0.78);
+  overflow: hidden;
+  z-index: 2;
+}
+
+.chart-grid-lines {
+  position: absolute;
+  inset: 22px 22px 72px 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.chart-grid-lines span {
+  display: block;
+  width: 100%;
+  border-top: 1px dashed rgba(148, 163, 184, 0.34);
+}
+
+.chart-trend-line {
+  position: absolute;
+  left: 26px;
+  right: 26px;
+  top: 24px;
+  bottom: 70px;
+  width: calc(100% - 52px);
+  height: calc(100% - 94px);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.chart-trend-line polyline {
+  fill: none;
+  stroke: var(--green-700);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 8px 12px rgba(4, 120, 87, 0.20));
+}
+
+.chart-trend-line circle {
+  fill: var(--white);
+  stroke: var(--green-700);
+  stroke-width: 4;
+  filter: drop-shadow(0 6px 9px rgba(4, 120, 87, 0.20));
+}
+
+.clinic-bars {
+  position: relative;
+  z-index: 2;
+  height: 270px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  align-items: end;
+  gap: 24px;
+}
+
+.clinic-bar-item {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.bar-number {
+  min-height: 26px;
+  margin-bottom: 10px;
+  color: var(--dark);
+  font-size: 15px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.bar-track {
+  width: 74px;
+  height: 178px;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(241, 245, 249, 0.8), rgba(248, 250, 252, 0.35));
+  border: 1px solid rgba(226, 232, 240, 0.72);
+  padding: 7px;
+}
+
+.bar-fill {
+  width: 100%;
+  height: 14%;
+  min-height: 18px;
+  border-radius: 14px 14px 9px 9px;
+  transition: height 0.4s ease;
+  box-shadow: 0 14px 22px rgba(15, 23, 42, 0.14);
+}
+
+.bar-fill-green {
+  background: linear-gradient(180deg, var(--green-500), var(--green-700));
+}
+
+.bar-fill-yellow {
+  background: linear-gradient(180deg, #fbbf24, var(--yellow-600));
+}
+
+.bar-fill-blue {
+  background: linear-gradient(180deg, #60a5fa, var(--blue-600));
+}
+
+.bar-fill-emerald {
+  background: linear-gradient(180deg, #34d399, var(--green-600));
+}
+
+.bar-label {
+  margin-top: 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.bar-label i {
+  color: var(--green-700);
+  font-size: 13px;
+}
+
+@media (max-width: 1200px) {
+  .clinic-bars {
+    gap: 16px;
+  }
+
+  .bar-track {
+    width: 62px;
+  }
+}
+
+@media (max-width: 700px) {
+  .chart-info {
+    flex-direction: column;
+  }
+
+  .clinic-bars {
+    gap: 10px;
+  }
+
+  .bar-track {
+    width: 48px;
+    height: 150px;
+  }
+
+  .bar-label {
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+  }
+
+  .chart-body {
+    min-height: 285px;
+  }
+
+  .clinic-bars {
+    height: 235px;
+  }
+}

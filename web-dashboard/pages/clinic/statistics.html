@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
@@ -26,11 +26,10 @@
 
 <body>
   <div class="app-layout">
-
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-logo">
-          <i class="fa-solid fa-leaf"></i>
+          <img src="../../assets/images/logo_splash_final.png" alt="CampusCare Logo" />
         </div>
 
         <div>
@@ -85,17 +84,6 @@
           <span>Statistik</span>
         </a>
       </nav>
-
-      <div class="sidebar-footer">
-        <div class="footer-icon">
-          <i class="fa-solid fa-seedling"></i>
-        </div>
-
-        <div>
-          <h3>CampusCare</h3>
-          <p>Klinik Sehat, Kampus Hebat</p>
-        </div>
-      </div>
     </aside>
 
     <main class="main-content">
@@ -133,7 +121,6 @@
       </header>
 
       <section class="content">
-
         <div class="page-header">
           <div>
             <h1>Statistik Klinik</h1>
@@ -203,6 +190,116 @@
             </div>
           </div>
         </div>
+
+        <div class="table-card fade-in statistics-visual-card">
+          <div class="table-header">
+            <div class="table-title">
+              <div class="table-icon">
+                <i class="fa-solid fa-chart-column"></i>
+              </div>
+
+              <h2>Grafik Statistik Klinik</h2>
+            </div>
+
+            <div class="statistics-chart-summary">
+              <span>
+                <i class="fa-solid fa-circle-dot"></i>
+                Visualisasi layanan
+              </span>
+            </div>
+          </div>
+
+          <div class="clinic-stat-chart">
+            <div class="chart-info">
+              <div>
+                <h3>Tren Layanan Klinik</h3>
+                <p>
+                  Perbandingan kunjungan, antrean, surat sakit, dan pemeriksaan selesai.
+                </p>
+              </div>
+
+              <div class="chart-period-badge">
+                <i class="fa-regular fa-calendar-check"></i>
+                Hari ini
+              </div>
+            </div>
+
+            <div class="chart-body">
+              <div class="chart-grid-lines">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+
+              <svg
+                class="chart-trend-line"
+                viewBox="0 0 640 260"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                <polyline
+                  id="statisticsTrendLine"
+                  points="80,200 240,178 400,155 560,130"
+                ></polyline>
+
+                <circle id="trendPoint1" cx="80" cy="200" r="7"></circle>
+                <circle id="trendPoint2" cx="240" cy="178" r="7"></circle>
+                <circle id="trendPoint3" cx="400" cy="155" r="7"></circle>
+                <circle id="trendPoint4" cx="560" cy="130" r="7"></circle>
+              </svg>
+
+              <div class="clinic-bars">
+                <div class="clinic-bar-item">
+                  <div class="bar-number" id="barValueVisits">0</div>
+                  <div class="bar-track">
+                    <div id="barVisits" class="bar-fill bar-fill-green"></div>
+                  </div>
+                  <div class="bar-label">
+                    <i class="fa-solid fa-users"></i>
+                    Kunjungan
+                  </div>
+                </div>
+
+                <div class="clinic-bar-item">
+                  <div class="bar-number" id="barValueQueue">0</div>
+                  <div class="bar-track">
+                    <div id="barQueue" class="bar-fill bar-fill-yellow"></div>
+                  </div>
+                  <div class="bar-label">
+                    <i class="fa-solid fa-clock"></i>
+                    Antrean
+                  </div>
+                </div>
+
+                <div class="clinic-bar-item">
+                  <div class="bar-number" id="barValueLetters">0</div>
+                  <div class="bar-track">
+                    <div id="barLetters" class="bar-fill bar-fill-blue"></div>
+                  </div>
+                  <div class="bar-label">
+                    <i class="fa-solid fa-file-medical"></i>
+                    Surat
+                  </div>
+                </div>
+
+                <div class="clinic-bar-item">
+                  <div class="bar-number" id="barValueCompleted">0</div>
+                  <div class="bar-track">
+                    <div id="barCompleted" class="bar-fill bar-fill-emerald"></div>
+                  </div>
+                  <div class="bar-label">
+                    <i class="fa-solid fa-circle-check"></i>
+                    Selesai
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <br />
 
         <div class="table-card fade-in">
           <div class="table-header">
@@ -275,7 +372,6 @@
             </div>
           </div>
         </div>
-
       </section>
     </main>
   </div>

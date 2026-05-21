@@ -147,6 +147,15 @@ const allowedClinicRoles = [
     return item.status || "normal";
   }
   
+  function getNumberFromElement(element) {
+    if (!element) return 0;
+  
+    const rawValue = String(element.textContent || "0").replace(/[^\d.-]/g, "");
+    const value = Number(rawValue);
+  
+    return Number.isFinite(value) ? value : 0;
+  }
+  
   function renderCardsFromSummary(summary) {
     if (totalVisits) {
       totalVisits.textContent =
@@ -201,10 +210,91 @@ const allowedClinicRoles = [
       return getCategory(item).toLowerCase().includes("selesai");
     });
   
-    if (totalVisits) totalVisits.textContent = totalVisitRow ? getValue(totalVisitRow) : 0;
-    if (averageQueueTime) averageQueueTime.textContent = queueTimeRow ? getValue(queueTimeRow) : 0;
-    if (totalSickLetters) totalSickLetters.textContent = sickLetterRow ? getValue(sickLetterRow) : 0;
-    if (completedCheckups) completedCheckups.textContent = completedRow ? getValue(completedRow) : 0;
+    if (totalVisits) {
+      totalVisits.textContent = totalVisitRow ? getValue(totalVisitRow) : 0;
+    }
+  
+    if (averageQueueTime) {
+      averageQueueTime.textContent = queueTimeRow ? getValue(queueTimeRow) : 0;
+    }
+  
+    if (totalSickLetters) {
+      totalSickLetters.textContent = sickLetterRow ? getValue(sickLetterRow) : 0;
+    }
+  
+    if (completedCheckups) {
+      completedCheckups.textContent = completedRow ? getValue(completedRow) : 0;
+    }
+  }
+  
+  function updateStatisticsGraph() {
+    const visits = getNumberFromElement(totalVisits);
+    const queue = getNumberFromElement(averageQueueTime);
+    const letters = getNumberFromElement(totalSickLetters);
+    const completed = getNumberFromElement(completedCheckups);
+  
+    const values = [visits, queue, letters, completed];
+    const maxValue = Math.max(...values, 1);
+  
+    const heights = values.map((value) => {
+      if (value <= 0) return 14;
+  
+      const percent = (value / maxValue) * 100;
+      return Math.min(Math.max(percent, 18), 100);
+    });
+  
+    const barElements = [
+      document.getElementById("barVisits"),
+      document.getElementById("barQueue"),
+      document.getElementById("barLetters"),
+      document.getElementById("barCompleted"),
+    ];
+  
+    const valueElements = [
+      document.getElementById("barValueVisits"),
+      document.getElementById("barValueQueue"),
+      document.getElementById("barValueLetters"),
+      document.getElementById("barValueCompleted"),
+    ];
+  
+    barElements.forEach((bar, index) => {
+      if (!bar) return;
+      bar.style.height = `${heights[index]}%`;
+    });
+  
+    valueElements.forEach((element, index) => {
+      if (!element) return;
+      element.textContent = values[index];
+    });
+  
+    const xPoints = [80, 240, 400, 560];
+    const yPoints = heights.map((height) => {
+      return 215 - (height / 100) * 145;
+    });
+  
+    const linePoints = xPoints
+      .map((xPoint, index) => `${xPoint},${yPoints[index]}`)
+      .join(" ");
+  
+    const line = document.getElementById("statisticsTrendLine");
+  
+    if (line) {
+      line.setAttribute("points", linePoints);
+    }
+  
+    const trendPoints = [
+      document.getElementById("trendPoint1"),
+      document.getElementById("trendPoint2"),
+      document.getElementById("trendPoint3"),
+      document.getElementById("trendPoint4"),
+    ];
+  
+    trendPoints.forEach((point, index) => {
+      if (!point) return;
+  
+      point.setAttribute("cx", xPoints[index]);
+      point.setAttribute("cy", yPoints[index]);
+    });
   }
   
   function renderTable(items) {
@@ -276,6 +366,7 @@ const allowedClinicRoles = [
   
     renderCardsFromRows(filteredStatisticsData);
     renderTable(filteredStatisticsData);
+    updateStatisticsGraph();
   }
   
   async function protectClinicPage() {
@@ -335,6 +426,7 @@ const allowedClinicRoles = [
         hideError();
         renderCardsFromRows(filteredStatisticsData);
         renderTable(filteredStatisticsData);
+        updateStatisticsGraph();
   
         if (tableInfo) {
           tableInfo.textContent =
@@ -352,6 +444,7 @@ const allowedClinicRoles = [
   
       renderCardsFromSummary(rawData);
       renderTable(filteredStatisticsData);
+      updateStatisticsGraph();
     } catch (error) {
       statisticsData = buildFallbackStatistics();
       filteredStatisticsData = [...statisticsData];
@@ -359,6 +452,7 @@ const allowedClinicRoles = [
       hideError();
       renderCardsFromRows(filteredStatisticsData);
       renderTable(filteredStatisticsData);
+      updateStatisticsGraph();
   
       if (tableInfo) {
         tableInfo.textContent =
@@ -390,6 +484,7 @@ const allowedClinicRoles = [
   
   (async function initStatisticsPage() {
     formatTodayDate();
+    updateStatisticsGraph();
   
     const isAllowed = await protectClinicPage();
   

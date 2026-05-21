@@ -1,4 +1,4 @@
-const allowedClinicRoles = [
+﻿const allowedClinicRoles = [
     "clinic_staff",
     "clinic_admin",
     "supervisor",
@@ -415,7 +415,7 @@ const allowedClinicRoles = [
     setLoading(true);
   
     try {
-      const result = await apiRequest("/statistics/clinic", {
+      const result = await apiRequest("/analytics/dashboard", {
         method: "GET",
       });
   
@@ -492,3 +492,4 @@ const allowedClinicRoles = [
       loadStatistics();
     }
   })();
+

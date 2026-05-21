@@ -370,7 +370,7 @@
     setLoading(true);
   
     try {
-      const result = await apiRequest("/emergency/today", {
+      const result = await apiRequest("/emergency-cases/today", {
         method: "GET",
       });
   
@@ -422,7 +422,7 @@
     }
   
     try {
-      const result = await apiRequest(`/emergency/${emergencyId}/status`, {
+      const result = await apiRequest(`/emergency-cases/${emergencyId}/status`, {
         method: "PATCH",
         body: JSON.stringify({
           status,
@@ -475,3 +475,4 @@
       loadEmergencyData();
     }
   })();
+

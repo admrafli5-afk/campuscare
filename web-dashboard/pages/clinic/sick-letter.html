@@ -3,72 +3,191 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Surat Izin Sakit - CampusCare</title>
 
   <link rel="stylesheet" href="../../assets/css/variables.css" />
   <link rel="stylesheet" href="../../assets/css/global.css" />
   <link rel="stylesheet" href="../../assets/css/clinic.css" />
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
 </head>
+
 <body>
-  <div class="clinic-layout">
+  <div class="app-layout">
+
     <aside class="sidebar">
-      <div class="sidebar-brand">CampusCare</div>
+      <div class="brand">
+        <div class="brand-logo">
+          <i class="fa-solid fa-leaf"></i>
+        </div>
+        <div>
+          <h1>CampusCare</h1>
+          <p>Sehat, Aman, Berkarya</p>
+        </div>
+      </div>
+
       <nav class="sidebar-menu">
-        <a href="./dashboard.html">Dashboard</a>
-        <a href="./queue.html">Antrean</a>
-        <a href="./qr-checkin.html">QR Check-in</a>
-        <a href="./health-check.html">Pemeriksaan</a>
-        <a href="./emergency.html">Emergency</a>
-        <a class="active" href="./sick-letter.html">Surat Sakit</a>
-        <a href="./lift-recommendation.html">Rekomendasi Lift</a>
-        <a href="./patient-history.html">Riwayat Pasien</a>
-        <a href="./statistics.html">Statistik</a>
+        <a href="./dashboard.html" class="menu-item">
+          <i class="fa-solid fa-house"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="./queue.html" class="menu-item">
+          <i class="fa-solid fa-users"></i>
+          <span>Antrean</span>
+        </a>
+
+        <a href="./qr-checkin.html" class="menu-item">
+          <i class="fa-solid fa-qrcode"></i>
+          <span>QR Check-in</span>
+        </a>
+
+        <a href="./health-check.html" class="menu-item">
+          <i class="fa-solid fa-stethoscope"></i>
+          <span>Pemeriksaan</span>
+        </a>
+
+        <a href="./emergency.html" class="menu-item">
+          <i class="fa-solid fa-truck-medical"></i>
+          <span>Emergency</span>
+        </a>
+
+        <a href="./sick-letter.html" class="menu-item active">
+          <i class="fa-solid fa-file-medical"></i>
+          <span>Surat Sakit</span>
+        </a>
+
+        <a href="./lift-recommendation.html" class="menu-item">
+          <i class="fa-solid fa-elevator"></i>
+          <span>Rekomendasi Lift</span>
+        </a>
+
+        <a href="./patient-history.html" class="menu-item">
+          <i class="fa-solid fa-hospital-user"></i>
+          <span>Riwayat Pasien</span>
+        </a>
+
+        <a href="./statistics.html" class="menu-item">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Statistik</span>
+        </a>
       </nav>
+
+      <div class="sidebar-footer">
+        <div class="footer-icon">
+          <i class="fa-solid fa-seedling"></i>
+        </div>
+        <div>
+          <h3>CampusCare</h3>
+          <p>Klinik Sehat, Kampus Hebat</p>
+        </div>
+      </div>
     </aside>
 
     <main class="main-content">
-      <header class="navbar">
-        <strong>Surat Izin Sakit</strong>
 
-        <div>
-          <span id="userName">Petugas Klinik</span>
-          <button id="logoutButton" class="btn btn-danger" style="margin-left: 12px;">
-            Logout
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="topbar-icon">
+            <i class="fa-solid fa-file-medical"></i>
+          </div>
+          <div>
+            <h2>Surat Izin Sakit</h2>
+            <p>Pembuatan surat keterangan sakit mahasiswa</p>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="user-profile">
+            <div class="avatar">
+              <i class="fa-solid fa-user-nurse"></i>
+            </div>
+            <div>
+              <h4 id="userName">Petugas Klinik</h4>
+              <p>Staf Klinik</p>
+            </div>
+            <i class="fa-solid fa-chevron-down chevron"></i>
+          </div>
+
+          <button id="logoutButton" class="logout-btn">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            <span>Logout</span>
           </button>
         </div>
       </header>
 
       <section class="content">
-        <h1 class="page-title">Pembuatan Surat Izin Sakit</h1>
-        <p class="page-subtitle">
-          Buat surat izin sakit berdasarkan hasil pemeriksaan klinik mahasiswa.
-        </p>
 
-        <div class="card">
+        <div class="page-header">
+          <div>
+            <h1>Pembuatan Surat Izin Sakit</h1>
+            <p>Buat surat izin sakit berdasarkan hasil pemeriksaan klinik mahasiswa.</p>
+          </div>
+
+          <div class="date-card">
+            <div class="date-icon">
+              <i class="fa-regular fa-calendar"></i>
+            </div>
+            <div>
+              <h4>Hari Ini</h4>
+              <p>CampusCare</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-card fade-in">
+          <div class="table-header">
+            <div class="table-title">
+              <div class="table-icon">
+                <i class="fa-solid fa-file-circle-plus"></i>
+              </div>
+              <h2>Form Surat Sakit</h2>
+            </div>
+
+            <div class="table-actions">
+              <button id="refreshButton" class="refresh-btn" type="button">
+                <i class="fa-solid fa-rotate-right"></i>
+                Refresh Pasien
+              </button>
+            </div>
+          </div>
+
           <div id="errorMessage" class="error-message"></div>
-          <div id="successMessage" class="badge badge-success" style="display:none; margin-bottom: 16px;"></div>
+          <div id="successMessage" class="badge badge-success" style="display:none; margin-bottom:16px;"></div>
 
           <form id="sickLetterForm">
-            <label>Pilih Pasien</label>
-            <select id="queueSelect" class="input">
-              <option value="">Memuat pasien...</option>
-            </select>
-
-            <br /><br />
+            <div style="margin-bottom: 18px;">
+              <label style="display:block; font-weight:700; margin-bottom:8px;">Pilih Pasien</label>
+              <select id="queueSelect" class="input">
+                <option value="">Memuat pasien...</option>
+              </select>
+            </div>
 
             <div class="form-grid">
               <div>
-                <label>Tanggal Mulai Izin</label>
+                <label style="display:block; font-weight:700; margin-bottom:8px;">Tanggal Mulai Izin</label>
                 <input id="startDate" class="input" type="date" />
               </div>
 
               <div>
-                <label>Tanggal Selesai Izin</label>
+                <label style="display:block; font-weight:700; margin-bottom:8px;">Tanggal Selesai Izin</label>
                 <input id="endDate" class="input" type="date" />
               </div>
 
               <div class="full">
-                <label>Diagnosis / Keterangan Sakit</label>
+                <label style="display:block; font-weight:700; margin-bottom:8px;">Diagnosis / Keterangan Sakit</label>
                 <textarea
                   id="diagnosis"
                   class="input"
@@ -78,7 +197,7 @@
               </div>
 
               <div class="full">
-                <label>Catatan Dokter / Petugas Klinik</label>
+                <label style="display:block; font-weight:700; margin-bottom:8px;">Catatan Petugas Klinik</label>
                 <textarea
                   id="notes"
                   class="input"
@@ -88,66 +207,60 @@
               </div>
             </div>
 
-            <br />
+            <div style="margin-top: 20px; display:flex; gap:10px; flex-wrap:wrap;">
+              <button id="saveButton" class="refresh-btn" type="submit">
+                <i class="fa-solid fa-floppy-disk"></i>
+                Buat Surat Sakit
+              </button>
 
-            <button id="saveButton" class="btn btn-primary" type="submit">
-              Buat Surat Sakit
-            </button>
-
-            <button id="previewButton" class="btn" type="button" style="margin-left: 8px;">
-              Preview Surat
-            </button>
-
-            <button id="refreshButton" class="btn" type="button" style="margin-left: 8px;">
-              Refresh Pasien
-            </button>
+              <button id="previewButton" class="filter-btn" type="button">
+                <i class="fa-solid fa-eye"></i>
+                Preview Surat
+              </button>
+            </div>
           </form>
         </div>
 
         <br />
 
-        <div id="previewCard" class="card" style="display:none;">
-          <h2 style="text-align:center; margin-bottom: 4px;">SURAT IZIN SAKIT</h2>
-          <p style="text-align:center; color: var(--text-gray); margin-top: 0;">
-            CampusCare - Klinik Kampus
-          </p>
+        <div id="previewCard" class="table-card fade-in" style="display:none;">
+          <div style="text-align:center; margin-bottom: 20px;">
+            <h2 style="margin-bottom: 4px;">SURAT IZIN SAKIT</h2>
+            <p style="color: var(--muted);">CampusCare - Klinik Kampus</p>
+          </div>
 
-          <hr style="border: none; border-top: 1px solid var(--border); margin: 20px 0;" />
+          <div class="table-wrapper">
+            <table>
+              <tbody>
+                <tr>
+                  <th>Nama</th>
+                  <td id="previewName">-</td>
+                </tr>
+                <tr>
+                  <th>NIM</th>
+                  <td id="previewNim">-</td>
+                </tr>
+                <tr>
+                  <th>Nomor Antrean</th>
+                  <td id="previewQueueNumber">-</td>
+                </tr>
+                <tr>
+                  <th>Diagnosis</th>
+                  <td id="previewDiagnosis">-</td>
+                </tr>
+                <tr>
+                  <th>Periode Izin</th>
+                  <td id="previewPeriod">-</td>
+                </tr>
+                <tr>
+                  <th>Catatan</th>
+                  <td id="previewNotes">-</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-          <p>
-            Yang bertanda tangan di bawah ini menerangkan bahwa mahasiswa berikut:
-          </p>
-
-          <table class="table">
-            <tbody>
-              <tr>
-                <th>Nama</th>
-                <td id="previewName">-</td>
-              </tr>
-              <tr>
-                <th>NIM</th>
-                <td id="previewNim">-</td>
-              </tr>
-              <tr>
-                <th>Nomor Antrean</th>
-                <td id="previewQueueNumber">-</td>
-              </tr>
-              <tr>
-                <th>Diagnosis</th>
-                <td id="previewDiagnosis">-</td>
-              </tr>
-              <tr>
-                <th>Periode Izin</th>
-                <td id="previewPeriod">-</td>
-              </tr>
-              <tr>
-                <th>Catatan</th>
-                <td id="previewNotes">-</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <p style="margin-top: 20px;">
+          <p style="margin-top: 22px; color: var(--dark);">
             Demikian surat ini dibuat untuk digunakan sebagaimana mestinya.
           </p>
 
@@ -160,29 +273,41 @@
 
         <br />
 
-        <div class="card">
-          <h2>Riwayat Surat Sakit</h2>
-          <p style="color: var(--text-gray);">
+        <div class="table-card fade-in">
+          <div class="table-header">
+            <div class="table-title">
+              <div class="table-icon">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+              </div>
+              <h2>Riwayat Surat Sakit</h2>
+            </div>
+          </div>
+
+          <p style="color: var(--muted); margin-bottom: 16px;">
             Data riwayat akan aktif setelah endpoint CP3 tersedia dari backend.
           </p>
 
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Nama</th>
-                <th>NIM</th>
-                <th>Periode</th>
-                <th>Diagnosis</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="letterTableBody">
-              <tr>
-                <td colspan="5">Belum ada data surat sakit.</td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nama</th>
+                  <th>NIM</th>
+                  <th>Periode</th>
+                  <th>Diagnosis</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+
+              <tbody id="letterTableBody">
+                <tr>
+                  <td colspan="5">Belum ada data surat sakit.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
+
       </section>
     </main>
   </div>

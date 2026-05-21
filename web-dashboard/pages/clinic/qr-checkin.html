@@ -3,103 +3,287 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>QR Check-in - CampusCare</title>
 
   <link rel="stylesheet" href="../../assets/css/variables.css" />
   <link rel="stylesheet" href="../../assets/css/global.css" />
   <link rel="stylesheet" href="../../assets/css/clinic.css" />
-</head>
-<body>
-  <div class="clinic-layout">
-    <aside class="sidebar">
-      <div class="sidebar-brand">CampusCare</div>
-      <nav class="sidebar-menu">
-        <a href="./dashboard.html">Dashboard</a>
-        <a href="./queue.html">Antrean</a>
-        <a class="active" href="./qr-checkin.html">QR Check-in</a>
-        <a href="./health-check.html">Pemeriksaan</a>
-        <a href="./emergency.html">Emergency</a>
-        <a href="./sick-letter.html">Surat Sakit</a>
-        <a href="./lift-recommendation.html">Rekomendasi Lift</a>
-        <a href="./patient-history.html">Riwayat Pasien</a>
-        <a href="./statistics.html">Statistik</a>
-      </nav>
-    </aside>
 
-    <main class="main-content">
-      <header class="navbar">
-        <strong>QR Check-in</strong>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+</head>
+
+<body>
+  <div class="app-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+      <div class="brand">
+        <div class="brand-logo">
+          <i class="fa-solid fa-leaf"></i>
+        </div>
 
         <div>
-          <span id="userName">Petugas Klinik</span>
-          <button id="logoutButton" class="btn btn-danger" style="margin-left: 12px;">
-            Logout
-          </button>
+          <h1>CampusCare</h1>
+          <p>Sehat, Aman, Berkarya</p>
         </div>
+      </div>
+
+      <nav class="sidebar-menu">
+
+        <a href="./dashboard.html" class="menu-item">
+          <i class="fa-solid fa-house"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="./queue.html" class="menu-item">
+          <i class="fa-solid fa-users"></i>
+          <span>Antrean</span>
+        </a>
+
+        <a href="./qr-checkin.html" class="menu-item active">
+          <i class="fa-solid fa-qrcode"></i>
+          <span>QR Check-in</span>
+        </a>
+
+        <a href="./health-check.html" class="menu-item">
+          <i class="fa-solid fa-stethoscope"></i>
+          <span>Pemeriksaan</span>
+        </a>
+
+        <a href="./emergency.html" class="menu-item">
+          <i class="fa-solid fa-truck-medical"></i>
+          <span>Emergency</span>
+        </a>
+
+        <a href="./sick-letter.html" class="menu-item">
+          <i class="fa-solid fa-file-medical"></i>
+          <span>Surat Sakit</span>
+        </a>
+
+        <a href="./lift-recommendation.html" class="menu-item">
+          <i class="fa-solid fa-elevator"></i>
+          <span>Rekomendasi Lift</span>
+        </a>
+
+        <a href="./patient-history.html" class="menu-item">
+          <i class="fa-solid fa-hospital-user"></i>
+          <span>Riwayat Pasien</span>
+        </a>
+
+        <a href="./statistics.html" class="menu-item">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Statistik</span>
+        </a>
+
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="footer-icon">
+          <i class="fa-solid fa-seedling"></i>
+        </div>
+
+        <div>
+          <h3>CampusCare</h3>
+          <p>Klinik Sehat, Kampus Hebat</p>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+      <!-- TOPBAR -->
+      <header class="topbar">
+
+        <div class="topbar-left">
+
+          <div class="topbar-icon">
+            <i class="fa-solid fa-qrcode"></i>
+          </div>
+
+          <div>
+            <h2>QR Check-in</h2>
+            <p>Validasi kedatangan mahasiswa di klinik</p>
+          </div>
+
+        </div>
+
+        <div class="topbar-right">
+
+          <div class="user-profile">
+
+            <div class="avatar">
+              <i class="fa-solid fa-user-nurse"></i>
+            </div>
+
+            <div>
+              <h4 id="userName">Petugas Klinik</h4>
+              <p>Staf Klinik</p>
+            </div>
+
+            <i class="fa-solid fa-chevron-down chevron"></i>
+
+          </div>
+
+          <button id="logoutButton" class="logout-btn">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            <span>Logout</span>
+          </button>
+
+        </div>
+
       </header>
 
+      <!-- CONTENT -->
       <section class="content">
-        <h1 class="page-title">QR Check-in Mahasiswa</h1>
-        <p class="page-subtitle">
-          Scan QR mahasiswa menggunakan USB QR scanner atau input token QR secara manual.
-        </p>
 
-        <div class="card" style="max-width: 680px;">
+        <div class="page-header">
+
+          <div>
+            <h1>QR Check-in Mahasiswa</h1>
+            <p>
+              Scan QR mahasiswa menggunakan USB QR scanner atau masukkan token QR secara manual.
+            </p>
+          </div>
+
+          <div class="date-card">
+
+            <div class="date-icon">
+              <i class="fa-regular fa-calendar"></i>
+            </div>
+
+            <div>
+              <h4 id="todayDate">Hari Ini</h4>
+              <p id="todayDay">CampusCare</p>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- QR CHECK-IN CARD -->
+        <div class="table-card fade-in" style="max-width: 760px;">
+
+          <div class="table-header">
+
+            <div class="table-title">
+
+              <div class="table-icon">
+                <i class="fa-solid fa-qrcode"></i>
+              </div>
+
+              <h2>Scan QR Pasien</h2>
+
+            </div>
+
+          </div>
+
           <div id="errorMessage" class="error-message"></div>
 
-          <label>QR Token</label>
-          <input
-            id="qrTokenInput"
-            class="input"
-            type="text"
-            placeholder="Scan atau tempel QR token di sini"
-            autocomplete="off"
-          />
+          <div style="display: grid; gap: 16px;">
 
-          <br /><br />
+            <div>
+              <label style="display:block; font-weight:700; margin-bottom:8px;">
+                QR Token
+              </label>
 
-          <button id="checkInButton" class="btn btn-primary">
-            Check-in Pasien
-          </button>
+              <input
+                id="qrTokenInput"
+                class="input"
+                type="text"
+                placeholder="Scan atau tempel QR token di sini"
+                autocomplete="off"
+              />
+            </div>
 
-          <p style="color: var(--text-gray); margin-top: 14px;">
-            Catatan: USB QR scanner biasanya bekerja seperti keyboard.
-            Klik input di atas, lalu scan QR mahasiswa.
-          </p>
+            <div>
+              <button id="checkInButton" class="refresh-btn" type="button">
+                <i class="fa-solid fa-circle-check"></i>
+                Check-in Pasien
+              </button>
+            </div>
+
+            <p style="color: var(--muted); font-size: 14px; line-height: 1.6;">
+              Catatan: USB QR scanner biasanya bekerja seperti keyboard.
+              Klik input di atas, lalu scan QR mahasiswa.
+            </p>
+
+          </div>
+
         </div>
 
         <br />
 
-        <div id="resultCard" class="card" style="display:none; max-width: 680px;">
-          <h2>Data Check-in</h2>
+        <!-- RESULT CARD -->
+        <div id="resultCard" class="table-card fade-in" style="display:none; max-width: 760px;">
 
-          <table class="table">
-            <tbody>
-              <tr>
-                <th>Nomor Antrean</th>
-                <td id="resultQueueNumber">-</td>
-              </tr>
-              <tr>
-                <th>Nama</th>
-                <td id="resultName">-</td>
-              </tr>
-              <tr>
-                <th>NIM</th>
-                <td id="resultNim">-</td>
-              </tr>
-              <tr>
-                <th>Keluhan</th>
-                <td id="resultComplaint">-</td>
-              </tr>
-              <tr>
-                <th>Status</th>
-                <td id="resultStatus">-</td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="table-header">
+
+            <div class="table-title">
+
+              <div class="table-icon">
+                <i class="fa-solid fa-clipboard-check"></i>
+              </div>
+
+              <h2>Data Check-in</h2>
+
+            </div>
+
+          </div>
+
+          <div class="table-wrapper">
+            <table>
+              <tbody>
+                <tr>
+                  <th>Nomor Antrean</th>
+                  <td id="resultQueueNumber">-</td>
+                </tr>
+
+                <tr>
+                  <th>Nama</th>
+                  <td id="resultName">-</td>
+                </tr>
+
+                <tr>
+                  <th>NIM</th>
+                  <td id="resultNim">-</td>
+                </tr>
+
+                <tr>
+                  <th>Keluhan</th>
+                  <td id="resultComplaint">-</td>
+                </tr>
+
+                <tr>
+                  <th>Status</th>
+                  <td>
+                    <span id="resultStatus" class="badge badge-info">-</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
         </div>
+
       </section>
+
     </main>
+
   </div>
 
   <script src="../../assets/js/config.js"></script>

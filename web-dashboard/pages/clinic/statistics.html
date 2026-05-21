@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Statistik Klinik - CampusCare</title>
+
+  <link rel="stylesheet" href="../../assets/css/variables.css" />
+  <link rel="stylesheet" href="../../assets/css/global.css" />
+  <link rel="stylesheet" href="../../assets/css/clinic.css" />
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+</head>
+
+<body>
+  <div class="app-layout">
+
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">
+          <i class="fa-solid fa-leaf"></i>
+        </div>
+        <div>
+          <h1>CampusCare</h1>
+          <p>Sehat, Aman, Berkarya</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-menu">
+        <a href="./dashboard.html" class="menu-item">
+          <i class="fa-solid fa-house"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="./queue.html" class="menu-item">
+          <i class="fa-solid fa-users"></i>
+          <span>Antrean</span>
+        </a>
+
+        <a href="./qr-checkin.html" class="menu-item">
+          <i class="fa-solid fa-qrcode"></i>
+          <span>QR Check-in</span>
+        </a>
+
+        <a href="./health-check.html" class="menu-item">
+          <i class="fa-solid fa-stethoscope"></i>
+          <span>Pemeriksaan</span>
+        </a>
+
+        <a href="./emergency.html" class="menu-item">
+          <i class="fa-solid fa-truck-medical"></i>
+          <span>Emergency</span>
+        </a>
+
+        <a href="./sick-letter.html" class="menu-item">
+          <i class="fa-solid fa-file-medical"></i>
+          <span>Surat Sakit</span>
+        </a>
+
+        <a href="./lift-recommendation.html" class="menu-item">
+          <i class="fa-solid fa-elevator"></i>
+          <span>Rekomendasi Lift</span>
+        </a>
+
+        <a href="./patient-history.html" class="menu-item">
+          <i class="fa-solid fa-hospital-user"></i>
+          <span>Riwayat Pasien</span>
+        </a>
+
+        <a href="./statistics.html" class="menu-item active">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Statistik</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="footer-icon">
+          <i class="fa-solid fa-seedling"></i>
+        </div>
+        <div>
+          <h3>CampusCare</h3>
+          <p>Klinik Sehat, Kampus Hebat</p>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="topbar-icon">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+          <div>
+            <h2>Statistik Klinik</h2>
+            <p>Rekap layanan kesehatan mahasiswa</p>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="user-profile">
+            <div class="avatar">
+              <i class="fa-solid fa-user-nurse"></i>
+            </div>
+            <div>
+              <h4 id="userName">Petugas Klinik</h4>
+              <p>Staf Klinik</p>
+            </div>
+            <i class="fa-solid fa-chevron-down chevron"></i>
+          </div>
+
+          <button id="logoutButton" class="logout-btn">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            <span>Logout</span>
+          </button>
+        </div>
+      </header>
+
+      <section class="content">
+
+        <div class="page-header">
+          <div>
+            <h1>Statistik Klinik</h1>
+            <p>Lihat ringkasan aktivitas layanan klinik kampus berdasarkan data kunjungan.</p>
+          </div>
+
+          <div class="date-card">
+            <div class="date-icon">
+              <i class="fa-regular fa-calendar"></i>
+            </div>
+            <div>
+              <h4>Hari Ini</h4>
+              <p>CampusCare</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card green">
+            <div class="stat-icon">
+              <i class="fa-solid fa-users"></i>
+            </div>
+            <div>
+              <h2>0</h2>
+              <h4>Total Kunjungan</h4>
+              <p>Periode ini</p>
+            </div>
+          </div>
+
+          <div class="stat-card yellow">
+            <div class="stat-icon">
+              <i class="fa-solid fa-clock"></i>
+            </div>
+            <div>
+              <h2>0</h2>
+              <h4>Rata-rata Antrean</h4>
+              <p>Menit estimasi</p>
+            </div>
+          </div>
+
+          <div class="stat-card blue">
+            <div class="stat-icon">
+              <i class="fa-solid fa-file-medical"></i>
+            </div>
+            <div>
+              <h2>0</h2>
+              <h4>Surat Sakit</h4>
+              <p>Dibuat klinik</p>
+            </div>
+          </div>
+
+          <div class="stat-card emerald">
+            <div class="stat-icon">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+              <h2>0</h2>
+              <h4>Selesai</h4>
+              <p>Pemeriksaan selesai</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-card fade-in">
+          <div class="table-header">
+            <div class="table-title">
+              <div class="table-icon">
+                <i class="fa-solid fa-chart-pie"></i>
+              </div>
+              <h2>Rekap Statistik</h2>
+            </div>
+
+            <div class="table-actions">
+              <button class="filter-btn" type="button">
+                <i class="fa-solid fa-filter"></i>
+                Filter Periode
+              </button>
+
+              <button class="refresh-btn" type="button">
+                <i class="fa-solid fa-rotate-right"></i>
+                Refresh
+              </button>
+            </div>
+          </div>
+
+          <div class="empty-state">
+            <i
+              class="fa-solid fa-chart-line"
+              style="font-size: 48px; color: #10b981;"
+            ></i>
+
+            <h3>Statistik Siap Digunakan</h3>
+
+            <p>
+              Grafik dan rekap layanan klinik akan aktif setelah endpoint statistik tersedia.
+            </p>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <script src="../../assets/js/config.js"></script>
+  <script src="../../assets/js/api.js"></script>
+  <script src="../../assets/js/clinic/dashboard.js"></script>
+</body>
+</html>

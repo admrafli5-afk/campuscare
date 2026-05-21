@@ -141,8 +141,8 @@
               <i class="fa-regular fa-calendar"></i>
             </div>
             <div>
-              <h4>Hari Ini</h4>
-              <p>CampusCare</p>
+              <h4 id="todayDate">Hari Ini</h4>
+              <p id="todayDay">CampusCare</p>
             </div>
           </div>
         </div>
@@ -153,7 +153,7 @@
               <i class="fa-solid fa-truck-medical"></i>
             </div>
             <div>
-              <h2>0</h2>
+              <h2 id="totalEmergency">0</h2>
               <h4>Total Kasus</h4>
               <p>Hari ini</p>
             </div>
@@ -164,7 +164,7 @@
               <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
             <div>
-              <h2>0</h2>
+              <h2 id="highPriorityEmergency">0</h2>
               <h4>Prioritas Tinggi</h4>
               <p>Perlu tindakan cepat</p>
             </div>
@@ -175,7 +175,7 @@
               <i class="fa-solid fa-user-check"></i>
             </div>
             <div>
-              <h2>0</h2>
+              <h2 id="handlingEmergency">0</h2>
               <h4>Ditangani</h4>
               <p>Dalam proses klinik</p>
             </div>
@@ -186,7 +186,7 @@
               <i class="fa-solid fa-circle-check"></i>
             </div>
             <div>
-              <h2>0</h2>
+              <h2 id="completedEmergency">0</h2>
               <h4>Selesai</h4>
               <p>Sudah ditutup</p>
             </div>
@@ -203,15 +203,35 @@
             </div>
 
             <div class="table-actions">
-              <button class="refresh-btn" type="button">
+              <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input
+                  type="text"
+                  id="searchInput"
+                  placeholder="Cari nama, NIM, lokasi..."
+                />
+              </div>
+
+              <button class="filter-btn" id="filterButton" type="button">
+                <i class="fa-solid fa-filter"></i>
+                Filter
+              </button>
+
+              <button class="refresh-btn" id="refreshButton" type="button">
                 <i class="fa-solid fa-rotate-right"></i>
                 Refresh
               </button>
             </div>
           </div>
 
+          <div id="loadingState" class="loading-state">
+            Memuat data emergency...
+          </div>
+
+          <div id="errorState" class="error-message"></div>
+
           <div class="table-wrapper">
-            <table>
+            <table id="emergencyTable" style="display:none;">
               <thead>
                 <tr>
                   <th>Waktu</th>
@@ -219,17 +239,32 @@
                   <th>NIM</th>
                   <th>Lokasi</th>
                   <th>Keterangan</th>
+                  <th>Prioritas</th>
                   <th>Status</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
 
-              <tbody>
+              <tbody id="emergencyTableBody">
                 <tr>
-                  <td colspan="7">Belum ada laporan emergency hari ini.</td>
+                  <td colspan="8">Belum ada laporan emergency hari ini.</td>
                 </tr>
               </tbody>
             </table>
+          </div>
+
+          <div class="table-footer">
+            <p id="tableInfo">Menampilkan data emergency hari ini</p>
+
+            <div class="pagination">
+              <button type="button">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <button class="active-page" type="button">1</button>
+              <button type="button">
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -239,6 +274,6 @@
 
   <script src="../../assets/js/config.js"></script>
   <script src="../../assets/js/api.js"></script>
-  <script src="../../assets/js/clinic/dashboard.js"></script>
+  <script src="../../assets/js/clinic/emergency.js"></script>
 </body>
 </html>

@@ -139,8 +139,12 @@ const allowedClinicRoles = [
   
   function normalizeLiftData(data) {
     if (Array.isArray(data)) return data;
-    if (data && Array.isArray(data.lift_recommendations)) return data.lift_recommendations;
-    if (data && Array.isArray(data.liftRecommendations)) return data.liftRecommendations;
+    if (data && Array.isArray(data.lift_recommendations)) {
+      return data.lift_recommendations;
+    }
+    if (data && Array.isArray(data.liftRecommendations)) {
+      return data.liftRecommendations;
+    }
     if (data && Array.isArray(data.items)) return data.items;
     return [];
   }
@@ -277,7 +281,8 @@ const allowedClinicRoles = [
       liftTable.style.display = "table";
   
       if (tableInfo) {
-        tableInfo.textContent = "Menampilkan 0 rekomendasi lift";
+        tableInfo.textContent =
+          "Belum ada data rekomendasi lift atau endpoint backend belum tersedia.";
       }
   
       return;
@@ -389,13 +394,15 @@ const allowedClinicRoles = [
         liftData = [];
         filteredLiftData = [];
   
-        showError(
-          result.message ||
-            "Endpoint rekomendasi lift belum tersedia dari backend. Halaman siap untuk integrasi CP4."
-        );
-  
+        hideError();
         renderStats([]);
         renderTable([]);
+  
+        if (tableInfo) {
+          tableInfo.textContent =
+            "Belum ada data rekomendasi lift atau endpoint backend belum tersedia.";
+        }
+  
         return;
       }
   
@@ -408,12 +415,14 @@ const allowedClinicRoles = [
       liftData = [];
       filteredLiftData = [];
   
-      showError(
-        "Tidak dapat memuat rekomendasi lift. Pastikan backend berjalan atau endpoint CP4 tersedia."
-      );
-  
+      hideError();
       renderStats([]);
       renderTable([]);
+  
+      if (tableInfo) {
+        tableInfo.textContent =
+          "Belum ada data rekomendasi lift atau endpoint backend belum tersedia.";
+      }
     } finally {
       setLoading(false);
     }

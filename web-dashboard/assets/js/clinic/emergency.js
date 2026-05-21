@@ -229,10 +229,7 @@ const allowedClinicRoles = [
       `);
     }
   
-    if (
-      status !== "completed" &&
-      status !== "cancelled"
-    ) {
+    if (status !== "completed" && status !== "cancelled") {
       buttons.push(`
         <button class="btn btn-sm btn-danger" onclick="updateEmergencyStatus(${emergencyId}, 'cancelled')">
           Batalkan
@@ -262,7 +259,8 @@ const allowedClinicRoles = [
       emergencyTable.style.display = "table";
   
       if (tableInfo) {
-        tableInfo.textContent = "Menampilkan 0 data emergency";
+        tableInfo.textContent =
+          "Belum ada data emergency atau endpoint backend belum tersedia.";
       }
   
       return;
@@ -380,13 +378,15 @@ const allowedClinicRoles = [
         emergencyData = [];
         filteredEmergencyData = [];
   
-        showError(
-          result.message ||
-            "Endpoint emergency belum tersedia dari backend. Halaman siap untuk integrasi CP4."
-        );
-  
+        hideError();
         renderStats([]);
         renderTable([]);
+  
+        if (tableInfo) {
+          tableInfo.textContent =
+            "Belum ada data emergency atau endpoint backend belum tersedia.";
+        }
+  
         return;
       }
   
@@ -399,12 +399,14 @@ const allowedClinicRoles = [
       emergencyData = [];
       filteredEmergencyData = [];
   
-      showError(
-        "Tidak dapat memuat data emergency. Pastikan backend berjalan atau endpoint CP4 tersedia."
-      );
-  
+      hideError();
       renderStats([]);
       renderTable([]);
+  
+      if (tableInfo) {
+        tableInfo.textContent =
+          "Belum ada data emergency atau endpoint backend belum tersedia.";
+      }
     } finally {
       setLoading(false);
     }

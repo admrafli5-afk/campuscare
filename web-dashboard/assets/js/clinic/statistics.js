@@ -222,7 +222,8 @@ const allowedClinicRoles = [
       statisticsTable.style.display = "table";
   
       if (tableInfo) {
-        tableInfo.textContent = "Menampilkan 0 data statistik";
+        tableInfo.textContent =
+          "Belum ada data statistik atau endpoint backend belum tersedia.";
       }
   
       return;
@@ -331,13 +332,15 @@ const allowedClinicRoles = [
         statisticsData = buildFallbackStatistics();
         filteredStatisticsData = [...statisticsData];
   
-        showError(
-          result.message ||
-            "Endpoint statistik klinik belum tersedia dari backend. Halaman siap untuk integrasi CP4."
-        );
-  
+        hideError();
         renderCardsFromRows(filteredStatisticsData);
         renderTable(filteredStatisticsData);
+  
+        if (tableInfo) {
+          tableInfo.textContent =
+            "Belum ada data statistik atau endpoint backend belum tersedia.";
+        }
+  
         return;
       }
   
@@ -353,12 +356,14 @@ const allowedClinicRoles = [
       statisticsData = buildFallbackStatistics();
       filteredStatisticsData = [...statisticsData];
   
-      showError(
-        "Tidak dapat memuat statistik klinik. Pastikan backend berjalan atau endpoint CP4 tersedia."
-      );
-  
+      hideError();
       renderCardsFromRows(filteredStatisticsData);
       renderTable(filteredStatisticsData);
+  
+      if (tableInfo) {
+        tableInfo.textContent =
+          "Belum ada data statistik atau endpoint backend belum tersedia.";
+      }
     } finally {
       setLoading(false);
     }

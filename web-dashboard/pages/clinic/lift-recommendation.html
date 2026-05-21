@@ -26,12 +26,12 @@
 
 <body>
   <div class="app-layout">
-
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-logo">
           <i class="fa-solid fa-leaf"></i>
         </div>
+
         <div>
           <h1>CampusCare</h1>
           <p>Sehat, Aman, Berkarya</p>
@@ -89,6 +89,7 @@
         <div class="footer-icon">
           <i class="fa-solid fa-seedling"></i>
         </div>
+
         <div>
           <h3>CampusCare</h3>
           <p>Klinik Sehat, Kampus Hebat</p>
@@ -97,12 +98,12 @@
     </aside>
 
     <main class="main-content">
-
       <header class="topbar">
         <div class="topbar-left">
           <div class="topbar-icon">
             <i class="fa-solid fa-elevator"></i>
           </div>
+
           <div>
             <h2>Rekomendasi Lift</h2>
             <p>Prioritas akses lift untuk kebutuhan medis</p>
@@ -114,10 +115,12 @@
             <div class="avatar">
               <i class="fa-solid fa-user-nurse"></i>
             </div>
+
             <div>
               <h4 id="userName">Petugas Klinik</h4>
               <p>Staf Klinik</p>
             </div>
+
             <i class="fa-solid fa-chevron-down chevron"></i>
           </div>
 
@@ -129,20 +132,23 @@
       </header>
 
       <section class="content">
-
         <div class="page-header">
           <div>
             <h1>Rekomendasi Lift</h1>
-            <p>Kelola rekomendasi lift bagi mahasiswa yang membutuhkan akses prioritas medis.</p>
+            <p>
+              Kelola rekomendasi lift bagi mahasiswa yang membutuhkan akses
+              prioritas medis.
+            </p>
           </div>
 
           <div class="date-card">
             <div class="date-icon">
               <i class="fa-regular fa-calendar"></i>
             </div>
+
             <div>
-              <h4>Hari Ini</h4>
-              <p>CampusCare</p>
+              <h4 id="todayDate">Hari Ini</h4>
+              <p id="todayDay">CampusCare</p>
             </div>
           </div>
         </div>
@@ -152,8 +158,9 @@
             <div class="stat-icon">
               <i class="fa-solid fa-elevator"></i>
             </div>
+
             <div>
-              <h2>0</h2>
+              <h2 id="totalLift">0</h2>
               <h4>Total Rekomendasi</h4>
               <p>Hari ini</p>
             </div>
@@ -163,8 +170,9 @@
             <div class="stat-icon">
               <i class="fa-solid fa-clock"></i>
             </div>
+
             <div>
-              <h2>0</h2>
+              <h2 id="pendingLift">0</h2>
               <h4>Menunggu</h4>
               <p>Perlu validasi</p>
             </div>
@@ -174,8 +182,9 @@
             <div class="stat-icon">
               <i class="fa-solid fa-user-check"></i>
             </div>
+
             <div>
-              <h2>0</h2>
+              <h2 id="activeLift">0</h2>
               <h4>Aktif</h4>
               <p>Sedang berlaku</p>
             </div>
@@ -185,8 +194,9 @@
             <div class="stat-icon">
               <i class="fa-solid fa-circle-check"></i>
             </div>
+
             <div>
-              <h2>0</h2>
+              <h2 id="completedLift">0</h2>
               <h4>Selesai</h4>
               <p>Sudah berakhir</p>
             </div>
@@ -199,19 +209,40 @@
               <div class="table-icon">
                 <i class="fa-solid fa-list-check"></i>
               </div>
+
               <h2>Daftar Rekomendasi Lift</h2>
             </div>
 
             <div class="table-actions">
-              <button class="refresh-btn" type="button">
+              <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input
+                  type="text"
+                  id="searchInput"
+                  placeholder="Cari nama, NIM, gedung..."
+                />
+              </div>
+
+              <button class="filter-btn" id="filterButton" type="button">
+                <i class="fa-solid fa-filter"></i>
+                Filter
+              </button>
+
+              <button class="refresh-btn" id="refreshButton" type="button">
                 <i class="fa-solid fa-rotate-right"></i>
                 Refresh
               </button>
             </div>
           </div>
 
+          <div id="loadingState" class="loading-state">
+            Memuat data rekomendasi lift...
+          </div>
+
+          <div id="errorState" class="error-message"></div>
+
           <div class="table-wrapper">
-            <table>
+            <table id="liftTable" style="display: none;">
               <thead>
                 <tr>
                   <th>Nama</th>
@@ -224,21 +255,34 @@
                 </tr>
               </thead>
 
-              <tbody>
+              <tbody id="liftTableBody">
                 <tr>
                   <td colspan="7">Belum ada rekomendasi lift.</td>
                 </tr>
               </tbody>
             </table>
           </div>
-        </div>
 
+          <div class="table-footer">
+            <p id="tableInfo">Menampilkan data rekomendasi lift</p>
+
+            <div class="pagination">
+              <button type="button">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <button class="active-page" type="button">1</button>
+              <button type="button">
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
       </section>
     </main>
   </div>
 
   <script src="../../assets/js/config.js"></script>
   <script src="../../assets/js/api.js"></script>
-  <script src="../../assets/js/clinic/dashboard.js"></script>
+  <script src="../../assets/js/clinic/lift-recommendation.js"></script>
 </body>
 </html>

@@ -32,6 +32,7 @@
         <div class="brand-logo">
           <i class="fa-solid fa-leaf"></i>
         </div>
+
         <div>
           <h1>CampusCare</h1>
           <p>Sehat, Aman, Berkarya</p>
@@ -89,6 +90,7 @@
         <div class="footer-icon">
           <i class="fa-solid fa-seedling"></i>
         </div>
+
         <div>
           <h3>CampusCare</h3>
           <p>Klinik Sehat, Kampus Hebat</p>
@@ -97,12 +99,12 @@
     </aside>
 
     <main class="main-content">
-
       <header class="topbar">
         <div class="topbar-left">
           <div class="topbar-icon">
             <i class="fa-solid fa-chart-line"></i>
           </div>
+
           <div>
             <h2>Statistik Klinik</h2>
             <p>Rekap layanan kesehatan mahasiswa</p>
@@ -114,10 +116,12 @@
             <div class="avatar">
               <i class="fa-solid fa-user-nurse"></i>
             </div>
+
             <div>
               <h4 id="userName">Petugas Klinik</h4>
               <p>Staf Klinik</p>
             </div>
+
             <i class="fa-solid fa-chevron-down chevron"></i>
           </div>
 
@@ -133,16 +137,19 @@
         <div class="page-header">
           <div>
             <h1>Statistik Klinik</h1>
-            <p>Lihat ringkasan aktivitas layanan klinik kampus berdasarkan data kunjungan.</p>
+            <p>
+              Lihat ringkasan aktivitas layanan klinik kampus berdasarkan data kunjungan.
+            </p>
           </div>
 
           <div class="date-card">
             <div class="date-icon">
               <i class="fa-regular fa-calendar"></i>
             </div>
+
             <div>
-              <h4>Hari Ini</h4>
-              <p>CampusCare</p>
+              <h4 id="todayDate">Hari Ini</h4>
+              <p id="todayDay">CampusCare</p>
             </div>
           </div>
         </div>
@@ -152,8 +159,9 @@
             <div class="stat-icon">
               <i class="fa-solid fa-users"></i>
             </div>
+
             <div>
-              <h2>0</h2>
+              <h2 id="totalVisits">0</h2>
               <h4>Total Kunjungan</h4>
               <p>Periode ini</p>
             </div>
@@ -163,8 +171,9 @@
             <div class="stat-icon">
               <i class="fa-solid fa-clock"></i>
             </div>
+
             <div>
-              <h2>0</h2>
+              <h2 id="averageQueueTime">0</h2>
               <h4>Rata-rata Antrean</h4>
               <p>Menit estimasi</p>
             </div>
@@ -174,8 +183,9 @@
             <div class="stat-icon">
               <i class="fa-solid fa-file-medical"></i>
             </div>
+
             <div>
-              <h2>0</h2>
+              <h2 id="totalSickLetters">0</h2>
               <h4>Surat Sakit</h4>
               <p>Dibuat klinik</p>
             </div>
@@ -185,8 +195,9 @@
             <div class="stat-icon">
               <i class="fa-solid fa-circle-check"></i>
             </div>
+
             <div>
-              <h2>0</h2>
+              <h2 id="completedCheckups">0</h2>
               <h4>Selesai</h4>
               <p>Pemeriksaan selesai</p>
             </div>
@@ -199,33 +210,69 @@
               <div class="table-icon">
                 <i class="fa-solid fa-chart-pie"></i>
               </div>
+
               <h2>Rekap Statistik</h2>
             </div>
 
             <div class="table-actions">
-              <button class="filter-btn" type="button">
+              <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input
+                  type="text"
+                  id="searchInput"
+                  placeholder="Cari kategori statistik..."
+                />
+              </div>
+
+              <button class="filter-btn" id="filterButton" type="button">
                 <i class="fa-solid fa-filter"></i>
-                Filter Periode
+                Filter
               </button>
 
-              <button class="refresh-btn" type="button">
+              <button class="refresh-btn" id="refreshButton" type="button">
                 <i class="fa-solid fa-rotate-right"></i>
                 Refresh
               </button>
             </div>
           </div>
 
-          <div class="empty-state">
-            <i
-              class="fa-solid fa-chart-line"
-              style="font-size: 48px; color: #10b981;"
-            ></i>
+          <div id="loadingState" class="loading-state">
+            Memuat statistik klinik...
+          </div>
 
-            <h3>Statistik Siap Digunakan</h3>
+          <div id="errorState" class="error-message"></div>
 
-            <p>
-              Grafik dan rekap layanan klinik akan aktif setelah endpoint statistik tersedia.
-            </p>
+          <div class="table-wrapper">
+            <table id="statisticsTable" style="display:none;">
+              <thead>
+                <tr>
+                  <th>Kategori</th>
+                  <th>Jumlah</th>
+                  <th>Keterangan</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+
+              <tbody id="statisticsTableBody">
+                <tr>
+                  <td colspan="4">Belum ada data statistik.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-footer">
+            <p id="tableInfo">Menampilkan rekap statistik klinik</p>
+
+            <div class="pagination">
+              <button type="button">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <button class="active-page" type="button">1</button>
+              <button type="button">
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -235,6 +282,6 @@
 
   <script src="../../assets/js/config.js"></script>
   <script src="../../assets/js/api.js"></script>
-  <script src="../../assets/js/clinic/dashboard.js"></script>
+  <script src="../../assets/js/clinic/statistics.js"></script>
 </body>
 </html>

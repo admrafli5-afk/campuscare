@@ -1,0 +1,394 @@
+const allowedClinicRoles = [
+    "clinic_staff",
+    "clinic_admin",
+    "supervisor",
+    "super_admin",
+  ];
+  
+  const userNameElement = document.getElementById("userName");
+  const logoutButton = document.getElementById("logoutButton");
+  const refreshButton = document.getElementById("refreshButton");
+  const filterButton = document.getElementById("filterButton");
+  const searchInput = document.getElementById("searchInput");
+  
+  const todayDateElement = document.getElementById("todayDate");
+  const todayDayElement = document.getElementById("todayDay");
+  
+  const loadingState = document.getElementById("loadingState");
+  const errorState = document.getElementById("errorState");
+  const statisticsTable = document.getElementById("statisticsTable");
+  const statisticsTableBody = document.getElementById("statisticsTableBody");
+  const tableInfo = document.getElementById("tableInfo");
+  
+  const totalVisits = document.getElementById("totalVisits");
+  const averageQueueTime = document.getElementById("averageQueueTime");
+  const totalSickLetters = document.getElementById("totalSickLetters");
+  const completedCheckups = document.getElementById("completedCheckups");
+  
+  let statisticsData = [];
+  let filteredStatisticsData = [];
+  
+  function showError(message) {
+    if (!errorState) return;
+  
+    errorState.style.display = "block";
+    errorState.textContent = message;
+  }
+  
+  function hideError() {
+    if (!errorState) return;
+  
+    errorState.style.display = "none";
+    errorState.textContent = "";
+  }
+  
+  function setLoading(isLoading) {
+    if (!loadingState || !statisticsTable) return;
+  
+    loadingState.style.display = isLoading ? "block" : "none";
+    statisticsTable.style.display = isLoading ? "none" : "table";
+  }
+  
+  function formatTodayDate() {
+    const today = new Date();
+  
+    if (todayDateElement) {
+      todayDateElement.textContent = today.toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      });
+    }
+  
+    if (todayDayElement) {
+      todayDayElement.textContent = today.toLocaleDateString("id-ID", {
+        weekday: "long",
+      });
+    }
+  }
+  
+  function mapStatisticStatus(status) {
+    const statuses = {
+      normal: "Normal",
+      good: "Baik",
+      warning: "Perlu Perhatian",
+      danger: "Tinggi",
+      empty: "Belum Ada Data",
+    };
+  
+    return statuses[status] || status || "-";
+  }
+  
+  function getStatusBadgeClass(status) {
+    if (status === "good" || status === "normal") {
+      return "badge-success";
+    }
+  
+    if (status === "warning") {
+      return "badge-warning";
+    }
+  
+    if (status === "danger") {
+      return "badge-danger";
+    }
+  
+    return "badge-info";
+  }
+  
+  function normalizeStatisticsData(data) {
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.statistics)) return data.statistics;
+    if (data && Array.isArray(data.items)) return data.items;
+    return [];
+  }
+  
+  function buildFallbackStatistics() {
+    return [
+      {
+        category: "Total Kunjungan",
+        value: 0,
+        description: "Jumlah kunjungan mahasiswa ke klinik pada periode ini.",
+        status: "empty",
+      },
+      {
+        category: "Rata-rata Waktu Antrean",
+        value: 0,
+        description: "Rata-rata estimasi waktu antrean dalam satuan menit.",
+        status: "empty",
+      },
+      {
+        category: "Surat Sakit",
+        value: 0,
+        description: "Jumlah surat izin sakit yang dibuat oleh klinik.",
+        status: "empty",
+      },
+      {
+        category: "Pemeriksaan Selesai",
+        value: 0,
+        description: "Jumlah pemeriksaan pasien yang sudah selesai.",
+        status: "empty",
+      },
+    ];
+  }
+  
+  function getCategory(item) {
+    return item.category || item.name || item.label || "-";
+  }
+  
+  function getValue(item) {
+    return item.value ?? item.count ?? item.total ?? 0;
+  }
+  
+  function getDescription(item) {
+    return item.description || item.notes || item.caption || "-";
+  }
+  
+  function getStatus(item) {
+    return item.status || "normal";
+  }
+  
+  function renderCardsFromSummary(summary) {
+    if (totalVisits) {
+      totalVisits.textContent =
+        summary.total_visits ??
+        summary.totalVisits ??
+        summary.total_patients ??
+        summary.totalPatients ??
+        0;
+    }
+  
+    if (averageQueueTime) {
+      averageQueueTime.textContent =
+        summary.average_queue_time ??
+        summary.averageQueueTime ??
+        summary.avg_queue_minutes ??
+        summary.avgQueueMinutes ??
+        0;
+    }
+  
+    if (totalSickLetters) {
+      totalSickLetters.textContent =
+        summary.total_sick_letters ??
+        summary.totalSickLetters ??
+        summary.sick_letters ??
+        summary.sickLetters ??
+        0;
+    }
+  
+    if (completedCheckups) {
+      completedCheckups.textContent =
+        summary.completed_checkups ??
+        summary.completedCheckups ??
+        summary.completed ??
+        0;
+    }
+  }
+  
+  function renderCardsFromRows(items) {
+    const totalVisitRow = items.find((item) => {
+      return getCategory(item).toLowerCase().includes("kunjungan");
+    });
+  
+    const queueTimeRow = items.find((item) => {
+      return getCategory(item).toLowerCase().includes("antrean");
+    });
+  
+    const sickLetterRow = items.find((item) => {
+      return getCategory(item).toLowerCase().includes("surat");
+    });
+  
+    const completedRow = items.find((item) => {
+      return getCategory(item).toLowerCase().includes("selesai");
+    });
+  
+    if (totalVisits) totalVisits.textContent = totalVisitRow ? getValue(totalVisitRow) : 0;
+    if (averageQueueTime) averageQueueTime.textContent = queueTimeRow ? getValue(queueTimeRow) : 0;
+    if (totalSickLetters) totalSickLetters.textContent = sickLetterRow ? getValue(sickLetterRow) : 0;
+    if (completedCheckups) completedCheckups.textContent = completedRow ? getValue(completedRow) : 0;
+  }
+  
+  function renderTable(items) {
+    if (!statisticsTableBody || !statisticsTable) return;
+  
+    statisticsTableBody.innerHTML = "";
+  
+    if (!items || items.length === 0) {
+      statisticsTableBody.innerHTML = `
+        <tr>
+          <td colspan="4">Belum ada data statistik.</td>
+        </tr>
+      `;
+  
+      statisticsTable.style.display = "table";
+  
+      if (tableInfo) {
+        tableInfo.textContent = "Menampilkan 0 data statistik";
+      }
+  
+      return;
+    }
+  
+    items.forEach((item) => {
+      const row = document.createElement("tr");
+      const status = getStatus(item);
+  
+      row.innerHTML = `
+        <td>${getCategory(item)}</td>
+        <td>${getValue(item)}</td>
+        <td>${getDescription(item)}</td>
+        <td>
+          <span class="badge ${getStatusBadgeClass(status)}">
+            ${mapStatisticStatus(status)}
+          </span>
+        </td>
+      `;
+  
+      statisticsTableBody.appendChild(row);
+    });
+  
+    statisticsTable.style.display = "table";
+  
+    if (tableInfo) {
+      tableInfo.textContent = `Menampilkan ${items.length} data statistik`;
+    }
+  }
+  
+  function applySearchFilter() {
+    const keyword = searchInput ? searchInput.value.trim().toLowerCase() : "";
+  
+    if (!keyword) {
+      filteredStatisticsData = [...statisticsData];
+    } else {
+      filteredStatisticsData = statisticsData.filter((item) => {
+        const combinedText = [
+          getCategory(item),
+          getValue(item),
+          getDescription(item),
+          mapStatisticStatus(getStatus(item)),
+        ]
+          .join(" ")
+          .toLowerCase();
+  
+        return combinedText.includes(keyword);
+      });
+    }
+  
+    renderCardsFromRows(filteredStatisticsData);
+    renderTable(filteredStatisticsData);
+  }
+  
+  async function protectClinicPage() {
+    const token = getToken();
+  
+    if (!token) {
+      window.location.href = "./login.html";
+      return false;
+    }
+  
+    try {
+      const result = await apiRequest("/auth/me", {
+        method: "GET",
+      });
+  
+      if (!result.success) {
+        removeToken();
+        window.location.href = "./login.html";
+        return false;
+      }
+  
+      const user = result.data;
+  
+      if (!allowedClinicRoles.includes(user.role)) {
+        removeToken();
+        window.location.href = "./login.html";
+        return false;
+      }
+  
+      setUser(user);
+  
+      if (userNameElement) {
+        userNameElement.textContent = user.name;
+      }
+  
+      return true;
+    } catch (error) {
+      removeToken();
+      window.location.href = "./login.html";
+      return false;
+    }
+  }
+  
+  async function loadStatistics() {
+    hideError();
+    setLoading(true);
+  
+    try {
+      const result = await apiRequest("/statistics/clinic", {
+        method: "GET",
+      });
+  
+      if (!result.success) {
+        statisticsData = buildFallbackStatistics();
+        filteredStatisticsData = [...statisticsData];
+  
+        showError(
+          result.message ||
+            "Endpoint statistik klinik belum tersedia dari backend. Halaman siap untuk integrasi CP4."
+        );
+  
+        renderCardsFromRows(filteredStatisticsData);
+        renderTable(filteredStatisticsData);
+        return;
+      }
+  
+      const rawData = result.data || {};
+      const rows = normalizeStatisticsData(rawData);
+  
+      statisticsData = rows.length > 0 ? rows : buildFallbackStatistics();
+      filteredStatisticsData = [...statisticsData];
+  
+      renderCardsFromSummary(rawData);
+      renderTable(filteredStatisticsData);
+    } catch (error) {
+      statisticsData = buildFallbackStatistics();
+      filteredStatisticsData = [...statisticsData];
+  
+      showError(
+        "Tidak dapat memuat statistik klinik. Pastikan backend berjalan atau endpoint CP4 tersedia."
+      );
+  
+      renderCardsFromRows(filteredStatisticsData);
+      renderTable(filteredStatisticsData);
+    } finally {
+      setLoading(false);
+    }
+  }
+  
+  if (logoutButton) {
+    logoutButton.addEventListener("click", function () {
+      removeToken();
+      window.location.href = "./login.html";
+    });
+  }
+  
+  if (refreshButton) {
+    refreshButton.addEventListener("click", loadStatistics);
+  }
+  
+  if (filterButton) {
+    filterButton.addEventListener("click", applySearchFilter);
+  }
+  
+  if (searchInput) {
+    searchInput.addEventListener("input", applySearchFilter);
+  }
+  
+  (async function initStatisticsPage() {
+    formatTodayDate();
+  
+    const isAllowed = await protectClinicPage();
+  
+    if (isAllowed) {
+      loadStatistics();
+    }
+  })();

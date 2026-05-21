@@ -32,6 +32,7 @@
         <div class="brand-logo">
           <i class="fa-solid fa-leaf"></i>
         </div>
+
         <div>
           <h1>CampusCare</h1>
           <p>Sehat, Aman, Berkarya</p>
@@ -89,6 +90,7 @@
         <div class="footer-icon">
           <i class="fa-solid fa-seedling"></i>
         </div>
+
         <div>
           <h3>CampusCare</h3>
           <p>Klinik Sehat, Kampus Hebat</p>
@@ -97,12 +99,12 @@
     </aside>
 
     <main class="main-content">
-
       <header class="topbar">
         <div class="topbar-left">
           <div class="topbar-icon">
             <i class="fa-solid fa-hospital-user"></i>
           </div>
+
           <div>
             <h2>Riwayat Pasien</h2>
             <p>Data kunjungan dan pemeriksaan mahasiswa</p>
@@ -114,10 +116,12 @@
             <div class="avatar">
               <i class="fa-solid fa-user-nurse"></i>
             </div>
+
             <div>
               <h4 id="userName">Petugas Klinik</h4>
               <p>Staf Klinik</p>
             </div>
+
             <i class="fa-solid fa-chevron-down chevron"></i>
           </div>
 
@@ -133,16 +137,69 @@
         <div class="page-header">
           <div>
             <h1>Riwayat Pasien</h1>
-            <p>Lihat riwayat kunjungan dan pemeriksaan mahasiswa di klinik kampus.</p>
+            <p>
+              Lihat riwayat kunjungan dan pemeriksaan mahasiswa di klinik kampus.
+            </p>
           </div>
 
           <div class="date-card">
             <div class="date-icon">
               <i class="fa-regular fa-calendar"></i>
             </div>
+
             <div>
-              <h4>Hari Ini</h4>
-              <p>CampusCare</p>
+              <h4 id="todayDate">Hari Ini</h4>
+              <p id="todayDay">CampusCare</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card green">
+            <div class="stat-icon">
+              <i class="fa-solid fa-users"></i>
+            </div>
+
+            <div>
+              <h2 id="totalHistory">0</h2>
+              <h4>Total Riwayat</h4>
+              <p>Data pasien</p>
+            </div>
+          </div>
+
+          <div class="stat-card yellow">
+            <div class="stat-icon">
+              <i class="fa-solid fa-calendar-day"></i>
+            </div>
+
+            <div>
+              <h2 id="todayHistory">0</h2>
+              <h4>Kunjungan Hari Ini</h4>
+              <p>Riwayat terbaru</p>
+            </div>
+          </div>
+
+          <div class="stat-card blue">
+            <div class="stat-icon">
+              <i class="fa-solid fa-stethoscope"></i>
+            </div>
+
+            <div>
+              <h2 id="checkupHistory">0</h2>
+              <h4>Pemeriksaan</h4>
+              <p>Sudah diperiksa</p>
+            </div>
+          </div>
+
+          <div class="stat-card emerald">
+            <div class="stat-icon">
+              <i class="fa-solid fa-file-medical"></i>
+            </div>
+
+            <div>
+              <h2 id="letterHistory">0</h2>
+              <h4>Surat Sakit</h4>
+              <p>Riwayat surat</p>
             </div>
           </div>
         </div>
@@ -153,47 +210,72 @@
               <div class="table-icon">
                 <i class="fa-solid fa-magnifying-glass"></i>
               </div>
+
               <h2>Pencarian Riwayat Pasien</h2>
             </div>
 
             <div class="table-actions">
               <div class="search-box">
                 <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" placeholder="Cari nama atau NIM..." />
+                <input
+                  type="text"
+                  id="searchInput"
+                  placeholder="Cari nama, NIM, keluhan..."
+                />
               </div>
 
-              <button class="filter-btn" type="button">
+              <button class="filter-btn" id="filterButton" type="button">
                 <i class="fa-solid fa-filter"></i>
                 Filter
               </button>
 
-              <button class="refresh-btn" type="button">
+              <button class="refresh-btn" id="refreshButton" type="button">
                 <i class="fa-solid fa-rotate-right"></i>
                 Refresh
               </button>
             </div>
           </div>
 
+          <div id="loadingState" class="loading-state">
+            Memuat riwayat pasien...
+          </div>
+
+          <div id="errorState" class="error-message"></div>
+
           <div class="table-wrapper">
-            <table>
+            <table id="historyTable" style="display: none;">
               <thead>
                 <tr>
                   <th>Tanggal</th>
                   <th>Nama</th>
                   <th>NIM</th>
                   <th>Keluhan</th>
-                  <th>Diagnosis</th>
+                  <th>Diagnosis / Catatan</th>
                   <th>Tindakan</th>
-                  <th>Aksi</th>
+                  <th>Status</th>
                 </tr>
               </thead>
 
-              <tbody>
+              <tbody id="historyTableBody">
                 <tr>
                   <td colspan="7">Belum ada data riwayat pasien.</td>
                 </tr>
               </tbody>
             </table>
+          </div>
+
+          <div class="table-footer">
+            <p id="tableInfo">Menampilkan riwayat pasien</p>
+
+            <div class="pagination">
+              <button type="button">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <button class="active-page" type="button">1</button>
+              <button type="button">
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -203,6 +285,6 @@
 
   <script src="../../assets/js/config.js"></script>
   <script src="../../assets/js/api.js"></script>
-  <script src="../../assets/js/clinic/dashboard.js"></script>
+  <script src="../../assets/js/clinic/patient-history.js"></script>
 </body>
 </html>

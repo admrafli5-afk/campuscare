@@ -122,6 +122,14 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  QueueRegisterScreen queueRegisterPage() {
+    return QueueRegisterScreen(
+      onSuccess: () {
+        openTab(2);
+      },
+    );
+  }
+
   Future<void> handleQrButtonTap() async {
     if (isCheckingQueue) return;
 
@@ -149,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
 
-        openFeature(const QueueRegisterScreen());
+        openFeature(queueRegisterPage());
         return;
       }
 
@@ -193,16 +201,65 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Widget bodyWithBackButton() {
-    return Stack(
+  String currentPageTitle() {
+    if (customPage != null) {
+      if (customPage is QueueRegisterScreen) return 'Daftar Antrean';
+      if (customPage is MedicalHistoryScreen) return 'Riwayat Kesehatan';
+      if (customPage is SickLettersScreen) return 'Surat Izin Sakit';
+      if (customPage is LiftRecommendationScreen) return 'Rekomendasi Lift';
+      if (customPage is HealthProfileScreen) return 'Profil Kesehatan';
+
+      return 'Satya Care';
+    }
+
+    switch (selectedIndex) {
+      case 1:
+        return 'Cek Antrean';
+      case 2:
+        return 'QR Antrean';
+      case 3:
+        return 'Pantau Antrean';
+      case 4:
+        return 'Profil';
+      default:
+        return 'Satya Care';
+    }
+  }
+
+  Widget bodyWithBackHeader() {
+    if (!shouldShowBackButton) {
+      return currentBody();
+    }
+
+    return Column(
       children: [
-        currentBody(),
-        if (shouldShowBackButton)
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 12,
-            left: 16,
-            child: _FloatingBackButton(onTap: backToHome),
+        SafeArea(
+          bottom: false,
+          child: Container(
+            height: 64,
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            color: AppColors.background,
+            child: Row(
+              children: [
+                _BackHeaderButton(onTap: backToHome),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    currentPageTitle(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: AppColors.textDark,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
+        ),
+        Expanded(child: currentBody()),
       ],
     );
   }
@@ -278,7 +335,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 18),
 
           _QueueHeroCard(
-            onRegisterTap: () => openFeature(const QueueRegisterScreen()),
+            onRegisterTap: () => openFeature(queueRegisterPage()),
             onStatusTap: () => openTab(1),
           ),
 
@@ -353,8 +410,6 @@ class _HomeScreenState extends State<HomeScreen> {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 18, 20, 128),
         children: [
-          const SizedBox(height: 54),
-
           Row(
             children: [
               const Expanded(
@@ -562,7 +617,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Scaffold(
         backgroundColor: AppColors.background,
         resizeToAvoidBottomInset: true,
-        body: bodyWithBackButton(),
+        body: bodyWithBackHeader(),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: isKeyboardOpen
             ? null
@@ -588,39 +643,38 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class _FloatingBackButton extends StatelessWidget {
+class _BackHeaderButton extends StatelessWidget {
   final VoidCallback onTap;
 
-  const _FloatingBackButton({required this.onTap});
+  const _BackHeaderButton({required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.surface,
-      borderRadius: BorderRadius.circular(16),
-      elevation: 0,
+      borderRadius: BorderRadius.circular(15),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(15),
         onTap: onTap,
         child: Container(
-          width: 46,
-          height: 46,
+          width: 44,
+          height: 44,
           decoration: BoxDecoration(
             color: AppColors.surface,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(15),
             border: Border.all(color: AppColors.border),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.08),
-                blurRadius: 14,
-                offset: const Offset(0, 5),
+                color: Colors.black.withOpacity(0.045),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
           child: const Icon(
             Icons.arrow_back_rounded,
             color: AppColors.textDark,
-            size: 24,
+            size: 23,
           ),
         ),
       ),

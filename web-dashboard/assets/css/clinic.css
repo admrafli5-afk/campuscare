@@ -975,3 +975,123 @@ textarea.input:focus {
     gap: 16px;
   }
 }
+/* ======================================================
+   FINAL UI ENHANCEMENT
+====================================================== */
+
+.card,
+.table-card,
+.stat-card {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.card:hover,
+.table-card:hover,
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Smooth table row */
+tbody tr {
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+tbody tr:hover {
+  background: #f8fafc;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Better button shadow */
+.btn-primary,
+.refresh-btn {
+  box-shadow:
+    0 10px 24px rgba(4, 120, 87, 0.18);
+}
+
+.btn-danger {
+  box-shadow:
+    0 10px 24px rgba(220, 38, 38, 0.16);
+}
+
+.btn-warning {
+  box-shadow:
+    0 10px 24px rgba(249, 115, 22, 0.16);
+}
+
+.btn-info {
+  box-shadow:
+    0 10px 24px rgba(37, 99, 235, 0.16);
+}
+
+/* Glass effect */
+.topbar,
+.navbar,
+.table-card,
+.card {
+  backdrop-filter: blur(12px);
+}
+
+/* Better loading state */
+.loading-state {
+  padding: 16px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+}
+
+/* Empty state */
+.empty-state {
+  padding: 42px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.empty-state h3 {
+  margin-top: 12px;
+  font-size: 18px;
+}
+
+.empty-state p {
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+/* Fade animation */
+.fade-in {
+  animation: fadeIn 0.35s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

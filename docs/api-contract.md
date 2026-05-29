@@ -1,257 +1,286 @@
-Mantap, bos 🔥
-Berarti **Checkpoint 1 untuk Role A sudah berhasil secara fungsi**.
-
-Status kamu sekarang:
-
-```text
-✓ Backend Express jalan
-✓ Database MySQL Laragon jalan
-✓ Schema database berhasil dibuat
-✓ Seed data dummy berhasil masuk
-✓ Login multi-role berhasil
-✓ JWT token berhasil keluar
-✓ GET /api/auth/me berhasil
-```
-
-Sekarang tugas terakhir Role A untuk Checkpoint 1:
-
-```text
-1. Update docs/api-contract.md
-2. Commit perubahan
-3. Push ke GitHub
-4. Berhenti dulu menunggu role lain
-```
-
----
-
-# 1. Update `docs/api-contract.md`
-
-Buka file:
-
-```text
-D:\campuscare\docs\api-contract.md
-```
-
-Kalau belum ada, buat file baru.
-
-Isi dengan ini:
-
-````md
 # CampusCare API Contract
 
-Base URL:
+Base URL lokal:
 
 ```text
 http://localhost:5000/api
-````
-
-## Standard Success Response
-
-```json
-{
-  "success": true,
-  "message": "Pesan berhasil",
-  "data": {}
-}
 ```
 
-## Standard Error Response
+Jika dari HP fisik dalam WiFi yang sama:
 
-```json
-{
-  "success": false,
-  "message": "Pesan error",
-  "errors": []
-}
+```text
+http://IP_LAPTOP:5000/api
+```
+
+Header untuk endpoint login-required:
+
+```text
+Authorization: Bearer <TOKEN_LOGIN>
+Content-Type: application/json
 ```
 
 ---
 
-# Auth API
+## 1. Auth API
 
-## POST /api/auth/login
+| Method | Endpoint | Fungsi | Role |
+|---|---|---|---|
+| POST | `/auth/login` | Login multi-role | Public |
+| GET | `/auth/me` | Ambil data user login | Semua user login |
+| POST | `/auth/logout` | Logout client-side | Semua user login |
 
-Role access: public
-
-### Request
+Contoh login:
 
 ```json
 {
-  "email": "rafli@student.campuscare.test",
+  "email": "petugas@campuscare.test",
   "password": "123456"
 }
 ```
 
-### Success Response
+---
 
-```json
-{
-  "success": true,
-  "message": "Login berhasil",
-  "data": {
-    "token": "jwt_token_here",
-    "user": {
-      "id": 1,
-      "name": "Rafli Akbar",
-      "email": "rafli@student.campuscare.test",
-      "role": "student"
-    }
-  }
-}
-```
+## 2. Queue API
 
-### Error Response
+| Method | Endpoint | Fungsi | Role |
+|---|---|---|---|
+| GET | `/queue/public-status` | Status antrean publik | Public |
+| POST | `/queue/register` | Mahasiswa ambil antrean + QR token | Student |
+| GET | `/queue/my-current` | Antrean aktif mahasiswa | Student |
+| GET | `/queue/today` | Daftar antrean hari ini | Clinic Staff/Admin/Supervisor |
+| POST | `/queue/check-in` | QR check-in oleh petugas | Clinic Staff/Admin/Supervisor |
+| PATCH | `/queue/:id/status` | Update status antrean | Clinic Staff/Admin/Supervisor |
 
-```json
-{
-  "success": false,
-  "message": "Email atau password salah",
-  "errors": []
-}
+Status antrean valid:
+
+```text
+waiting
+called
+on_the_way
+checked_in
+in_checkup
+completed
+missed
+cancelled
 ```
 
 ---
 
-## GET /api/auth/me
+## 3. Health Check API
 
-Role access: authenticated user
+| Method | Endpoint | Fungsi | Role |
+|---|---|---|---|
+| POST | `/health-checks` | Simpan pemeriksaan awal | Clinic Staff/Admin/Supervisor |
+| GET | `/health-checks/:id` | Detail pemeriksaan awal | Clinic Staff/Admin/Supervisor |
 
-### Header
+Status kondisi valid:
 
 ```text
-Authorization: Bearer <token>
-```
-
-### Success Response
-
-```json
-{
-  "success": true,
-  "message": "Data user login berhasil diambil",
-  "data": {
-    "id": 1,
-    "name": "Rafli Akbar",
-    "email": "rafli@student.campuscare.test",
-    "role": "student",
-    "is_active": 1
-  }
-}
-```
-
-### Error Response
-
-```json
-{
-  "success": false,
-  "message": "Token tidak ditemukan",
-  "errors": []
-}
+healthy
+light_sick
+medium_sick
+injury
+emergency
+need_referral
 ```
 
 ---
 
-## POST /api/auth/logout
+## 4. Sick Letter API
 
-Role access: authenticated user
+| Method | Endpoint | Fungsi | Role |
+|---|---|---|---|
+| POST | `/sick-letters` | Membuat draft surat sakit | Clinic Staff/Admin/Supervisor |
+| PATCH | `/sick-letters/:id/submit-validation` | Ajukan validasi surat | Clinic Staff/Admin/Supervisor |
+| PATCH | `/sick-letters/:id/approve` | Approve surat sakit | Clinic Admin/Supervisor |
+| PATCH | `/sick-letters/:id/reject` | Reject surat sakit | Clinic Admin/Supervisor |
+| GET | `/sick-letters/me` | Mahasiswa lihat surat sakit miliknya | Student |
+| GET | `/sick-letters/:id` | Detail surat sakit | Student/Clinic |
 
-### Header
+Catatan: Web kemahasiswaan dibatalkan. Surat sakit tetap dibuat dari dashboard klinik dan ditujukan ke kemahasiswaan sebagai dokumen administratif.
+
+---
+
+## 5. Emergency Case API
+
+| Method | Endpoint | Fungsi | Role |
+|---|---|---|---|
+| POST | `/emergency-cases` | Membuat kasus darurat | Clinic Staff/Admin/Supervisor |
+| GET | `/emergency-cases/today` | Emergency hari ini | Clinic Staff/Admin/Supervisor |
+| GET | `/emergency-cases/:id` | Detail emergency | Clinic Staff/Admin/Supervisor |
+| PATCH | `/emergency-cases/:id/status` | Update status emergency | Clinic Staff/Admin/Supervisor |
+
+Status emergency valid:
 
 ```text
-Authorization: Bearer <token>
-```
-
-### Success Response
-
-```json
-{
-  "success": true,
-  "message": "Logout berhasil. Hapus token dari client.",
-  "data": null
-}
+emergency
+emergency_handled
+referred
+stabilized
+completed
 ```
 
 ---
 
-# Dummy Accounts
+## 6. Medical History API
 
-Semua password dummy:
+| Method | Endpoint | Fungsi | Role |
+|---|---|---|---|
+| GET | `/students/me/medical-history` | Mahasiswa lihat riwayat kesehatannya sendiri | Student |
+| GET | `/students/:id/medical-history` | Klinik lihat riwayat mahasiswa tertentu | Clinic Staff/Admin/Supervisor |
+
+Endpoint resmi mobile history:
 
 ```text
-123456
+GET /api/students/me/medical-history
 ```
 
-## Student
+Jangan gunakan:
 
 ```text
-email: rafli@student.campuscare.test
-role : student
-```
-
-## Clinic Staff
-
-```text
-email: petugas@campuscare.test
-role : clinic_staff
-```
-
-## Clinic Admin
-
-```text
-email: admin.klinik@campuscare.test
-role : clinic_admin
-```
-
-## Supervisor / Dosen Penanggung Jawab
-
-```text
-email: supervisor@campuscare.test
-role : supervisor
-```
-
-## Student Affairs / Kemahasiswaan
-
-```text
-email: kemahasiswaan@campuscare.test
-role : student_affairs
-```
-
-## Super Admin
-
-```text
-email: superadmin@campuscare.test
-role : super_admin
+/api/medical-records/my-history
+/api/history/my
+/api/medical-history
+/api/medical-records/me
+/api/health-records/my-history
 ```
 
 ---
 
-# Queue API
+## 7. Analytics API
 
-Status: Checkpoint 2. Belum dikerjakan.
+| Method | Endpoint | Fungsi | Role |
+|---|---|---|---|
+| GET | `/analytics/dashboard` | Statistik dashboard klinik | Clinic Staff/Admin/Supervisor |
+
+Response berisi:
+- queue_today
+- active_queue_today
+- health_checks_today
+- sick_letters_total
+- sick_letters_today
+- emergency_today
+- students_total
+- dominant_conditions
+- queue_status_today
+
+Endpoint statistik resmi:
+
+```text
+GET /api/analytics/dashboard
+```
+
+Jangan gunakan:
+
+```text
+GET /api/statistics/clinic
+```
 
 ---
 
-# Health Check API
+## 8. Medicine Inventory API
 
-Status: Checkpoint 3. Belum dikerjakan.
+| Method | Endpoint | Fungsi | Role |
+|---|---|---|---|
+| GET | `/medicines` | Daftar obat | Clinic Staff/Admin/Supervisor |
+| POST | `/medicines` | Tambah obat | Clinic Admin/Supervisor |
+| GET | `/medicines/low-stock` | Obat stok menipis | Clinic Staff/Admin/Supervisor |
+| GET | `/medicines/:id` | Detail obat | Clinic Staff/Admin/Supervisor |
+| PATCH | `/medicines/:id` | Edit obat | Clinic Admin/Supervisor |
+| PATCH | `/medicines/:id/stock` | Update stok obat | Clinic Admin/Supervisor |
+| GET | `/medicines/:id/logs` | Log perubahan stok obat | Clinic Staff/Admin/Supervisor |
+
+Tipe stok valid:
+
+```text
+in
+out
+adjust
+```
+
+---
+
+## 9. Prescription API
+
+| Method | Endpoint | Fungsi | Role |
+|---|---|---|---|
+| POST | `/prescriptions` | Membuat resep obat dan mengurangi stok | Clinic Staff/Admin/Supervisor |
+| GET | `/prescriptions/me` | Mahasiswa melihat resepnya | Student |
+| GET | `/prescriptions/student/:student_id` | Klinik melihat resep mahasiswa tertentu | Clinic Staff/Admin/Supervisor |
+| GET | `/prescriptions/:id` | Detail resep | Student/Clinic |
+| PATCH | `/prescriptions/:id/cancel` | Membatalkan resep | Clinic Admin/Supervisor |
+
+Catatan: cancel prescription belum otomatis mengembalikan stok obat.
 
 ---
 
-# Sick Letter API
+## 10. Medical Record SOAP API
 
-Status: Checkpoint 3. Belum dikerjakan.
+| Method | Endpoint | Fungsi | Role |
+|---|---|---|---|
+| POST | `/medical-records` | Membuat rekam medis SOAP | Clinic Staff/Admin/Supervisor |
+| GET | `/medical-records/:id` | Detail medical record | Clinic Staff/Admin/Supervisor |
+| GET | `/medical-records/student/:student_id` | Medical record mahasiswa tertentu | Clinic Staff/Admin/Supervisor |
+| PATCH | `/medical-records/:id` | Update medical record | Clinic Staff/Admin/Supervisor |
+
+Status medical record valid:
+
+```text
+draft
+final
+cancelled
+```
 
 ---
 
-# Emergency Case API
+## Endpoint yang Belum Dibuat
 
-Status: Checkpoint 4. Belum dikerjakan.
+### Lift Recommendation Full
 
----
+Rencana:
 
-# Facility Recommendation API
+```text
+POST /lift-recommendations
+PATCH /lift-recommendations/:id/submit
+PATCH /lift-recommendations/:id/approve
+PATCH /lift-recommendations/:id/reject
+GET /lift-recommendations/:id
+GET /lift-recommendations/student/:student_id
+```
 
-Status: Checkpoint 4. Belum dikerjakan.
+### Firebase FCM Token
 
-````
+Rencana:
 
----
+```text
+POST /devices/fcm-token
+DELETE /devices/fcm-token
+```
+
+### Notification API
+
+Rencana:
+
+```text
+GET /notifications/me
+PATCH /notifications/:id/read
+```
+
+### Audit Log API
+
+Rencana:
+
+```text
+GET /audit-logs
+```
+
+### Report Export API
+
+Rencana:
+
+```text
+GET /reports/monthly
+GET /reports/sick-letters
+GET /reports/emergency
+GET /reports/medicine-stock
+```

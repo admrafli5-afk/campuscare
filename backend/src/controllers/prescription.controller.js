@@ -2,6 +2,10 @@ const pool = require('../config/db');
 const { successResponse, errorResponse } = require('../utils/response');
 const { generatePrescriptionNumber } = require('../services/prescription.service');
 const { createStockLog } = require('../services/medicineStock.service');
+const {
+  createAuditLog,
+  getRequestMeta,
+} = require('../services/auditLog.service');
 
 async function createPrescription(req, res) {
   const connection = await pool.getConnection();
@@ -192,6 +196,23 @@ async function createPrescription(req, res) {
     }
 
     await connection.commit();
+
+    const requestMeta = getRequestMeta(req);
+
+    await createAuditLog({
+      userId: req.user.id,
+      action: 'CREATE_PRESCRIPTION',
+      module: 'prescription',
+      targetId: prescriptionId,
+      description: `Membuat resep ${prescriptionNumber}`,
+      metadata: {
+        prescription_number: prescriptionNumber,
+        student_id,
+        total_items: items.length,
+      },
+      ipAddress: requestMeta.ipAddress,
+      userAgent: requestMeta.userAgent,
+    });
 
     return successResponse(
       res,

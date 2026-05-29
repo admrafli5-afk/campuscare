@@ -13,6 +13,7 @@ const analyticsRoutes = require('./routes/analytics.routes');
 const medicineRoutes = require('./routes/medicine.routes');
 const prescriptionRoutes = require('./routes/prescription.routes');
 const medicalRecordRoutes = require('./routes/medicalRecord.routes');
+const auditLogRoutes = require('./routes/auditLog.routes');
 
 
 const app = express();
@@ -42,6 +43,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/medicines', medicineRoutes);
 app.use('/api/prescriptions', prescriptionRoutes);
 app.use('/api/medical-records', medicalRecordRoutes);
+app.use('/api/audit-logs', auditLogRoutes);
 
 const PORT = process.env.PORT || 5000;
 

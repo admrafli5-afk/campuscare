@@ -1,6 +1,10 @@
 const pool = require('../config/db');
 const { successResponse, errorResponse } = require('../utils/response');
 const {
+  createAuditLog,
+  getRequestMeta,
+} = require('../services/auditLog.service');
+const {
   generateMedicineCode,
   createStockLog,
 } = require('../services/medicineStock.service');
@@ -191,6 +195,23 @@ async function createMedicine(req, res) {
       });
     }
 
+    const requestMeta = getRequestMeta(req);
+
+    await createAuditLog({
+      userId: req.user.id,
+      action: 'CREATE_MEDICINE',
+      module: 'medicine',
+      targetId: result.insertId,
+      description: `Menambahkan obat ${name}`,
+      metadata: {
+        medicine_code: finalMedicineCode,
+        name,
+        stock: initialStock,
+      },
+      ipAddress: requestMeta.ipAddress,
+      userAgent: requestMeta.userAgent,
+    });
+
     return successResponse(
       res,
       'Obat berhasil ditambahkan',
@@ -323,6 +344,25 @@ async function updateMedicineStock(req, res) {
       stockAfter,
       note,
       createdBy: req.user.id,
+    });
+
+    const requestMeta = getRequestMeta(req);
+
+    await createAuditLog({
+      userId: req.user.id,
+      action: 'UPDATE_MEDICINE_STOCK',
+      module: 'medicine',
+      targetId: Number(id),
+      description: `Mengubah stok obat dengan tipe ${type}`,
+      metadata: {
+        type,
+        quantity: finalQuantity,
+        stock_before: stockBefore,
+        stock_after: stockAfter,
+        note: note || null,
+      },
+      ipAddress: requestMeta.ipAddress,
+      userAgent: requestMeta.userAgent,
     });
 
     return successResponse(res, 'Stok obat berhasil diperbarui', {

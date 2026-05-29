@@ -1,5 +1,9 @@
 const pool = require('../config/db');
 const { successResponse, errorResponse } = require('../utils/response');
+const {
+  createAuditLog,
+  getRequestMeta,x
+} = require('../services/auditLog.service');
 
 async function createMedicalRecord(req, res) {
   try {
@@ -106,6 +110,25 @@ async function createMedicalRecord(req, res) {
         [queue_id]
       );
     }
+
+    const requestMeta = getRequestMeta(req);
+
+    await createAuditLog({
+      userId: req.user.id,
+      action: 'CREATE_MEDICAL_RECORD',
+      module: 'medical_record',
+      targetId: result.insertId,
+      description: `Membuat medical record untuk mahasiswa ID ${student_id}`,
+      metadata: {
+        student_id,
+        queue_id: queue_id || null,
+        health_check_id: health_check_id || null,
+        diagnosis: diagnosis || null,
+        status: finalStatus,
+      },
+      ipAddress: requestMeta.ipAddress,
+      userAgent: requestMeta.userAgent,
+    });
 
     return successResponse(
       res,
@@ -276,6 +299,32 @@ async function updateMedicalRecord(req, res) {
         [recordRows[0].queue_id]
       );
     }
+
+    const requestMeta = getRequestMeta(req);
+
+    await createAuditLog({
+      userId: req.user.id,
+      action: 'UPDATE_MEDICAL_RECORD',
+      module: 'medical_record',
+      targetId: Number(id),
+      description: `Memperbarui medical record ID ${id}`,
+      metadata: {
+        previous_status: recordRows[0].status,
+        new_status: status || recordRows[0].status,
+        updated_fields: {
+          subjective: subjective !== undefined,
+          objective: objective !== undefined,
+          assessment: assessment !== undefined,
+          plan: plan !== undefined,
+          diagnosis: diagnosis !== undefined,
+          treatment: treatment !== undefined,
+          doctor_notes: doctor_notes !== undefined,
+          status: status !== undefined,
+        },
+      },
+      ipAddress: requestMeta.ipAddress,
+      userAgent: requestMeta.userAgent,
+    });
 
     return successResponse(res, 'Medical record berhasil diperbarui', {
       id: Number(id),

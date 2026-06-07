@@ -1,5 +1,5 @@
-const pool = require('../config/db');
-const { successResponse, errorResponse } = require('../utils/response');
+const pool = require("../config/db");
+const { successResponse, errorResponse } = require("../utils/response");
 
 async function createHealthCheck(req, res) {
   try {
@@ -12,29 +12,34 @@ async function createHealthCheck(req, res) {
       weight,
       height,
       complaint,
+      chief_complaint,
       condition_status,
       recommendation,
+      action_taken,
       notes,
     } = req.body;
 
     if (!student_id) {
-      return errorResponse(res, 'student_id wajib diisi', [], 400);
+      return errorResponse(res, "student_id wajib diisi", [], 400);
     }
 
     const allowedConditionStatus = [
-      'healthy',
-      'light_sick',
-      'medium_sick',
-      'injury',
-      'emergency',
-      'need_referral',
+      "healthy",
+      "light_sick",
+      "medium_sick",
+      "injury",
+      "emergency",
+      "need_referral",
     ];
 
-    const finalConditionStatus = condition_status || 'light_sick';
+    const finalConditionStatus = condition_status || "light_sick";
 
     if (!allowedConditionStatus.includes(finalConditionStatus)) {
-      return errorResponse(res, 'condition_status tidak valid', [], 400);
+      return errorResponse(res, "condition_status tidak valid", [], 400);
     }
+
+    const finalComplaint = complaint || chief_complaint || null;
+    const finalRecommendation = recommendation || action_taken || null;
 
     const [studentRows] = await pool.query(
       `SELECT id FROM students WHERE id = ? LIMIT 1`,
@@ -42,7 +47,7 @@ async function createHealthCheck(req, res) {
     );
 
     if (studentRows.length === 0) {
-      return errorResponse(res, 'Data mahasiswa tidak ditemukan', [], 404);
+      return errorResponse(res, "Data mahasiswa tidak ditemukan", [], 404);
     }
 
     if (queue_id) {
@@ -52,7 +57,7 @@ async function createHealthCheck(req, res) {
       );
 
       if (queueRows.length === 0) {
-        return errorResponse(res, 'Data antrean tidak ditemukan', [], 404);
+        return errorResponse(res, "Data antrean tidak ditemukan", [], 404);
       }
     }
 
@@ -82,9 +87,9 @@ async function createHealthCheck(req, res) {
         pulse || null,
         weight || null,
         height || null,
-        complaint || null,
+        finalComplaint,
         finalConditionStatus,
-        recommendation || null,
+        finalRecommendation,
         notes || null,
       ]
     );
@@ -100,7 +105,7 @@ async function createHealthCheck(req, res) {
 
     return successResponse(
       res,
-      'Pemeriksaan awal berhasil disimpan',
+      "Pemeriksaan awal berhasil disimpan",
       {
         id: result.insertId,
         queue_id: queue_id || null,
@@ -112,7 +117,61 @@ async function createHealthCheck(req, res) {
     );
   } catch (error) {
     console.error(error);
-    return errorResponse(res, 'Gagal menyimpan pemeriksaan awal', [error.message], 500);
+    return errorResponse(
+      res,
+      "Gagal menyimpan pemeriksaan awal",
+      [error.message],
+      500
+    );
+  }
+}
+
+async function getAllHealthChecks(req, res) {
+  try {
+    const [rows] = await pool.query(
+      `SELECT 
+        hc.id,
+        hc.queue_id,
+        hc.student_id,
+        hc.staff_id,
+        hc.temperature,
+        hc.blood_pressure,
+        hc.pulse,
+        hc.weight,
+        hc.height,
+        hc.complaint AS chief_complaint,
+        hc.complaint,
+        hc.condition_status,
+        hc.recommendation AS action_taken,
+        hc.recommendation,
+        hc.notes,
+        hc.created_at,
+        student_user.name AS student_name,
+        s.nim,
+        s.study_program,
+        s.class_name,
+        s.room,
+        staff_user.name AS staff_name,
+        'health_check' AS type,
+        'health_check' AS status
+       FROM health_checks hc
+       JOIN students s ON hc.student_id = s.id
+       JOIN users student_user ON s.user_id = student_user.id
+       LEFT JOIN users staff_user ON hc.staff_id = staff_user.id
+       ORDER BY hc.created_at DESC`
+    );
+
+    return successResponse(res, "Riwayat pemeriksaan berhasil diambil", {
+      health_checks: rows,
+    });
+  } catch (error) {
+    console.error(error);
+    return errorResponse(
+      res,
+      "Gagal mengambil riwayat pemeriksaan",
+      [error.message],
+      500
+    );
   }
 }
 
@@ -131,8 +190,10 @@ async function getHealthCheckById(req, res) {
         hc.pulse,
         hc.weight,
         hc.height,
+        hc.complaint AS chief_complaint,
         hc.complaint,
         hc.condition_status,
+        hc.recommendation AS action_taken,
         hc.recommendation,
         hc.notes,
         hc.created_at,
@@ -141,28 +202,36 @@ async function getHealthCheckById(req, res) {
         s.study_program,
         s.class_name,
         s.room,
-        staff_user.name AS staff_name
+        staff_user.name AS staff_name,
+        'health_check' AS type,
+        'health_check' AS status
        FROM health_checks hc
        JOIN students s ON hc.student_id = s.id
        JOIN users student_user ON s.user_id = student_user.id
-       JOIN users staff_user ON hc.staff_id = staff_user.id
+       LEFT JOIN users staff_user ON hc.staff_id = staff_user.id
        WHERE hc.id = ?
        LIMIT 1`,
       [id]
     );
 
     if (rows.length === 0) {
-      return errorResponse(res, 'Data pemeriksaan tidak ditemukan', [], 404);
+      return errorResponse(res, "Data pemeriksaan tidak ditemukan", [], 404);
     }
 
-    return successResponse(res, 'Data pemeriksaan berhasil diambil', rows[0]);
+    return successResponse(res, "Data pemeriksaan berhasil diambil", rows[0]);
   } catch (error) {
     console.error(error);
-    return errorResponse(res, 'Gagal mengambil data pemeriksaan', [error.message], 500);
+    return errorResponse(
+      res,
+      "Gagal mengambil data pemeriksaan",
+      [error.message],
+      500
+    );
   }
 }
 
 module.exports = {
   createHealthCheck,
+  getAllHealthChecks,
   getHealthCheckById,
 };

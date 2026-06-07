@@ -1,4 +1,4 @@
-const allowedClinicRoles = [
+﻿const allowedClinicRoles = [
     "clinic_staff",
     "clinic_admin",
     "supervisor",

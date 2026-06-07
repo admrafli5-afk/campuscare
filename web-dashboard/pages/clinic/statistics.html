@@ -1,0 +1,387 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Statistik Klinik - CampusCare</title>
+
+  <link rel="stylesheet" href="../../assets/css/variables.css" />
+  <link rel="stylesheet" href="../../assets/css/global.css" />
+  <link rel="stylesheet" href="../../assets/css/clinic.css" />
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+  />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+</head>
+
+<body>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo">
+          <img src="../../assets/images/logo_splash_final.png" alt="CampusCare Logo" />
+        </div>
+
+        <div>
+          <h1>CampusCare</h1>
+          <p>Sehat, Aman, Berkarya</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-menu">
+        <a href="./dashboard.html" class="menu-item">
+          <i class="fa-solid fa-house"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="./queue.html" class="menu-item">
+          <i class="fa-solid fa-users"></i>
+          <span>Antrean</span>
+        </a>
+
+        <a href="./qr-checkin.html" class="menu-item">
+          <i class="fa-solid fa-qrcode"></i>
+          <span>QR Check-in</span>
+        </a>
+
+        <a href="./health-check.html" class="menu-item">
+          <i class="fa-solid fa-stethoscope"></i>
+          <span>Pemeriksaan</span>
+        </a>
+
+        <a href="./emergency.html" class="menu-item">
+          <i class="fa-solid fa-truck-medical"></i>
+          <span>Emergency</span>
+        </a>
+
+        <a href="./sick-letter.html" class="menu-item">
+          <i class="fa-solid fa-file-medical"></i>
+          <span>Surat Sakit</span>
+        </a>
+
+        <a href="./lift-recommendation.html" class="menu-item">
+          <i class="fa-solid fa-elevator"></i>
+          <span>Rekomendasi Lift</span>
+        </a>
+
+        <a href="./patient-history.html" class="menu-item">
+          <i class="fa-solid fa-hospital-user"></i>
+          <span>Riwayat Pasien</span>
+        </a>
+
+        <a href="./statistics.html" class="menu-item active">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Statistik</span>
+        </a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="topbar-icon">
+            <i class="fa-solid fa-chart-line"></i>
+          </div>
+
+          <div>
+            <h2>Statistik Klinik</h2>
+            <p>Rekap layanan kesehatan mahasiswa</p>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="user-profile">
+            <div class="avatar">
+              <i class="fa-solid fa-user-nurse"></i>
+            </div>
+
+            <div>
+              <h4 id="userName">Petugas Klinik</h4>
+              <p>Staf Klinik</p>
+            </div>
+
+            <i class="fa-solid fa-chevron-down chevron"></i>
+          </div>
+
+          <button id="logoutButton" class="logout-btn">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            <span>Logout</span>
+          </button>
+        </div>
+      </header>
+
+      <section class="content">
+        <div class="page-header">
+          <div>
+            <h1>Statistik Klinik</h1>
+            <p>
+              Lihat ringkasan aktivitas layanan klinik kampus berdasarkan data kunjungan.
+            </p>
+          </div>
+
+          <div class="date-card">
+            <div class="date-icon">
+              <i class="fa-regular fa-calendar"></i>
+            </div>
+
+            <div>
+              <h4 id="todayDate">Hari Ini</h4>
+              <p id="todayDay">CampusCare</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card green">
+            <div class="stat-icon">
+              <i class="fa-solid fa-users"></i>
+            </div>
+
+            <div>
+              <h2 id="totalVisits">0</h2>
+              <h4>Total Antrean</h4>
+              <p>Hari ini</p>
+            </div>
+          </div>
+
+          <div class="stat-card yellow">
+            <div class="stat-icon">
+              <i class="fa-solid fa-clock"></i>
+            </div>
+
+            <div>
+              <h2 id="averageQueueTime">0</h2>
+              <h4>Antrean Aktif</h4>
+              <p>Belum selesai</p>
+            </div>
+          </div>
+
+          <div class="stat-card blue">
+            <div class="stat-icon">
+              <i class="fa-solid fa-file-medical"></i>
+            </div>
+
+            <div>
+              <h2 id="totalSickLetters">0</h2>
+              <h4>Surat Sakit</h4>
+              <p>Dibuat klinik</p>
+            </div>
+          </div>
+
+          <div class="stat-card emerald">
+            <div class="stat-icon">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+
+            <div>
+              <h2 id="completedCheckups">0</h2>
+              <h4>Selesai</h4>
+              <p>Pemeriksaan hari ini</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-card fade-in statistics-visual-card">
+          <div class="table-header">
+            <div class="table-title">
+              <div class="table-icon">
+                <i class="fa-solid fa-chart-column"></i>
+              </div>
+
+              <h2>Grafik Statistik Klinik</h2>
+            </div>
+
+            <div class="statistics-chart-summary">
+              <span>
+                <i class="fa-solid fa-circle-dot"></i>
+                Visualisasi layanan
+              </span>
+            </div>
+          </div>
+
+          <div class="clinic-stat-chart">
+            <div class="chart-info">
+              <div>
+                <h3>Tren Layanan Klinik</h3>
+                <p>
+                  Perbandingan kunjungan, antrean, surat sakit, dan pemeriksaan selesai.
+                </p>
+              </div>
+
+              <div class="chart-period-badge">
+                <i class="fa-regular fa-calendar-check"></i>
+                Hari ini
+              </div>
+            </div>
+
+            <div class="chart-body">
+              <div class="chart-grid-lines">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+
+              <svg
+                class="chart-trend-line"
+                viewBox="0 0 640 260"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                <polyline
+                  id="statisticsTrendLine"
+                  points="80,200 240,178 400,155 560,130"
+                ></polyline>
+
+                <circle id="trendPoint1" cx="80" cy="200" r="7"></circle>
+                <circle id="trendPoint2" cx="240" cy="178" r="7"></circle>
+                <circle id="trendPoint3" cx="400" cy="155" r="7"></circle>
+                <circle id="trendPoint4" cx="560" cy="130" r="7"></circle>
+              </svg>
+
+              <div class="clinic-bars">
+                <div class="clinic-bar-item">
+                  <div class="bar-number" id="barValueVisits">0</div>
+                  <div class="bar-track">
+                    <div id="barVisits" class="bar-fill bar-fill-green"></div>
+                  </div>
+                  <div class="bar-label">
+                    <i class="fa-solid fa-users"></i>
+                    Kunjungan
+                  </div>
+                </div>
+
+                <div class="clinic-bar-item">
+                  <div class="bar-number" id="barValueQueue">0</div>
+                  <div class="bar-track">
+                    <div id="barQueue" class="bar-fill bar-fill-yellow"></div>
+                  </div>
+                  <div class="bar-label">
+                    <i class="fa-solid fa-clock"></i>
+                    Antrean
+                  </div>
+                </div>
+
+                <div class="clinic-bar-item">
+                  <div class="bar-number" id="barValueLetters">0</div>
+                  <div class="bar-track">
+                    <div id="barLetters" class="bar-fill bar-fill-blue"></div>
+                  </div>
+                  <div class="bar-label">
+                    <i class="fa-solid fa-file-medical"></i>
+                    Surat
+                  </div>
+                </div>
+
+                <div class="clinic-bar-item">
+                  <div class="bar-number" id="barValueCompleted">0</div>
+                  <div class="bar-track">
+                    <div id="barCompleted" class="bar-fill bar-fill-emerald"></div>
+                  </div>
+                  <div class="bar-label">
+                    <i class="fa-solid fa-circle-check"></i>
+                    Selesai
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <br />
+
+        <div class="table-card fade-in">
+          <div class="table-header">
+            <div class="table-title">
+              <div class="table-icon">
+                <i class="fa-solid fa-chart-pie"></i>
+              </div>
+
+              <h2>Rekap Statistik</h2>
+            </div>
+
+            <div class="table-actions">
+              <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input
+                  type="text"
+                  id="searchInput"
+                  placeholder="Cari kategori statistik..."
+                />
+              </div>
+
+              <button class="filter-btn" id="filterButton" type="button">
+                <i class="fa-solid fa-filter"></i>
+                Filter
+              </button>
+
+              <button class="refresh-btn" id="refreshButton" type="button">
+                <i class="fa-solid fa-rotate-right"></i>
+                Refresh
+              </button>
+            </div>
+          </div>
+
+          <div id="loadingState" class="loading-state">
+            Memuat statistik klinik...
+          </div>
+
+          <div id="errorState" class="error-message"></div>
+
+          <div class="table-wrapper">
+            <table id="statisticsTable" style="display:none;">
+              <thead>
+                <tr>
+                  <th>Kategori</th>
+                  <th>Jumlah</th>
+                  <th>Keterangan</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+
+              <tbody id="statisticsTableBody">
+                <tr>
+                  <td colspan="4">Belum ada data statistik.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-footer">
+            <p id="tableInfo">Menampilkan rekap statistik klinik</p>
+
+            <div class="pagination">
+              <button type="button">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <button class="active-page" type="button">1</button>
+              <button type="button">
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../../assets/js/config.js"></script>
+  <script src="../../assets/js/api.js"></script>
+  <script src="../../assets/js/clinic/notification.js"></script>
+  <script src="../../assets/js/clinic/statistics.js"></script>
+</body>
+</html>
+
+
+

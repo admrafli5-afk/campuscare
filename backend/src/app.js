@@ -10,6 +10,11 @@ const authRoutes = require('./routes/auth.routes');
 const queueRoutes = require('./routes/queue.routes');
 const medicalHistoryRoutes = require('./routes/medicalHistory.routes');
 const analyticsRoutes = require('./routes/analytics.routes');
+const medicineRoutes = require('./routes/medicine.routes');
+const prescriptionRoutes = require('./routes/prescription.routes');
+const medicalRecordRoutes = require('./routes/medicalRecord.routes');
+const auditLogRoutes = require('./routes/auditLog.routes');
+const liftRecommendationRoutes = require('./routes/liftRecommendation.routes');
 
 
 const app = express();
@@ -36,6 +41,11 @@ app.use('/api/sick-letters', sickLetterRoutes);
 app.use('/api/emergency-cases', emergencyCaseRoutes);
 app.use('/api/students', medicalHistoryRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/medicines', medicineRoutes);
+app.use('/api/prescriptions', prescriptionRoutes);
+app.use('/api/medical-records', medicalRecordRoutes);
+app.use('/api/audit-logs', auditLogRoutes);
+app.use('/api/lift-recommendations', liftRecommendationRoutes); 
 
 const PORT = process.env.PORT || 5000;
 

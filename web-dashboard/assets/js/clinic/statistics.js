@@ -29,19 +29,46 @@ let statisticsData = [];
 let filteredStatisticsData = [];
 
 function showError(message) {
+  if (window.CampusAlert) {
+    CampusAlert.toastError(message);
+  }
+
   if (!errorState) return;
+
   errorState.style.display = "block";
   errorState.textContent = message;
 }
 
+function showSuccess(message) {
+  if (window.CampusAlert) {
+    CampusAlert.toastSuccess(message);
+  }
+}
+
+function showInfo(message) {
+  if (window.CampusAlert) {
+    CampusAlert.toastInfo(message);
+  }
+}
+
 function hideError() {
   if (!errorState) return;
+
   errorState.style.display = "none";
   errorState.textContent = "";
 }
 
+async function confirmAction(title, message, confirmText = "Ya, lanjutkan") {
+  if (window.CampusAlert) {
+    return await CampusAlert.confirm(title, message, confirmText);
+  }
+
+  return window.confirm(message);
+}
+
 function setLoading(isLoading) {
   if (!loadingState || !statisticsTable) return;
+
   loadingState.style.display = isLoading ? "block" : "none";
   statisticsTable.style.display = isLoading ? "none" : "table";
 }
@@ -236,10 +263,27 @@ function renderCardsFromRows(items) {
     getCategory(item).toLowerCase().includes("pemeriksaan")
   );
 
-  if (totalVisits) totalVisits.textContent = queueTodayRow ? getValue(queueTodayRow) : 0;
-  if (averageQueueTime) averageQueueTime.textContent = activeQueueRow ? getValue(activeQueueRow) : 0;
-  if (totalSickLetters) totalSickLetters.textContent = sickLetterRow ? getValue(sickLetterRow) : 0;
-  if (completedCheckups) completedCheckups.textContent = healthCheckRow ? getValue(healthCheckRow) : 0;
+  if (totalVisits) {
+    totalVisits.textContent = queueTodayRow ? getValue(queueTodayRow) : 0;
+  }
+
+  if (averageQueueTime) {
+    averageQueueTime.textContent = activeQueueRow
+      ? getValue(activeQueueRow)
+      : 0;
+  }
+
+  if (totalSickLetters) {
+    totalSickLetters.textContent = sickLetterRow
+      ? getValue(sickLetterRow)
+      : 0;
+  }
+
+  if (completedCheckups) {
+    completedCheckups.textContent = healthCheckRow
+      ? getValue(healthCheckRow)
+      : 0;
+  }
 }
 
 function updateStatisticsGraph() {
@@ -418,9 +462,12 @@ async function protectClinicPage() {
   }
 }
 
-async function loadStatistics() {
+async function loadStatistics({ silent = false } = {}) {
   hideError();
-  setLoading(true);
+
+  if (!silent) {
+    setLoading(true);
+  }
 
   try {
     const result = await apiRequest("/analytics/dashboard", {
@@ -435,11 +482,15 @@ async function loadStatistics() {
       renderTable(filteredStatisticsData);
       updateStatisticsGraph();
 
+      const message =
+        result.message ||
+        "Belum ada data statistik atau data analytics belum tersedia.";
+
       if (tableInfo) {
-        tableInfo.textContent =
-          "Belum ada data statistik atau data analytics belum tersedia.";
+        tableInfo.textContent = message;
       }
 
+      showError(message);
       return;
     }
 
@@ -451,33 +502,52 @@ async function loadStatistics() {
     renderCardsFromAnalytics(rawData);
     renderTable(filteredStatisticsData);
     updateStatisticsGraph();
+
+    if (!silent) {
+      showSuccess("Data statistik berhasil dimuat.");
+    }
   } catch (error) {
     statisticsData = buildFallbackStatistics();
     filteredStatisticsData = [...statisticsData];
 
-    hideError();
     renderCardsFromRows(filteredStatisticsData);
     renderTable(filteredStatisticsData);
     updateStatisticsGraph();
 
+    const message =
+      "Tidak dapat memuat analytics dashboard. Pastikan backend berjalan.";
+
     if (tableInfo) {
-      tableInfo.textContent =
-        "Tidak dapat memuat analytics dashboard. Pastikan backend berjalan.";
+      tableInfo.textContent = message;
     }
+
+    showError(message);
   } finally {
     setLoading(false);
   }
 }
 
 if (logoutButton) {
-  logoutButton.addEventListener("click", function () {
+  logoutButton.addEventListener("click", async function () {
+    const isConfirmed = await confirmAction(
+      "Keluar dari akun?",
+      "Anda perlu login kembali untuk mengakses dashboard klinik.",
+      "Ya, logout"
+    );
+
+    if (!isConfirmed) {
+      return;
+    }
+
     removeToken();
     window.location.href = "./login.html";
   });
 }
 
 if (refreshButton) {
-  refreshButton.addEventListener("click", loadStatistics);
+  refreshButton.addEventListener("click", function () {
+    loadStatistics();
+  });
 }
 
 if (filterButton) {
@@ -495,6 +565,6 @@ if (searchInput) {
   const isAllowed = await protectClinicPage();
 
   if (isAllowed) {
-    loadStatistics();
+    loadStatistics({ silent: true });
   }
 })();

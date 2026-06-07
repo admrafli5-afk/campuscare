@@ -29,10 +29,20 @@ let historyData = [];
 let filteredHistoryData = [];
 
 function showError(message) {
+  if (window.CampusAlert) {
+    CampusAlert.toastError(message);
+  }
+
   if (!errorState) return;
 
   errorState.style.display = "block";
   errorState.textContent = message;
+}
+
+function showSuccess(message) {
+  if (window.CampusAlert) {
+    CampusAlert.toastSuccess(message);
+  }
 }
 
 function hideError() {
@@ -40,6 +50,14 @@ function hideError() {
 
   errorState.style.display = "none";
   errorState.textContent = "";
+}
+
+async function confirmAction(title, message, confirmText = "Ya, lanjutkan") {
+  if (window.CampusAlert) {
+    return await CampusAlert.confirm(title, message, confirmText);
+  }
+
+  return window.confirm(message);
 }
 
 function setLoading(isLoading) {
@@ -219,9 +237,11 @@ function getHistoryDate(item) {
 
 function normalizeItemType(item) {
   if (item.type) return item.type;
+
   if (item.status === "sick_letter" || item.letter_id || item.sick_letter_id) {
     return "sick_letter";
   }
+
   return "health_check";
 }
 
@@ -431,13 +451,15 @@ async function loadPatientHistory() {
 
     renderStats(filteredHistoryData);
     renderTable(filteredHistoryData);
+
+    if (historyData.length > 0) {
+      showSuccess("Riwayat pasien berhasil dimuat.");
+    }
   } catch (error) {
     historyData = [];
     filteredHistoryData = [];
 
-    showError(
-      "Tidak dapat memuat riwayat pasien. Pastikan backend berjalan."
-    );
+    showError("Tidak dapat memuat riwayat pasien. Pastikan backend berjalan.");
 
     renderStats([]);
     renderTable([]);
@@ -447,7 +469,17 @@ async function loadPatientHistory() {
 }
 
 if (logoutButton) {
-  logoutButton.addEventListener("click", function () {
+  logoutButton.addEventListener("click", async function () {
+    const isConfirmed = await confirmAction(
+      "Keluar dari akun?",
+      "Anda perlu login kembali untuk mengakses dashboard klinik.",
+      "Ya, logout"
+    );
+
+    if (!isConfirmed) {
+      return;
+    }
+
     removeToken();
     window.location.href = "./login.html";
   });

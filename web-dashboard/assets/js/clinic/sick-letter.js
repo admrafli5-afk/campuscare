@@ -44,22 +44,80 @@ let sickLetters = [];
 let currentUser = null;
 
 function showError(message) {
-  errorMessage.style.display = "block";
-  errorMessage.textContent = message;
-  successMessage.style.display = "none";
+  if (window.CampusAlert) {
+    CampusAlert.toastError(message);
+  }
+
+  if (errorMessage) {
+    errorMessage.style.display = "block";
+    errorMessage.textContent = message;
+  }
+
+  if (successMessage) {
+    successMessage.style.display = "none";
+  }
 }
 
 function showSuccess(message) {
-  successMessage.style.display = "inline-block";
-  successMessage.textContent = message;
-  errorMessage.style.display = "none";
+  if (window.CampusAlert) {
+    CampusAlert.toastSuccess(message);
+  }
+
+  if (successMessage) {
+    successMessage.style.display = "inline-block";
+    successMessage.textContent = message;
+  }
+
+  if (errorMessage) {
+    errorMessage.style.display = "none";
+  }
 }
 
 function hideMessages() {
-  errorMessage.style.display = "none";
-  errorMessage.textContent = "";
-  successMessage.style.display = "none";
-  successMessage.textContent = "";
+  if (errorMessage) {
+    errorMessage.style.display = "none";
+    errorMessage.textContent = "";
+  }
+
+  if (successMessage) {
+    successMessage.style.display = "none";
+    successMessage.textContent = "";
+  }
+}
+
+async function confirmAction(title, message, confirmText = "Ya, lanjutkan") {
+  if (window.CampusAlert) {
+    return await CampusAlert.confirm(title, message, confirmText);
+  }
+
+  return window.confirm(message);
+}
+
+async function warningConfirm(title, message, confirmText = "Ya, lanjutkan") {
+  if (window.CampusAlert) {
+    const result = await Swal.fire({
+      icon: "warning",
+      title,
+      text: message,
+      showCancelButton: true,
+      confirmButtonText: confirmText,
+      cancelButtonText: "Batal",
+      confirmButtonColor: "#047857",
+      cancelButtonColor: "#64748b",
+      background: "#ffffff",
+      color: "#0f172a",
+      customClass: {
+        popup: "campuscare-swal-popup",
+        title: "campuscare-swal-title",
+        confirmButton: "campuscare-swal-confirm",
+        cancelButton: "campuscare-swal-cancel",
+      },
+    });
+
+    return result.isConfirmed === true;
+  }
+
+  return window.confirm(message);
 }
 
 async function protectClinicPage() {
@@ -536,6 +594,16 @@ async function handleSubmit(event) {
     return;
   }
 
+  const confirmCreate = await confirmAction(
+    "Buat Surat Sakit?",
+    "Surat sakit akan dibuat dan langsung diajukan untuk validasi.",
+    "Ya, buat surat"
+  );
+
+  if (!confirmCreate) {
+    return;
+  }
+
   const studentId = getStudentId(healthCheck);
   const healthCheckId = getHealthCheckId(healthCheck);
   const restDays = calculateRestDays(startDateInput.value, endDateInput.value);
@@ -571,7 +639,14 @@ async function handleSubmit(event) {
       });
     }
 
-    showSuccess("Surat sakit berhasil dibuat dan diajukan untuk validasi.");
+    if (window.CampusAlert) {
+      await CampusAlert.success(
+        "Surat Sakit Berhasil Dibuat",
+        "Surat sakit berhasil dibuat dan diajukan untuk validasi."
+      );
+    } else {
+      showSuccess("Surat sakit berhasil dibuat dan diajukan untuk validasi.");
+    }
 
     renderPreview(createdLetter);
     resetForm();
@@ -587,6 +662,16 @@ async function handleSubmit(event) {
 
 async function submitLetterValidation(id) {
   hideMessages();
+
+  const isConfirmed = await confirmAction(
+    "Ajukan Validasi?",
+    "Surat ini akan diajukan untuk proses validasi.",
+    "Ya, ajukan"
+  );
+
+  if (!isConfirmed) {
+    return;
+  }
 
   try {
     const result = await apiRequest(`/sick-letters/${id}/submit-validation`, {
@@ -608,6 +693,16 @@ async function submitLetterValidation(id) {
 async function approveLetter(id) {
   hideMessages();
 
+  const isConfirmed = await confirmAction(
+    "Setujui Surat Sakit?",
+    "Surat izin sakit akan disetujui dan dapat digunakan mahasiswa.",
+    "Ya, setujui"
+  );
+
+  if (!isConfirmed) {
+    return;
+  }
+
   try {
     const result = await apiRequest(`/sick-letters/${id}/approve`, {
       method: "PATCH",
@@ -618,7 +713,15 @@ async function approveLetter(id) {
       return;
     }
 
-    showSuccess("Surat izin sakit berhasil disetujui.");
+    if (window.CampusAlert) {
+      await CampusAlert.success(
+        "Surat Disetujui",
+        "Surat izin sakit berhasil disetujui."
+      );
+    } else {
+      showSuccess("Surat izin sakit berhasil disetujui.");
+    }
+
     await loadSickLetters();
   } catch (error) {
     showError("Tidak dapat menyetujui surat.");
@@ -627,6 +730,16 @@ async function approveLetter(id) {
 
 async function rejectLetter(id) {
   hideMessages();
+
+  const isConfirmed = await warningConfirm(
+    "Tolak Surat Sakit?",
+    "Surat izin sakit akan ditolak. Pastikan keputusan sudah sesuai.",
+    "Ya, tolak"
+  );
+
+  if (!isConfirmed) {
+    return;
+  }
 
   try {
     const result = await apiRequest(`/sick-letters/${id}/reject`, {
@@ -638,7 +751,15 @@ async function rejectLetter(id) {
       return;
     }
 
-    showSuccess("Surat izin sakit berhasil ditolak.");
+    if (window.CampusAlert) {
+      await CampusAlert.warning(
+        "Surat Ditolak",
+        "Surat izin sakit berhasil ditolak."
+      );
+    } else {
+      showSuccess("Surat izin sakit berhasil ditolak.");
+    }
+
     await loadSickLetters();
   } catch (error) {
     showError("Tidak dapat menolak surat.");
@@ -664,7 +785,14 @@ async function printLetter(id) {
     const printWindow = window.open("", "_blank");
 
     if (!printWindow) {
-      showError("Popup diblokir browser. Izinkan popup untuk mencetak surat.");
+      if (window.CampusAlert) {
+        await CampusAlert.warning(
+          "Popup Diblokir",
+          "Izinkan popup pada browser untuk mencetak surat sakit."
+        );
+      } else {
+        showError("Popup diblokir browser. Izinkan popup untuk mencetak surat.");
+      }
       return;
     }
 
@@ -876,6 +1004,8 @@ async function printLetter(id) {
     `);
 
     printWindow.document.close();
+
+    showSuccess("Surat siap dicetak.");
   } catch (error) {
     showError("Tidak dapat mencetak surat. Pastikan backend berjalan.");
   }
@@ -887,7 +1017,17 @@ window.rejectLetter = rejectLetter;
 window.printLetter = printLetter;
 
 if (logoutButton) {
-  logoutButton.addEventListener("click", function () {
+  logoutButton.addEventListener("click", async function () {
+    const isConfirmed = await confirmAction(
+      "Keluar dari akun?",
+      "Anda perlu login kembali untuk mengakses dashboard klinik.",
+      "Ya, logout"
+    );
+
+    if (!isConfirmed) {
+      return;
+    }
+
     removeToken();
     window.location.href = "./login.html";
   });

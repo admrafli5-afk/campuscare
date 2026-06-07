@@ -26,7 +26,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>  with WidgetsBindingObserver {
   int selectedIndex = 0;
   Widget? customPage;
   bool isCheckingQueue = false;
@@ -39,23 +39,34 @@ class _HomeScreenState extends State<HomeScreen> {
   bool get shouldShowBackButton => customPage != null || selectedIndex != 0;
   bool get isClinicOpen => clinicStatus?.isOpen == true;
 
-  @override
-  void initState() {
-    super.initState();
 
-    loadClinicStatus();
-
-    clinicStatusTimer = Timer.periodic(
-      const Duration(seconds: 10),
-      (_) => loadClinicStatus(silent: true),
-    );
+@override
+void didChangeAppLifecycleState(AppLifecycleState state) {
+  if (state == AppLifecycleState.resumed) {
+    loadClinicStatus(silent: true);
   }
+}
 
-  @override
-  void dispose() {
-    clinicStatusTimer?.cancel();
-    super.dispose();
-  }
+@override
+void initState() {
+  super.initState();
+
+  WidgetsBinding.instance.addObserver(this);
+
+  loadClinicStatus();
+
+  clinicStatusTimer = Timer.periodic(
+    const Duration(seconds: 10),
+    (_) => loadClinicStatus(silent: true),
+  );
+}
+
+@override
+void dispose() {
+  WidgetsBinding.instance.removeObserver(this);
+  clinicStatusTimer?.cancel();
+  super.dispose();
+}
 
   Future<void> loadClinicStatus({bool silent = false}) async {
     if (!mounted) return;
@@ -781,6 +792,21 @@ class _BackHeaderButton extends StatelessWidget {
   }
 }
 
+String formatDisplayTime(String? value) {
+  if (value == null || value.isEmpty || value == '-') {
+    return 'Real-time';
+  }
+
+  final cleanValue = value.replaceAll('.', ':');
+  final parts = cleanValue.split(':');
+
+  if (parts.length >= 2) {
+    return '${parts[0].padLeft(2, '0')}:${parts[1].padLeft(2, '0')}';
+  }
+
+  return value;
+}
+
 class _ClinicStatusCard extends StatelessWidget {
   final ClinicStatus? status;
   final bool isLoading;
@@ -941,7 +967,7 @@ class _ClinicStatusCard extends StatelessWidget {
               ),
               const SizedBox(width: 7),
               Text(
-                status?.localTime ?? 'Real-time',
+                 formatDisplayTime(status?.localTime),
                 style: const TextStyle(
                   color: AppColors.textGray,
                   fontSize: 13,

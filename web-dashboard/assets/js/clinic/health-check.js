@@ -28,22 +28,61 @@ const patientTableBody = document.getElementById("patientTableBody");
 let checkedInQueues = [];
 
 function showError(message) {
-  errorMessage.style.display = "block";
-  errorMessage.textContent = message;
-  successMessage.style.display = "none";
+  if (window.CampusAlert) {
+    CampusAlert.toastError(message);
+  }
+
+  if (errorMessage) {
+    errorMessage.style.display = "block";
+    errorMessage.textContent = message;
+  }
+
+  if (successMessage) {
+    successMessage.style.display = "none";
+  }
 }
 
 function showSuccess(message) {
-  successMessage.style.display = "inline-block";
-  successMessage.textContent = message;
-  errorMessage.style.display = "none";
+  if (window.CampusAlert) {
+    CampusAlert.toastSuccess(message);
+  }
+
+  if (successMessage) {
+    successMessage.style.display = "inline-block";
+    successMessage.textContent = message;
+  }
+
+  if (errorMessage) {
+    errorMessage.style.display = "none";
+  }
+}
+
+function showWarning(message) {
+  if (window.CampusAlert) {
+    CampusAlert.toastWarning(message);
+  } else {
+    showError(message);
+  }
 }
 
 function hideMessages() {
-  errorMessage.style.display = "none";
-  errorMessage.textContent = "";
-  successMessage.style.display = "none";
-  successMessage.textContent = "";
+  if (errorMessage) {
+    errorMessage.style.display = "none";
+    errorMessage.textContent = "";
+  }
+
+  if (successMessage) {
+    successMessage.style.display = "none";
+    successMessage.textContent = "";
+  }
+}
+
+async function confirmAction(title, message, confirmText = "Ya, lanjutkan") {
+  if (window.CampusAlert) {
+    return await CampusAlert.confirm(title, message, confirmText);
+  }
+
+  return window.confirm(message);
 }
 
 function mapQueueStatus(status) {
@@ -139,6 +178,8 @@ function getQueueLabel(queue) {
 }
 
 function renderQueueOptions() {
+  if (!queueSelect) return;
+
   queueSelect.innerHTML = "";
 
   if (checkedInQueues.length === 0) {
@@ -157,6 +198,8 @@ function renderQueueOptions() {
 }
 
 function renderPatientTable() {
+  if (!patientTableBody) return;
+
   patientTableBody.innerHTML = "";
 
   if (checkedInQueues.length === 0) {
@@ -173,7 +216,13 @@ function renderPatientTable() {
 
     row.innerHTML = `
       <td>${queue.queue_number || queue.queueNumber || "-"}</td>
-      <td>${queue.student_name || queue.studentName || queue.name || queue.student?.name || "-"}</td>
+      <td>${
+        queue.student_name ||
+        queue.studentName ||
+        queue.name ||
+        queue.student?.name ||
+        "-"
+      }</td>
       <td>${queue.nim || queue.student?.nim || "-"}</td>
       <td>${queue.complaint || queue.symptoms || queue.chief_complaint || "-"}</td>
       <td>${mapQueueStatus(queue.status)}</td>
@@ -183,15 +232,20 @@ function renderPatientTable() {
   });
 }
 
-async function loadCheckedInPatients() {
+async function loadCheckedInPatients({ silent = false } = {}) {
   hideMessages();
 
-  queueSelect.innerHTML = `<option value="">Memuat pasien...</option>`;
-  patientTableBody.innerHTML = `
-    <tr>
-      <td colspan="5">Memuat data pasien...</td>
-    </tr>
-  `;
+  if (queueSelect) {
+    queueSelect.innerHTML = `<option value="">Memuat pasien...</option>`;
+  }
+
+  if (patientTableBody) {
+    patientTableBody.innerHTML = `
+      <tr>
+        <td colspan="5">Memuat data pasien...</td>
+      </tr>
+    `;
+  }
 
   try {
     const result = await apiRequest("/queue/today", {
@@ -211,30 +265,34 @@ async function loadCheckedInPatients() {
 
     renderQueueOptions();
     renderPatientTable();
+
+    if (!silent) {
+      showSuccess("Data pasien berhasil dimuat.");
+    }
   } catch (error) {
     showError("Tidak dapat terhubung ke server. Pastikan backend berjalan.");
   }
 }
 
 function resetFormFields() {
-  queueSelect.value = "";
-  temperatureInput.value = "";
-  bloodPressureInput.value = "";
-  pulseInput.value = "";
-  respirationInput.value = "";
-  chiefComplaintInput.value = "";
-  notesInput.value = "";
-  actionTakenInput.value = "";
+  if (queueSelect) queueSelect.value = "";
+  if (temperatureInput) temperatureInput.value = "";
+  if (bloodPressureInput) bloodPressureInput.value = "";
+  if (pulseInput) pulseInput.value = "";
+  if (respirationInput) respirationInput.value = "";
+  if (chiefComplaintInput) chiefComplaintInput.value = "";
+  if (notesInput) notesInput.value = "";
+  if (actionTakenInput) actionTakenInput.value = "";
 }
 
 async function handleSubmit(event) {
   event.preventDefault();
   hideMessages();
 
-  const queueId = queueSelect.value;
+  const queueId = queueSelect ? queueSelect.value : "";
 
   if (!queueId) {
-    showError("Pilih pasien terlebih dahulu.");
+    showWarning("Pilih pasien terlebih dahulu.");
     return;
   }
 
@@ -258,7 +316,24 @@ async function handleSubmit(event) {
   }
 
   if (!chiefComplaintInput.value.trim()) {
-    showError("Keluhan utama wajib diisi.");
+    showWarning("Keluhan utama wajib diisi.");
+    return;
+  }
+
+  const patientName =
+    selectedQueue.student_name ||
+    selectedQueue.studentName ||
+    selectedQueue.name ||
+    selectedQueue.student?.name ||
+    "pasien";
+
+  const isConfirmed = await confirmAction(
+    "Simpan Pemeriksaan?",
+    `Pemeriksaan awal untuk ${patientName} akan disimpan.`,
+    "Ya, simpan"
+  );
+
+  if (!isConfirmed) {
     return;
   }
 
@@ -292,9 +367,17 @@ async function handleSubmit(event) {
       return;
     }
 
-    showSuccess("Pemeriksaan awal berhasil disimpan.");
+    if (window.CampusAlert) {
+      await CampusAlert.success(
+        "Pemeriksaan Berhasil Disimpan",
+        "Data pemeriksaan awal berhasil disimpan dan masuk ke riwayat pasien."
+      );
+    } else {
+      showSuccess("Pemeriksaan awal berhasil disimpan.");
+    }
+
     resetFormFields();
-    await loadCheckedInPatients();
+    await loadCheckedInPatients({ silent: true });
   } catch (error) {
     showError("Tidak dapat terhubung ke server. Pastikan backend berjalan.");
   } finally {
@@ -304,14 +387,26 @@ async function handleSubmit(event) {
 }
 
 if (logoutButton) {
-  logoutButton.addEventListener("click", function () {
+  logoutButton.addEventListener("click", async function () {
+    const isConfirmed = await confirmAction(
+      "Keluar dari akun?",
+      "Anda perlu login kembali untuk mengakses dashboard klinik.",
+      "Ya, logout"
+    );
+
+    if (!isConfirmed) {
+      return;
+    }
+
     removeToken();
     window.location.href = "./login.html";
   });
 }
 
 if (refreshButton) {
-  refreshButton.addEventListener("click", loadCheckedInPatients);
+  refreshButton.addEventListener("click", function () {
+    loadCheckedInPatients();
+  });
 }
 
 if (healthCheckForm) {
@@ -322,6 +417,6 @@ if (healthCheckForm) {
   const isAllowed = await protectClinicPage();
 
   if (isAllowed) {
-    loadCheckedInPatients();
+    loadCheckedInPatients({ silent: true });
   }
 })();

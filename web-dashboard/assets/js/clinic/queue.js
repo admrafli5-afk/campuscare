@@ -40,8 +40,12 @@ function mapQueueStatus(status) {
 function getStatusBadgeClass(status) {
   if (status === "completed") return "badge-success";
   if (status === "checked_in" || status === "in_checkup") return "badge-info";
-  if (status === "waiting" || status === "called" || status === "on_the_way") return "badge-warning";
-  if (status === "missed" || status === "cancelled" || status === "emergency") return "badge-danger";
+  if (status === "waiting" || status === "called" || status === "on_the_way") {
+    return "badge-warning";
+  }
+  if (status === "missed" || status === "cancelled" || status === "emergency") {
+    return "badge-danger";
+  }
 
   return "badge-info";
 }
@@ -51,13 +55,35 @@ function getQueueId(queue) {
 }
 
 function showError(message) {
-  errorState.style.display = "block";
-  errorState.textContent = message;
+  if (window.CampusAlert) {
+    CampusAlert.toastError(message);
+  }
+
+  if (errorState) {
+    errorState.style.display = "block";
+    errorState.textContent = message;
+  }
+}
+
+function showSuccess(message) {
+  if (window.CampusAlert) {
+    CampusAlert.toastSuccess(message);
+  }
 }
 
 function hideError() {
-  errorState.style.display = "none";
-  errorState.textContent = "";
+  if (errorState) {
+    errorState.style.display = "none";
+    errorState.textContent = "";
+  }
+}
+
+async function confirmAction(title, message, confirmText = "Ya, lanjutkan") {
+  if (window.CampusAlert) {
+    return await CampusAlert.confirm(title, message, confirmText);
+  }
+
+  return window.confirm(message);
 }
 
 async function protectClinicPage() {
@@ -109,10 +135,29 @@ function normalizeQueueData(data) {
 }
 
 function renderQueueStats(queues) {
-  totalQueue.textContent = queues.length;
-  waitingQueue.textContent = queues.filter((item) => item.status === "waiting").length;
-  checkedInQueue.textContent = queues.filter((item) => item.status === "checked_in").length;
-  completedQueue.textContent = queues.filter((item) => item.status === "completed").length;
+  if (totalQueue) totalQueue.textContent = queues.length;
+
+  if (waitingQueue) {
+    waitingQueue.textContent = queues.filter((item) => {
+      return (
+        item.status === "waiting" ||
+        item.status === "called" ||
+        item.status === "on_the_way"
+      );
+    }).length;
+  }
+
+  if (checkedInQueue) {
+    checkedInQueue.textContent = queues.filter((item) => {
+      return item.status === "checked_in" || item.status === "in_checkup";
+    }).length;
+  }
+
+  if (completedQueue) {
+    completedQueue.textContent = queues.filter((item) => {
+      return item.status === "completed";
+    }).length;
+  }
 }
 
 function buildActionButtons(queue) {
@@ -192,12 +237,17 @@ function renderQueueTable(queues) {
   queues.forEach((queue) => {
     const row = document.createElement("tr");
 
+    const estimated =
+      queue.estimated_minutes || queue.estimatedMinutes
+        ? `${queue.estimated_minutes || queue.estimatedMinutes} menit`
+        : "-";
+
     row.innerHTML = `
       <td>${queue.queue_number || queue.queueNumber || "-"}</td>
       <td>${queue.student_name || queue.studentName || queue.name || "-"}</td>
       <td>${queue.nim || "-"}</td>
       <td>${queue.complaint || queue.symptoms || queue.chief_complaint || "-"}</td>
-      <td>${queue.estimated_minutes || queue.estimatedMinutes ? `${queue.estimated_minutes || queue.estimatedMinutes} menit` : "-"}</td>
+      <td>${estimated}</td>
       <td>
         <span class="badge ${getStatusBadgeClass(queue.status)}">
           ${mapQueueStatus(queue.status)}
@@ -216,8 +266,9 @@ function renderQueueTable(queues) {
 
 async function loadTodayQueue() {
   hideError();
-  loadingState.style.display = "block";
-  queueTable.style.display = "none";
+
+  if (loadingState) loadingState.style.display = "block";
+  if (queueTable) queueTable.style.display = "none";
 
   try {
     const result = await apiRequest("/queue/today", {
@@ -237,18 +288,22 @@ async function loadTodayQueue() {
   } catch (error) {
     showError("Tidak dapat terhubung ke server. Pastikan backend berjalan.");
   } finally {
-    loadingState.style.display = "none";
+    if (loadingState) loadingState.style.display = "none";
   }
 }
 
 async function updateQueueStatus(queueId, status) {
   hideError();
 
-  const confirmation = confirm(
-    `Ubah status antrean menjadi "${mapQueueStatus(status)}"?`
+  const label = mapQueueStatus(status);
+
+  const isConfirmed = await confirmAction(
+    "Ubah Status Antrean?",
+    `Status antrean akan diubah menjadi "${label}".`,
+    "Ya, ubah"
   );
 
-  if (!confirmation) {
+  if (!isConfirmed) {
     return;
   }
 
@@ -265,6 +320,8 @@ async function updateQueueStatus(queueId, status) {
       return;
     }
 
+    showSuccess(`Status antrean berhasil diubah menjadi ${label}.`);
+
     await loadTodayQueue();
   } catch (error) {
     showError("Tidak dapat mengubah status. Pastikan backend berjalan.");
@@ -274,7 +331,17 @@ async function updateQueueStatus(queueId, status) {
 window.updateQueueStatus = updateQueueStatus;
 
 if (logoutButton) {
-  logoutButton.addEventListener("click", function () {
+  logoutButton.addEventListener("click", async function () {
+    const isConfirmed = await confirmAction(
+      "Keluar dari akun?",
+      "Anda perlu login kembali untuk mengakses dashboard klinik.",
+      "Ya, logout"
+    );
+
+    if (!isConfirmed) {
+      return;
+    }
+
     removeToken();
     window.location.href = "./login.html";
   });

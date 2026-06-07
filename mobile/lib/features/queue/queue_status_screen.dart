@@ -6,6 +6,7 @@ import '../../core/storage/secure_storage_service.dart';
 import '../../shared/widgets/error_view.dart';
 import '../../shared/widgets/loading_view.dart';
 import '../queue/queue_register_screen.dart';
+import '../services/clinic_status_service.dart';
 import 'services/queue_service.dart';
 
 class QueueStatusScreen extends StatefulWidget {
@@ -19,21 +20,45 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
   final storage = SecureStorageService();
 
   bool isLoading = true;
+  bool isLoadingClinicStatus = false;
   String? errorMessage;
+  String? clinicStatusError;
+
   Map<String, dynamic>? queueStatus;
+  ClinicStatus? clinicStatus;
+
+  bool get isClinicOpen => clinicStatus?.isOpen == true;
 
   @override
   void initState() {
     super.initState();
-    loadQueueStatus();
+    loadPageData();
   }
 
-  Future<void> loadQueueStatus() async {
+  Future<void> loadPageData() async {
     setState(() {
       isLoading = true;
       errorMessage = null;
+      clinicStatusError = null;
     });
 
+    await Future.wait([
+      loadQueueStatusOnly(),
+      loadClinicStatusOnly(),
+    ]);
+
+    if (!mounted) return;
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  Future<void> refreshPage() async {
+    await loadPageData();
+  }
+
+  Future<void> loadQueueStatusOnly() async {
     final apiClient = ApiClient(storage: storage);
     final queueService = QueueService(apiClient: apiClient);
 
@@ -44,27 +69,84 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
 
       setState(() {
         queueStatus = result;
-        isLoading = false;
       });
     } catch (e) {
       if (!mounted) return;
 
       setState(() {
         errorMessage = e.toString().replaceFirst('Exception: ', '');
-        isLoading = false;
       });
     }
   }
 
-  String clinicStatusLabel(String? status) {
-    switch (status) {
-      case 'open':
-        return 'Klinik Sedang Buka';
-      case 'closed':
-        return 'Klinik Tutup';
-      default:
-        return 'Status Klinik';
+  Future<void> loadClinicStatusOnly() async {
+    if (!mounted) return;
+
+    setState(() {
+      isLoadingClinicStatus = true;
+      clinicStatusError = null;
+    });
+
+    try {
+      final result = await ClinicStatusService.getClinicStatus();
+
+      if (!mounted) return;
+
+      setState(() {
+        clinicStatus = result;
+        isLoadingClinicStatus = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        clinicStatusError = e.toString().replaceFirst('Exception: ', '');
+        isLoadingClinicStatus = false;
+      });
     }
+  }
+
+  String formatDisplayTime(String? value) {
+    if (value == null || value.isEmpty || value == '-') {
+      return 'Real-time';
+    }
+
+    final cleanValue = value.replaceAll('.', ':');
+    final parts = cleanValue.split(':');
+
+    if (parts.length >= 2) {
+      return '${parts[0].padLeft(2, '0')}:${parts[1].padLeft(2, '0')}';
+    }
+
+    return value;
+  }
+
+  String clinicStatusLabel() {
+    if (isLoadingClinicStatus && clinicStatus == null) {
+      return 'Memuat Status Klinik';
+    }
+
+    if (clinicStatus != null) {
+      return clinicStatus!.statusText;
+    }
+
+    return 'Status Klinik Tidak Tersedia';
+  }
+
+  String clinicStatusDescription(String? crowdLevel) {
+    if (isLoadingClinicStatus && clinicStatus == null) {
+      return 'Mengambil status klinik dari server...';
+    }
+
+    if (clinicStatusError != null) {
+      return 'Status klinik belum berhasil dimuat.';
+    }
+
+    if (isClinicOpen) {
+      return 'Kondisi saat ini: ${crowdLabel(crowdLevel)}';
+    }
+
+    return 'Pendaftaran antrean sedang ditutup.';
   }
 
   String crowdLabel(String? level) {
@@ -81,6 +163,10 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
   }
 
   String recommendationTitle(String? level) {
+    if (!isClinicOpen) {
+      return 'Klinik sedang tutup';
+    }
+
     switch (level) {
       case 'sepi':
         return 'Klinik sedang sepi!';
@@ -94,6 +180,10 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
   }
 
   String recommendationMessage(String? level) {
+    if (!isClinicOpen) {
+      return 'Kamu belum bisa mengambil antrean saat klinik tutup. Silakan cek kembali sesuai jam operasional.';
+    }
+
     switch (level) {
       case 'sepi':
         return 'Waktu yang tepat untuk berkunjung. Kamu bisa mengambil antrean sekarang.';
@@ -139,9 +229,7 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
             ),
             child: Icon(icon, color: AppColors.primaryGreen, size: 22),
           ),
-
           const SizedBox(height: 18),
-
           SizedBox(
             height: 34,
             width: double.infinity,
@@ -159,9 +247,7 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
               ),
             ),
           ),
-
           const SizedBox(height: 7),
-
           Text(
             title,
             maxLines: 1,
@@ -173,9 +259,7 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
               height: 1.1,
             ),
           ),
-
           const SizedBox(height: 4),
-
           Text(
             subtitle,
             maxLines: 2,
@@ -191,18 +275,196 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
     );
   }
 
+  Widget clinicStatusHero(String? crowdLevel) {
+    final Color firstColor =
+        isClinicOpen ? const Color(0xFF06734F) : const Color(0xFF991B1B);
+    final Color secondColor =
+        isClinicOpen ? AppColors.primaryGreen : const Color(0xFFDC2626);
+
+    final Color dotColor =
+        isClinicOpen ? const Color(0xFF7CFFB2) : const Color(0xFFFFB4B4);
+
+    final IconData icon =
+        isClinicOpen ? Icons.local_hospital_outlined : Icons.lock_outline;
+
+    return Container(
+      padding: const EdgeInsets.all(19),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [firstColor, secondColor],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: secondColor.withOpacity(0.22),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 62,
+            height: 62,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.18),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Icon(
+              icon,
+              color: Colors.white,
+              size: 32,
+            ),
+          ),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  clinicStatusLabel(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 19,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: dotColor,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 7),
+                    Expanded(
+                      child: Text(
+                        clinicStatusDescription(crowdLevel),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (clinicStatus != null) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    '${clinicStatus!.openTime} - ${clinicStatus!.closeTime} WIB • ${formatDisplayTime(clinicStatus!.localTime)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          InkWell(
+            onTap: isLoadingClinicStatus ? null : refreshPage,
+            borderRadius: BorderRadius.circular(999),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 6,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.18),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isLoadingClinicStatus)
+                    const SizedBox(
+                      width: 13,
+                      height: 13,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  else
+                    const Icon(
+                      Icons.refresh_rounded,
+                      color: Colors.white,
+                      size: 15,
+                    ),
+                  const SizedBox(width: 4),
+                  const Text(
+                    'Live',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget clinicStatusErrorView() {
+    if (clinicStatusError == null) return const SizedBox.shrink();
+
+    return Container(
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.all(13),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFE4E6),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.error_outline, color: Colors.red, size: 20),
+          const SizedBox(width: 9),
+          Expanded(
+            child: Text(
+              clinicStatusError!,
+              style: const TextStyle(
+                color: Colors.red,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w700,
+                height: 1.35,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget statusContent() {
     final data = queueStatus ?? {};
 
-    final clinicStatus = data['clinic_status']?.toString();
     final currentlyServing = data['currently_serving']?.toString();
     final activeQueueCount = data['active_queue_count']?.toString() ?? '0';
     final estimatedWaitMinutes =
         data['estimated_wait_minutes']?.toString() ?? '0';
     final crowdLevel = data['crowd_level']?.toString();
 
-    final servingText =
-        currentlyServing == null ||
+    final servingText = currentlyServing == null ||
             currentlyServing == 'null' ||
             currentlyServing.isEmpty
         ? '-'
@@ -210,8 +472,9 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
 
     return RefreshIndicator(
       color: AppColors.primaryGreen,
-      onRefresh: loadQueueStatus,
+      onRefresh: refreshPage,
       child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(20, 18, 20, 140),
         children: [
           Row(
@@ -230,7 +493,7 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
                     ),
                     SizedBox(height: 5),
                     Text(
-                      'Data antrean diperbarui secara real-time.',
+                      'Data antrean dan status klinik diperbarui dari server.',
                       style: TextStyle(
                         color: AppColors.textGray,
                         fontSize: 13.5,
@@ -240,7 +503,7 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
                 ),
               ),
               InkWell(
-                onTap: loadQueueStatus,
+                onTap: refreshPage,
                 borderRadius: BorderRadius.circular(15),
                 child: Container(
                   width: 44,
@@ -261,103 +524,8 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
 
           const SizedBox(height: 18),
 
-          Container(
-            padding: const EdgeInsets.all(19),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF06734F), AppColors.primaryGreen],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(28),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primaryGreen.withOpacity(0.22),
-                  blurRadius: 18,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 62,
-                  height: 62,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.18),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Icon(
-                    Icons.local_hospital_outlined,
-                    color: Colors.white,
-                    size: 32,
-                  ),
-                ),
-                const SizedBox(width: 15),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        clinicStatusLabel(clinicStatus),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 19,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF7CFFB2),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const SizedBox(width: 7),
-                          Expanded(
-                            child: Text(
-                              'Kondisi saat ini: ${crowdLabel(crowdLevel)}',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.18),
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: const Text(
-                    'Live',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 11.5,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          clinicStatusHero(crowdLevel),
+          clinicStatusErrorView(),
 
           const SizedBox(height: 18),
 
@@ -399,9 +567,11 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
               Expanded(
                 child: statCard(
                   title: 'Kondisi Klinik',
-                  value: crowdLabel(crowdLevel),
-                  subtitle: 'Tingkat keramaian',
-                  icon: Icons.sentiment_satisfied_alt_outlined,
+                  value: isClinicOpen ? crowdLabel(crowdLevel) : 'Tutup',
+                  subtitle: 'Status layanan',
+                  icon: isClinicOpen
+                      ? Icons.sentiment_satisfied_alt_outlined
+                      : Icons.lock_outline_rounded,
                 ),
               ),
             ],
@@ -412,7 +582,8 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: AppColors.softMint,
+              color:
+                  isClinicOpen ? AppColors.softMint : const Color(0xFFFFE4E6),
               borderRadius: BorderRadius.circular(24),
             ),
             child: Column(
@@ -427,9 +598,13 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
                         color: Colors.white.withOpacity(0.75),
                         borderRadius: BorderRadius.circular(18),
                       ),
-                      child: const Icon(
-                        Icons.volunteer_activism_outlined,
-                        color: AppColors.primaryGreen,
+                      child: Icon(
+                        isClinicOpen
+                            ? Icons.volunteer_activism_outlined
+                            : Icons.lock_outline_rounded,
+                        color: isClinicOpen
+                            ? AppColors.primaryGreen
+                            : Colors.red,
                         size: 30,
                       ),
                     ),
@@ -442,8 +617,10 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
                             recommendationTitle(crowdLevel),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: AppColors.primaryGreen,
+                            style: TextStyle(
+                              color: isClinicOpen
+                                  ? AppColors.primaryGreen
+                                  : Colors.red,
                               fontSize: 17,
                               fontWeight: FontWeight.w800,
                             ),
@@ -451,8 +628,10 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
                           const SizedBox(height: 4),
                           Text(
                             recommendationMessage(crowdLevel),
-                            style: const TextStyle(
-                              color: AppColors.primaryGreen,
+                            style: TextStyle(
+                              color: isClinicOpen
+                                  ? AppColors.primaryGreen
+                                  : Colors.red,
                               fontSize: 13.2,
                               height: 1.35,
                             ),
@@ -472,23 +651,33 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryGreen,
                       foregroundColor: Colors.white,
+                      disabledBackgroundColor: const Color(0xFFCBD5E1),
+                      disabledForegroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const QueueRegisterScreen(),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.confirmation_number_outlined),
-                    label: const Text(
-                      'Ambil Antrean Sekarang',
-                      style: TextStyle(fontWeight: FontWeight.w800),
+                    onPressed: isClinicOpen
+                        ? () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const QueueRegisterScreen(),
+                              ),
+                            );
+                          }
+                        : null,
+                    icon: Icon(
+                      isClinicOpen
+                          ? Icons.confirmation_number_outlined
+                          : Icons.lock_outline_rounded,
+                    ),
+                    label: Text(
+                      isClinicOpen
+                          ? 'Ambil Antrean Sekarang'
+                          : 'Klinik Sedang Tutup',
+                      style: const TextStyle(fontWeight: FontWeight.w800),
                     ),
                   ),
                 ),
@@ -500,13 +689,17 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
                   width: double.infinity,
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primaryGreen,
-                      side: const BorderSide(color: AppColors.primaryGreen),
+                      foregroundColor:
+                          isClinicOpen ? AppColors.primaryGreen : Colors.red,
+                      side: BorderSide(
+                        color:
+                            isClinicOpen ? AppColors.primaryGreen : Colors.red,
+                      ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    onPressed: loadQueueStatus,
+                    onPressed: refreshPage,
                     icon: const Icon(Icons.refresh_rounded),
                     label: const Text(
                       'Refresh Status',
@@ -529,7 +722,7 @@ class _QueueStatusScreenState extends State<QueueStatusScreen> {
     if (isLoading) {
       body = const LoadingView(message: 'Memuat status antrean klinik...');
     } else if (errorMessage != null) {
-      body = ErrorView(message: errorMessage!, onRetry: loadQueueStatus);
+      body = ErrorView(message: errorMessage!, onRetry: refreshPage);
     } else {
       body = statusContent();
     }

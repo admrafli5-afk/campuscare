@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 
 class ClinicStatus {
@@ -37,7 +38,8 @@ class ClinicStatus {
 }
 
 class ClinicStatusService {
-  // GANTI IP kalau IP laptop kamu berubah
+  // GANTI IP INI jika IP laptop berubah.
+  // Jangan pakai localhost saat menjalankan aplikasi di HP fisik.
   static const String baseUrl = 'http://192.168.1.5:5000/api';
 
   static Future<ClinicStatus> getClinicStatus() async {

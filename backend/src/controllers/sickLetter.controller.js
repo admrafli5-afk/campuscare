@@ -1,9 +1,9 @@
-const pool = require('../config/db');
-const { successResponse, errorResponse } = require('../utils/response');
+const pool = require("../config/db");
+const { successResponse, errorResponse } = require("../utils/response");
 const {
   generateSickLetterNumber,
   generateVerificationToken,
-} = require('../services/letterNumber.service');
+} = require("../services/letterNumber.service");
 
 async function createSickLetter(req, res) {
   try {
@@ -17,10 +17,16 @@ async function createSickLetter(req, res) {
       end_date,
     } = req.body;
 
-    if (!student_id || !health_check_id || !rest_days || !start_date || !end_date) {
+    if (
+      !student_id ||
+      !health_check_id ||
+      !rest_days ||
+      !start_date ||
+      !end_date
+    ) {
       return errorResponse(
         res,
-        'student_id, health_check_id, rest_days, start_date, dan end_date wajib diisi',
+        "student_id, health_check_id, rest_days, start_date, dan end_date wajib diisi",
         [],
         400
       );
@@ -32,16 +38,39 @@ async function createSickLetter(req, res) {
     );
 
     if (studentRows.length === 0) {
-      return errorResponse(res, 'Data mahasiswa tidak ditemukan', [], 404);
+      return errorResponse(res, "Data mahasiswa tidak ditemukan", [], 404);
     }
 
     const [healthRows] = await pool.query(
-      `SELECT id FROM health_checks WHERE id = ? LIMIT 1`,
+      `SELECT id, student_id FROM health_checks WHERE id = ? LIMIT 1`,
       [health_check_id]
     );
 
     if (healthRows.length === 0) {
-      return errorResponse(res, 'Data pemeriksaan tidak ditemukan', [], 404);
+      return errorResponse(res, "Data pemeriksaan tidak ditemukan", [], 404);
+    }
+
+    if (Number(healthRows[0].student_id) !== Number(student_id)) {
+      return errorResponse(
+        res,
+        "Data pemeriksaan tidak sesuai dengan mahasiswa",
+        [],
+        400
+      );
+    }
+
+    const [existingRows] = await pool.query(
+      `SELECT id FROM sick_letters WHERE health_check_id = ? LIMIT 1`,
+      [health_check_id]
+    );
+
+    if (existingRows.length > 0) {
+      return errorResponse(
+        res,
+        "Surat sakit untuk pemeriksaan ini sudah pernah dibuat",
+        [],
+        400
+      );
     }
 
     const letterNumber = await generateSickLetterNumber();
@@ -69,7 +98,7 @@ async function createSickLetter(req, res) {
         letterNumber,
         reason || null,
         diagnosis_summary || null,
-        rest_days,
+        Number(rest_days),
         start_date,
         end_date,
         req.user.id,
@@ -79,18 +108,69 @@ async function createSickLetter(req, res) {
 
     return successResponse(
       res,
-      'Draft surat izin sakit berhasil dibuat',
+      "Draft surat izin sakit berhasil dibuat",
       {
         id: result.insertId,
         letter_number: letterNumber,
-        status: 'draft',
+        status: "draft",
         verification_token: verificationToken,
       },
       201
     );
   } catch (error) {
     console.error(error);
-    return errorResponse(res, 'Gagal membuat surat izin sakit', [error.message], 500);
+    return errorResponse(
+      res,
+      "Gagal membuat surat izin sakit",
+      [error.message],
+      500
+    );
+  }
+}
+
+async function getAllSickLetters(req, res) {
+  try {
+    const [rows] = await pool.query(
+      `SELECT 
+        sl.id,
+        sl.student_id,
+        sl.health_check_id,
+        sl.letter_number,
+        sl.reason,
+        sl.diagnosis_summary,
+        sl.rest_days,
+        sl.start_date,
+        sl.end_date,
+        sl.status,
+        sl.verification_token,
+        sl.created_at,
+        sl.updated_at,
+        student_user.name AS student_name,
+        s.nim,
+        s.study_program,
+        s.class_name,
+        s.room,
+        creator.name AS created_by_name,
+        validator.name AS validated_by_name
+       FROM sick_letters sl
+       JOIN students s ON sl.student_id = s.id
+       JOIN users student_user ON s.user_id = student_user.id
+       JOIN users creator ON sl.created_by = creator.id
+       LEFT JOIN users validator ON sl.validated_by = validator.id
+       ORDER BY sl.created_at DESC`
+    );
+
+    return successResponse(res, "Data surat izin sakit berhasil diambil", {
+      sick_letters: rows,
+    });
+  } catch (error) {
+    console.error(error);
+    return errorResponse(
+      res,
+      "Gagal mengambil data surat izin sakit",
+      [error.message],
+      500
+    );
   }
 }
 
@@ -104,11 +184,16 @@ async function submitValidation(req, res) {
     );
 
     if (rows.length === 0) {
-      return errorResponse(res, 'Surat izin sakit tidak ditemukan', [], 404);
+      return errorResponse(res, "Surat izin sakit tidak ditemukan", [], 404);
     }
 
-    if (rows[0].status !== 'draft') {
-      return errorResponse(res, 'Surat hanya bisa diajukan dari status draft', [], 400);
+    if (rows[0].status !== "draft") {
+      return errorResponse(
+        res,
+        "Surat hanya bisa diajukan dari status draft",
+        [],
+        400
+      );
     }
 
     await pool.query(
@@ -118,13 +203,18 @@ async function submitValidation(req, res) {
       [id]
     );
 
-    return successResponse(res, 'Surat berhasil diajukan untuk validasi', {
+    return successResponse(res, "Surat berhasil diajukan untuk validasi", {
       id: Number(id),
-      status: 'waiting_validation',
+      status: "waiting_validation",
     });
   } catch (error) {
     console.error(error);
-    return errorResponse(res, 'Gagal mengajukan validasi surat', [error.message], 500);
+    return errorResponse(
+      res,
+      "Gagal mengajukan validasi surat",
+      [error.message],
+      500
+    );
   }
 }
 
@@ -138,11 +228,16 @@ async function approveSickLetter(req, res) {
     );
 
     if (rows.length === 0) {
-      return errorResponse(res, 'Surat izin sakit tidak ditemukan', [], 404);
+      return errorResponse(res, "Surat izin sakit tidak ditemukan", [], 404);
     }
 
-    if (rows[0].status !== 'waiting_validation') {
-      return errorResponse(res, 'Surat hanya bisa disetujui dari status waiting_validation', [], 400);
+    if (rows[0].status !== "waiting_validation") {
+      return errorResponse(
+        res,
+        "Surat hanya bisa disetujui dari status waiting_validation",
+        [],
+        400
+      );
     }
 
     await pool.query(
@@ -155,14 +250,19 @@ async function approveSickLetter(req, res) {
       [req.user.id, id]
     );
 
-    return successResponse(res, 'Surat izin sakit berhasil disetujui', {
+    return successResponse(res, "Surat izin sakit berhasil disetujui", {
       id: Number(id),
-      status: 'approved',
+      status: "approved",
       validated_by: req.user.id,
     });
   } catch (error) {
     console.error(error);
-    return errorResponse(res, 'Gagal menyetujui surat izin sakit', [error.message], 500);
+    return errorResponse(
+      res,
+      "Gagal menyetujui surat izin sakit",
+      [error.message],
+      500
+    );
   }
 }
 
@@ -176,11 +276,16 @@ async function rejectSickLetter(req, res) {
     );
 
     if (rows.length === 0) {
-      return errorResponse(res, 'Surat izin sakit tidak ditemukan', [], 404);
+      return errorResponse(res, "Surat izin sakit tidak ditemukan", [], 404);
     }
 
-    if (rows[0].status !== 'waiting_validation') {
-      return errorResponse(res, 'Surat hanya bisa ditolak dari status waiting_validation', [], 400);
+    if (rows[0].status !== "waiting_validation") {
+      return errorResponse(
+        res,
+        "Surat hanya bisa ditolak dari status waiting_validation",
+        [],
+        400
+      );
     }
 
     await pool.query(
@@ -192,14 +297,19 @@ async function rejectSickLetter(req, res) {
       [req.user.id, id]
     );
 
-    return successResponse(res, 'Surat izin sakit berhasil ditolak', {
+    return successResponse(res, "Surat izin sakit berhasil ditolak", {
       id: Number(id),
-      status: 'rejected',
+      status: "rejected",
       validated_by: req.user.id,
     });
   } catch (error) {
     console.error(error);
-    return errorResponse(res, 'Gagal menolak surat izin sakit', [error.message], 500);
+    return errorResponse(
+      res,
+      "Gagal menolak surat izin sakit",
+      [error.message],
+      500
+    );
   }
 }
 
@@ -211,7 +321,7 @@ async function getMySickLetters(req, res) {
     );
 
     if (studentRows.length === 0) {
-      return errorResponse(res, 'Data mahasiswa tidak ditemukan', [], 404);
+      return errorResponse(res, "Data mahasiswa tidak ditemukan", [], 404);
     }
 
     const [rows] = await pool.query(
@@ -233,10 +343,15 @@ async function getMySickLetters(req, res) {
       [studentRows[0].id]
     );
 
-    return successResponse(res, 'Data surat izin sakit berhasil diambil', rows);
+    return successResponse(res, "Data surat izin sakit berhasil diambil", rows);
   } catch (error) {
     console.error(error);
-    return errorResponse(res, 'Gagal mengambil surat izin sakit mahasiswa', [error.message], 500);
+    return errorResponse(
+      res,
+      "Gagal mengambil surat izin sakit mahasiswa",
+      [error.message],
+      500
+    );
   }
 }
 
@@ -247,6 +362,8 @@ async function getSickLetterById(req, res) {
     const [rows] = await pool.query(
       `SELECT 
         sl.id,
+        sl.student_id,
+        sl.health_check_id,
         sl.letter_number,
         sl.reason,
         sl.diagnosis_summary,
@@ -275,13 +392,22 @@ async function getSickLetterById(req, res) {
     );
 
     if (rows.length === 0) {
-      return errorResponse(res, 'Surat izin sakit tidak ditemukan', [], 404);
+      return errorResponse(res, "Surat izin sakit tidak ditemukan", [], 404);
     }
 
-    return successResponse(res, 'Detail surat izin sakit berhasil diambil', rows[0]);
+    return successResponse(
+      res,
+      "Detail surat izin sakit berhasil diambil",
+      rows[0]
+    );
   } catch (error) {
     console.error(error);
-    return errorResponse(res, 'Gagal mengambil detail surat izin sakit', [error.message], 500);
+    return errorResponse(
+      res,
+      "Gagal mengambil detail surat izin sakit",
+      [error.message],
+      500
+    );
   }
 }
 
@@ -292,6 +418,7 @@ async function getStudentAffairsSickLetters(req, res) {
         sl.id,
         sl.letter_number,
         sl.reason,
+        sl.diagnosis_summary,
         sl.rest_days,
         sl.start_date,
         sl.end_date,
@@ -309,15 +436,25 @@ async function getStudentAffairsSickLetters(req, res) {
        ORDER BY sl.created_at DESC`
     );
 
-    return successResponse(res, 'Data surat masuk kemahasiswaan berhasil diambil', rows);
+    return successResponse(
+      res,
+      "Data surat masuk kemahasiswaan berhasil diambil",
+      rows
+    );
   } catch (error) {
     console.error(error);
-    return errorResponse(res, 'Gagal mengambil surat masuk kemahasiswaan', [error.message], 500);
+    return errorResponse(
+      res,
+      "Gagal mengambil surat masuk kemahasiswaan",
+      [error.message],
+      500
+    );
   }
 }
 
 module.exports = {
   createSickLetter,
+  getAllSickLetters,
   submitValidation,
   approveSickLetter,
   rejectSickLetter,

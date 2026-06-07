@@ -1,9 +1,9 @@
-const pool = require('../config/db');
-const { successResponse, errorResponse } = require('../utils/response');
+const pool = require("../config/db");
+const { successResponse, errorResponse } = require("../utils/response");
 
 async function generateEmergencyCaseNumber() {
   const now = new Date();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, "0");
   const year = now.getFullYear();
 
   const [rows] = await pool.query(
@@ -15,15 +15,38 @@ async function generateEmergencyCaseNumber() {
   );
 
   const nextNumber = Number(rows[0].total) + 1;
-  const sequence = String(nextNumber).padStart(4, '0');
+  const sequence = String(nextNumber).padStart(4, "0");
 
   return `EMG/CC/${month}/${year}/${sequence}`;
+}
+
+async function findStudentByIdOrNim({ student_id, nim }) {
+  if (student_id) {
+    const [rows] = await pool.query(
+      `SELECT id FROM students WHERE id = ? LIMIT 1`,
+      [student_id]
+    );
+
+    return rows[0] || null;
+  }
+
+  if (nim) {
+    const [rows] = await pool.query(
+      `SELECT id FROM students WHERE nim = ? LIMIT 1`,
+      [nim]
+    );
+
+    return rows[0] || null;
+  }
+
+  return null;
 }
 
 async function createEmergencyCase(req, res) {
   try {
     const {
       student_id,
+      nim,
       temporary_patient_name,
       condition_type,
       location,
@@ -37,25 +60,29 @@ async function createEmergencyCase(req, res) {
     if (!condition_type || !initial_condition) {
       return errorResponse(
         res,
-        'condition_type dan initial_condition wajib diisi',
+        "condition_type dan initial_condition wajib diisi",
         [],
         400
       );
     }
 
-    if (student_id) {
-      const [studentRows] = await pool.query(
-        `SELECT id FROM students WHERE id = ? LIMIT 1`,
-        [student_id]
-      );
+    let finalStudentId = null;
 
-      if (studentRows.length === 0) {
-        return errorResponse(res, 'Data mahasiswa tidak ditemukan', [], 404);
+    if (student_id || nim) {
+      const student = await findStudentByIdOrNim({
+        student_id,
+        nim,
+      });
+
+      if (!student) {
+        return errorResponse(res, "Data mahasiswa tidak ditemukan", [], 404);
       }
+
+      finalStudentId = student.id;
     }
 
     const caseNumber = await generateEmergencyCaseNumber();
-    const identityStatus = student_id ? 'identified' : 'identity_pending';
+    const identityStatus = finalStudentId ? "identified" : "identity_pending";
 
     const [result] = await pool.query(
       `INSERT INTO emergency_cases
@@ -78,8 +105,10 @@ async function createEmergencyCase(req, res) {
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'emergency', 'emergency', ?, ?)`,
       [
         caseNumber,
-        student_id || null,
-        temporary_patient_name || null,
+        finalStudentId,
+        finalStudentId
+          ? null
+          : temporary_patient_name || "Pasien Darurat Sementara",
         identityStatus,
         condition_type,
         location || null,
@@ -94,18 +123,24 @@ async function createEmergencyCase(req, res) {
 
     return successResponse(
       res,
-      'Kasus emergency berhasil dibuat',
+      "Kasus emergency berhasil dibuat",
       {
         id: result.insertId,
         case_number: caseNumber,
-        status: 'emergency',
+        status: "emergency",
         identity_status: identityStatus,
+        student_id: finalStudentId,
       },
       201
     );
   } catch (error) {
     console.error(error);
-    return errorResponse(res, 'Gagal membuat emergency case', [error.message], 500);
+    return errorResponse(
+      res,
+      "Gagal membuat emergency case",
+      [error.message],
+      500
+    );
   }
 }
 
@@ -144,10 +179,19 @@ async function getTodayEmergencyCases(req, res) {
        ORDER BY ec.created_at DESC`
     );
 
-    return successResponse(res, 'Data emergency hari ini berhasil diambil', rows);
+    return successResponse(
+      res,
+      "Data emergency hari ini berhasil diambil",
+      rows
+    );
   } catch (error) {
     console.error(error);
-    return errorResponse(res, 'Gagal mengambil emergency case', [error.message], 500);
+    return errorResponse(
+      res,
+      "Gagal mengambil emergency case",
+      [error.message],
+      500
+    );
   }
 }
 
@@ -190,13 +234,80 @@ async function getEmergencyCaseById(req, res) {
     );
 
     if (rows.length === 0) {
-      return errorResponse(res, 'Emergency case tidak ditemukan', [], 404);
+      return errorResponse(res, "Emergency case tidak ditemukan", [], 404);
     }
 
-    return successResponse(res, 'Detail emergency case berhasil diambil', rows[0]);
+    return successResponse(
+      res,
+      "Detail emergency case berhasil diambil",
+      rows[0]
+    );
   } catch (error) {
     console.error(error);
-    return errorResponse(res, 'Gagal mengambil detail emergency case', [error.message], 500);
+    return errorResponse(
+      res,
+      "Gagal mengambil detail emergency case",
+      [error.message],
+      500
+    );
+  }
+}
+
+async function updateEmergencyIdentity(req, res) {
+  try {
+    const { id } = req.params;
+    const { student_id, nim } = req.body;
+
+    if (!student_id && !nim) {
+      return errorResponse(
+        res,
+        "student_id atau nim wajib diisi",
+        [],
+        400
+      );
+    }
+
+    const [caseRows] = await pool.query(
+      `SELECT id FROM emergency_cases WHERE id = ? LIMIT 1`,
+      [id]
+    );
+
+    if (caseRows.length === 0) {
+      return errorResponse(res, "Emergency case tidak ditemukan", [], 404);
+    }
+
+    const student = await findStudentByIdOrNim({
+      student_id,
+      nim,
+    });
+
+    if (!student) {
+      return errorResponse(res, "Data mahasiswa tidak ditemukan", [], 404);
+    }
+
+    await pool.query(
+      `UPDATE emergency_cases
+       SET 
+        student_id = ?,
+        identity_status = 'identified',
+        temporary_patient_name = NULL
+       WHERE id = ?`,
+      [student.id, id]
+    );
+
+    return successResponse(res, "Identitas emergency berhasil dilengkapi", {
+      id: Number(id),
+      student_id: student.id,
+      identity_status: "identified",
+    });
+  } catch (error) {
+    console.error(error);
+    return errorResponse(
+      res,
+      "Gagal melengkapi identitas emergency",
+      [error.message],
+      500
+    );
   }
 }
 
@@ -206,15 +317,15 @@ async function updateEmergencyStatus(req, res) {
     const { status } = req.body;
 
     const allowedStatus = [
-      'emergency',
-      'emergency_handled',
-      'referred',
-      'stabilized',
-      'completed',
+      "emergency",
+      "emergency_handled",
+      "referred",
+      "stabilized",
+      "completed",
     ];
 
     if (!allowedStatus.includes(status)) {
-      return errorResponse(res, 'Status emergency tidak valid', [], 400);
+      return errorResponse(res, "Status emergency tidak valid", [], 400);
     }
 
     const [rows] = await pool.query(
@@ -223,7 +334,7 @@ async function updateEmergencyStatus(req, res) {
     );
 
     if (rows.length === 0) {
-      return errorResponse(res, 'Emergency case tidak ditemukan', [], 404);
+      return errorResponse(res, "Emergency case tidak ditemukan", [], 404);
     }
 
     await pool.query(
@@ -233,13 +344,18 @@ async function updateEmergencyStatus(req, res) {
       [status, id]
     );
 
-    return successResponse(res, 'Status emergency berhasil diperbarui', {
+    return successResponse(res, "Status emergency berhasil diperbarui", {
       id: Number(id),
       status,
     });
   } catch (error) {
     console.error(error);
-    return errorResponse(res, 'Gagal update status emergency', [error.message], 500);
+    return errorResponse(
+      res,
+      "Gagal update status emergency",
+      [error.message],
+      500
+    );
   }
 }
 
@@ -247,5 +363,6 @@ module.exports = {
   createEmergencyCase,
   getTodayEmergencyCases,
   getEmergencyCaseById,
+  updateEmergencyIdentity,
   updateEmergencyStatus,
 };

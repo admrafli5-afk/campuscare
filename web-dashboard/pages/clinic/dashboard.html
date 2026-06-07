@@ -1,5 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,31 +11,179 @@
   <link rel="stylesheet" href="../../assets/css/global.css" />
   <link rel="stylesheet" href="../../assets/css/clinic.css" />
 
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-  />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .status-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+    }
+
+    .status-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .clinic-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .clinic-status-badge.open {
+      background: #dcfce7;
+      color: #047857;
+    }
+
+    .clinic-status-badge.closed {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .setting-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      align-items: end;
+    }
+
+    .input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-family: inherit;
+      outline: none;
+      background: #ffffff;
+    }
+
+    .input:focus {
+      border-color: #047857;
+      box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.12);
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: #0f172a;
+      font-size: 14px;
+    }
+
+    .toggle-open {
+      background: #047857 !important;
+      color: #ffffff !important;
+    }
+
+    .toggle-closed {
+      background: #dc2626 !important;
+      color: #ffffff !important;
+    }
+
+    .activity-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 24px;
+    }
+
+    .activity-item {
+      display: flex;
+      gap: 12px;
+      padding: 14px;
+      border-radius: 18px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 12px;
+    }
+
+    .activity-dot {
+      width: 10px;
+      border-radius: 999px;
+      background: #047857;
+      flex-shrink: 0;
+    }
+
+    .activity-dot.red {
+      background: #dc2626;
+    }
+
+    .activity-title {
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+
+    .activity-text {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .activity-time {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 1100px) {
+      .dashboard-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .setting-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .activity-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 700px) {
+
+      .dashboard-grid,
+      .setting-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .status-header {
+        flex-direction: column;
+      }
+    }
+  </style>
 </head>
 
 <body>
   <div class="app-layout">
 
-    <!-- SIDEBAR -->
     <aside class="sidebar">
-
       <div class="brand">
         <div class="brand-logo">
           <img src="../../assets/images/logo_splash_final.png" alt="CampusCare Logo" />
         </div>
-
         <div>
           <h1>CampusCare</h1>
           <p>Sehat, Aman, Berkarya</p>
@@ -42,7 +191,6 @@
       </div>
 
       <nav class="sidebar-menu">
-
         <a href="./dashboard.html" class="menu-item active">
           <i class="fa-solid fa-house"></i>
           <span>Dashboard</span>
@@ -87,191 +235,241 @@
           <i class="fa-solid fa-chart-line"></i>
           <span>Statistik</span>
         </a>
-
       </nav>
-
     </aside>
 
-    <!-- MAIN -->
     <main class="main-content">
 
-      <!-- TOPBAR -->
       <header class="topbar">
-
         <div class="topbar-left">
-
           <div class="topbar-icon">
             <i class="fa-solid fa-hospital"></i>
           </div>
-
           <div>
             <h2>Dashboard Klinik</h2>
             <p>Monitoring layanan kesehatan kampus</p>
           </div>
-
         </div>
 
         <div class="topbar-right">
-
           <div class="user-profile">
-
             <div class="avatar">
               <i class="fa-solid fa-user-nurse"></i>
             </div>
-
             <div>
               <h4 id="userName">Petugas Klinik</h4>
               <p>Staf Klinik</p>
             </div>
-
             <i class="fa-solid fa-chevron-down chevron"></i>
-
           </div>
 
           <button id="logoutButton" class="logout-btn">
             <i class="fa-solid fa-arrow-right-from-bracket"></i>
             <span>Logout</span>
           </button>
-
         </div>
-
       </header>
 
-      <!-- CONTENT -->
       <section class="content">
 
         <div class="page-header">
-
           <div>
             <h1>Dashboard Klinik</h1>
-            <p>
-              Pantau seluruh aktivitas layanan kesehatan mahasiswa hari ini.
-            </p>
+            <p>Pantau seluruh aktivitas layanan kesehatan mahasiswa hari ini.</p>
           </div>
 
           <div class="date-card">
-
             <div class="date-icon">
               <i class="fa-regular fa-calendar"></i>
             </div>
-
             <div>
               <h4 id="todayDate">Hari Ini</h4>
               <p id="todayDay">CampusCare</p>
             </div>
-
           </div>
-
         </div>
 
-        <!-- STATISTICS -->
-        <div class="stats-grid">
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="badge badge-success" style="display:none; margin-bottom:16px;"></div>
 
+        <div class="status-card">
+          <div class="status-header">
+            <div>
+              <h2 style="margin-bottom: 6px;">Status Operasional Klinik</h2>
+              <p style="color: var(--muted);">
+                Status buka/tutup ini akan menjadi acuan untuk web dan mobile mahasiswa.
+              </p>
+            </div>
+
+            <div>
+              <span id="clinicStatusBadge" class="clinic-status-badge closed">
+                <i class="fa-solid fa-circle"></i>
+                Memuat...
+              </span>
+            </div>
+          </div>
+
+          <div class="setting-grid">
+            <div class="form-group">
+              <label>Kontrol Klinik</label>
+              <button id="toggleClinicStatusButton" class="refresh-btn" type="button">
+                Memuat Status...
+              </button>
+            </div>
+
+            <div class="form-group">
+              <label>Jam Buka</label>
+              <input id="clinicOpenTime" class="input" type="time" />
+            </div>
+
+            <div class="form-group">
+              <label>Jam Tutup</label>
+              <input id="clinicCloseTime" class="input" type="time" />
+            </div>
+
+            <div class="form-group">
+              <label>Waktu Real-time</label>
+              <input id="serverTimeDisplay" class="input" type="text" readonly />
+            </div>
+
+            <div style="grid-column: 1 / -1; display:flex; gap:10px; flex-wrap:wrap;">
+              <button id="saveClinicStatusButton" class="refresh-btn" type="button">
+                <i class="fa-solid fa-floppy-disk"></i>
+                Simpan Jam Operasional
+              </button>
+
+              <button id="refreshButton" class="filter-btn" type="button">
+                <i class="fa-solid fa-rotate-right"></i>
+                Refresh
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
           <div class="stat-card green">
-
             <div class="stat-icon">
               <i class="fa-solid fa-users"></i>
             </div>
-
             <div>
-              <h2 id="totalPatients">0</h2>
+              <h2 id="totalPatientsToday">0</h2>
               <h4>Pasien Hari Ini</h4>
-              <p>Total kunjungan</p>
+              <p>Total antrean hari ini</p>
             </div>
-
           </div>
 
           <div class="stat-card yellow">
-
             <div class="stat-icon">
               <i class="fa-regular fa-clock"></i>
             </div>
-
             <div>
-              <h2 id="waitingQueue">0</h2>
+              <h2 id="waitingQueues">0</h2>
               <h4>Antrean Menunggu</h4>
-              <p>Belum dipanggil</p>
+              <p>Waiting / dipanggil / menuju</p>
             </div>
-
           </div>
 
           <div class="stat-card blue">
-
             <div class="stat-icon">
               <i class="fa-solid fa-user-check"></i>
             </div>
-
             <div>
-              <h2 id="checkedInPatients">0</h2>
+              <h2 id="checkedIn">0</h2>
               <h4>Sudah Check-in</h4>
               <p>Mahasiswa hadir</p>
             </div>
-
           </div>
 
           <div class="stat-card emerald">
-
             <div class="stat-icon">
               <i class="fa-solid fa-truck-medical"></i>
             </div>
-
             <div>
               <h2 id="emergencyCases">0</h2>
               <h4>Kasus Darurat</h4>
               <p>Hari ini</p>
             </div>
-
           </div>
 
+          <div class="stat-card blue">
+            <div class="stat-icon">
+              <i class="fa-solid fa-stethoscope"></i>
+            </div>
+            <div>
+              <h2 id="healthChecksToday">0</h2>
+              <h4>Pemeriksaan</h4>
+              <p>Hari ini</p>
+            </div>
+          </div>
+
+          <div class="stat-card yellow">
+            <div class="stat-icon">
+              <i class="fa-solid fa-file-medical"></i>
+            </div>
+            <div>
+              <h2 id="sickLettersToday">0</h2>
+              <h4>Surat Sakit</h4>
+              <p>Dibuat hari ini</p>
+            </div>
+          </div>
+
+          <div class="stat-card green">
+            <div class="stat-icon">
+              <i class="fa-solid fa-file-signature"></i>
+            </div>
+            <div>
+              <h2 id="waitingLetters">0</h2>
+              <h4>Menunggu Validasi</h4>
+              <p>Surat sakit</p>
+            </div>
+          </div>
+
+          <div class="stat-card emerald">
+            <div class="stat-icon">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+              <h2 id="approvedLetters">0</h2>
+              <h4>Surat Disetujui</h4>
+              <p>Hari ini</p>
+            </div>
+          </div>
         </div>
 
-        <!-- TABLE CARD -->
-        <div class="table-card fade-in">
-
-          <div class="table-header">
-
-            <div class="table-title">
-
-              <div class="table-icon">
-                <i class="fa-solid fa-chart-line"></i>
+        <div class="activity-grid">
+          <div class="table-card fade-in">
+            <div class="table-header">
+              <div class="table-title">
+                <div class="table-icon">
+                  <i class="fa-solid fa-list-check"></i>
+                </div>
+                <h2>Aktivitas Antrean Terbaru</h2>
               </div>
-
-              <h2>Ringkasan Aktivitas Klinik</h2>
-
             </div>
 
-            <div class="table-actions">
+            <div id="recentQueueList">
+              <p style="color: var(--muted);">Memuat aktivitas antrean...</p>
+            </div>
+          </div>
 
-              <button class="refresh-btn" type="button">
-                <i class="fa-solid fa-rotate-right"></i>
-                Refresh
-              </button>
-
+          <div class="table-card fade-in">
+            <div class="table-header">
+              <div class="table-title">
+                <div class="table-icon">
+                  <i class="fa-solid fa-truck-medical"></i>
+                </div>
+                <h2>Emergency Terbaru</h2>
+              </div>
             </div>
 
+            <div id="recentEmergencyList">
+              <p style="color: var(--muted);">Memuat data emergency...</p>
+            </div>
           </div>
-
-          <div class="empty-state">
-
-            <i
-              class="fa-solid fa-hospital"
-              style="font-size: 48px; color: #10b981;"
-            ></i>
-
-            <h3>Dashboard Siap Digunakan</h3>
-
-            <p>
-              Statistik layanan kesehatan kampus akan muncul di sini.
-            </p>
-
-          </div>
-
         </div>
 
       </section>
-
     </main>
-
   </div>
 
   <script src="../../assets/js/config.js"></script>
@@ -279,11 +477,5 @@
   <script src="../../assets/js/clinic/notification.js"></script>
   <script src="../../assets/js/clinic/dashboard.js"></script>
 </body>
+
 </html>
-
-
-
-
-
-
-

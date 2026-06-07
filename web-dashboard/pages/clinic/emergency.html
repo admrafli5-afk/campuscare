@@ -1,5 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,18 +11,180 @@
   <link rel="stylesheet" href="../../assets/css/global.css" />
   <link rel="stylesheet" href="../../assets/css/clinic.css" />
 
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-  />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 760px;
+      background: #ffffff;
+      border-radius: 24px;
+      box-shadow: 0 30px 80px rgba(15, 23, 42, 0.25);
+      overflow: hidden;
+      animation: modalFadeIn 0.2s ease;
+    }
+
+    @keyframes modalFadeIn {
+      from {
+        transform: translateY(10px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 22px 26px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 22px;
+      color: #0f172a;
+    }
+
+    .modal-header p {
+      margin: 4px 0 0;
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .modal-close {
+      border: none;
+      background: #f1f5f9;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      cursor: pointer;
+      color: #0f172a;
+      font-size: 18px;
+    }
+
+    .modal-body {
+      padding: 24px 26px;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      font-weight: 700;
+      color: #0f172a;
+      font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 13px 14px;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      background: #ffffff;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 95px;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: #047857;
+      box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.12);
+    }
+
+    .helper-text {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      padding: 18px 26px 24px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .btn-secondary {
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      color: #0f172a;
+      padding: 12px 18px;
+      border-radius: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-danger-solid {
+      border: none;
+      background: #dc2626;
+      color: #ffffff;
+      padding: 12px 18px;
+      border-radius: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(220, 38, 38, 0.2);
+    }
+
+    .btn-danger-solid:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 720px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -195,11 +358,7 @@
             <div class="table-actions">
               <div class="search-box">
                 <i class="fa-solid fa-magnifying-glass"></i>
-                <input
-                  type="text"
-                  id="searchInput"
-                  placeholder="Cari nama, NIM, lokasi..."
-                />
+                <input type="text" id="searchInput" placeholder="Cari nama, NIM, lokasi..." />
               </div>
 
               <button class="filter-btn" id="filterButton" type="button">
@@ -210,6 +369,11 @@
               <button class="refresh-btn" id="refreshButton" type="button">
                 <i class="fa-solid fa-rotate-right"></i>
                 Refresh
+              </button>
+
+              <button class="btn-danger-solid" id="createEmergencyButton" type="button">
+                <i class="fa-solid fa-plus"></i>
+                Buat Emergency
               </button>
             </div>
           </div>
@@ -262,16 +426,144 @@
     </main>
   </div>
 
+  <!-- MODAL BUAT EMERGENCY -->
+  <div id="emergencyModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3>Buat Kasus Emergency</h3>
+          <p>Input cepat kasus darurat. Identitas boleh dilengkapi setelah pasien stabil.</p>
+        </div>
+
+        <button id="closeEmergencyModal" class="modal-close" type="button">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="emergencyForm">
+        <div class="modal-body">
+          <div class="form-grid">
+
+            <div class="form-group">
+              <label for="studentNim">NIM Mahasiswa</label>
+              <input type="text" id="studentNim" placeholder="Contoh: 231001" />
+              <span class="helper-text">
+                Opsional. Kosongkan jika identitas belum diketahui saat emergency.
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="temporaryPatientName">Nama Pasien Sementara</label>
+              <input type="text" id="temporaryPatientName" placeholder="Contoh: Pasien Darurat Sementara" />
+              <span class="helper-text">
+                Diisi jika NIM/identitas belum diketahui.
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label for="conditionType">Kondisi Darurat</label>
+              <select id="conditionType" required>
+                <option value="">Pilih kondisi</option>
+                <option value="Pingsan">Pingsan</option>
+                <option value="Jatuh dari tangga">Jatuh dari tangga</option>
+                <option value="Sesak napas">Sesak napas</option>
+                <option value="Cedera">Cedera</option>
+                <option value="Kecelakaan">Kecelakaan</option>
+                <option value="Kejang">Kejang</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="locationInput">Lokasi Kejadian</label>
+              <input type="text" id="locationInput" placeholder="Contoh: Gedung B Lantai 2" />
+            </div>
+
+            <div class="form-group">
+              <label for="broughtByName">Dibawa/Dilaporkan Oleh</label>
+              <input type="text" id="broughtByName" placeholder="Nama teman/pelapor" />
+            </div>
+
+            <div class="form-group">
+              <label for="broughtByPhone">No. HP Pelapor</label>
+              <input type="text" id="broughtByPhone" placeholder="Contoh: 08123456789" />
+            </div>
+
+            <div class="form-group full">
+              <label for="incidentTime">Waktu Kejadian</label>
+              <input type="datetime-local" id="incidentTime" />
+            </div>
+
+            <div class="form-group full">
+              <label for="initialCondition">Kondisi Awal</label>
+              <textarea id="initialCondition"
+                placeholder="Contoh: Mahasiswa ditemukan pingsan dan dibawa oleh teman ke klinik." required></textarea>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="cancelEmergencyModal" class="btn-secondary" type="button">
+            Batal
+          </button>
+
+          <button id="saveEmergencyButton" class="btn-danger-solid" type="submit">
+            <i class="fa-solid fa-floppy-disk"></i>
+            Simpan Emergency
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL LENGKAPI IDENTITAS -->
+  <div id="identityModal" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h3>Lengkapi Identitas Emergency</h3>
+          <p>Masukkan NIM mahasiswa setelah kondisi pasien stabil.</p>
+        </div>
+
+        <button id="closeIdentityModal" class="modal-close" type="button">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <form id="identityForm">
+        <div class="modal-body">
+          <input type="hidden" id="identityEmergencyId" />
+
+          <div class="form-grid">
+            <div class="form-group full">
+              <label for="identityNim">NIM Mahasiswa</label>
+              <input type="text" id="identityNim" placeholder="Contoh: 231001" required />
+              <span class="helper-text">
+                Sistem akan mencari data mahasiswa berdasarkan NIM.
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="cancelIdentityModal" class="btn-secondary" type="button">
+            Batal
+          </button>
+
+          <button id="saveIdentityButton" class="btn-danger-solid" type="submit">
+            <i class="fa-solid fa-floppy-disk"></i>
+            Simpan Identitas
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script src="../../assets/js/config.js"></script>
   <script src="../../assets/js/api.js"></script>
   <script src="../../assets/js/clinic/notification.js"></script>
   <script src="../../assets/js/clinic/emergency.js"></script>
 </body>
+
 </html>
-
-
-
-
-
-
-

@@ -1,189 +1,479 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Klinik Sehat - Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Dashboard Klinik - CampusCare</title>
+
+    <link rel="stylesheet" href="../../assets/css/variables.css" />
+    <link rel="stylesheet" href="../../assets/css/global.css" />
+    <link rel="stylesheet" href="../../assets/css/clinic.css" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #F8FAFC; color: #0F172A; }
-        .sidebar-link:hover { background-color: #D1FAE5; color: #047857; }
-        .sidebar-active { background-color: #047857; color: #FFFFFF; }
-        .card-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .status-card {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+        }
+
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .clinic-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .clinic-status-badge.open {
+            background: #dcfce7;
+            color: #047857;
+        }
+
+        .clinic-status-badge.closed {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .setting-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            align-items: end;
+        }
+
+        .input {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-family: inherit;
+            outline: none;
+            background: #ffffff;
+        }
+
+        .input:focus {
+            border-color: #047857;
+            box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.12);
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: #0f172a;
+            font-size: 14px;
+        }
+
+        .activity-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 24px;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 18px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 12px;
+        }
+
+        .activity-dot {
+            width: 10px;
+            border-radius: 999px;
+            background: #047857;
+            flex-shrink: 0;
+        }
+
+        .activity-dot.red {
+            background: #dc2626;
+        }
+
+        .activity-title {
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .activity-text {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .activity-time {
+            color: #94a3b8;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        @media (max-width: 1100px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .setting-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .activity-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 700px) {
+
+            .dashboard-grid,
+            .setting-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .status-header {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
-<body>
 
-    <div class="flex min-h-screen">
-        <!-- SIDEBAR -->
-        <aside class="w-64 bg-white border-r border-slate-200 hidden md:flex flex-col">
-            <div class="p-6">
-                <div class="flex items-center gap-3 text-[#047857] font-bold text-xl">
-                    <i class="fas fa-plus-square"></i>
-                    <span>MediDash</span>
+<body>
+    <div class="app-layout">
+
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-logo">
+                    <img src="../../assets/images/logo_splash_final.png" alt="CampusCare Logo" />
+                </div>
+                <div>
+                    <h1>CampusCare</h1>
+                    <p>Sehat, Aman, Berkarya</p>
                 </div>
             </div>
 
-            <nav class="flex-1 px-4 space-y-1">
-                <a href="#" class="sidebar-active flex items-center gap-3 px-4 py-3 rounded-xl transition-all">
-                    <i class="fas fa-home w-5"></i> Dashboard
+            <nav class="sidebar-menu">
+                <a href="./dashboard.html" class="menu-item active">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Dashboard</span>
                 </a>
-                <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600">
-                    <i class="fas fa-users w-5"></i> Antrean
+
+                <a href="./queue.html" class="menu-item">
+                    <i class="fa-solid fa-users"></i>
+                    <span>Antrean</span>
                 </a>
-                <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600">
-                    <i class="fas fa-qrcode w-5"></i> QR Check-In
+
+                <a href="./qr-checkin.html" class="menu-item">
+                    <i class="fa-solid fa-qrcode"></i>
+                    <span>QR Check-in</span>
                 </a>
-                <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600">
-                    <i class="fas fa-stethoscope w-5"></i> Pemeriksaan
+
+                <a href="./health-check.html" class="menu-item">
+                    <i class="fa-solid fa-stethoscope"></i>
+                    <span>Pemeriksaan</span>
                 </a>
-                <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600">
-                    <i class="fas fa-ambulance w-5 text-red-500"></i> Emergency Case
+
+                <a href="./emergency.html" class="menu-item">
+                    <i class="fa-solid fa-truck-medical"></i>
+                    <span>Emergency</span>
                 </a>
-                <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600">
-                    <i class="fas fa-file-medical w-5"></i> Surat Izin
+
+                <a href="./sick-letter.html" class="menu-item">
+                    <i class="fa-solid fa-file-medical"></i>
+                    <span>Surat Sakit</span>
                 </a>
-                <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600">
-                    <i class="fas fa-elevator w-5"></i> Rekomendasi Lift
+
+                <a href="./lift-recommendation.html" class="menu-item">
+                    <i class="fa-solid fa-elevator"></i>
+                    <span>Rekomendasi Lift</span>
                 </a>
-                <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600">
-                    <i class="fas fa-history w-5"></i> Riwayat Pasien
+
+                <a href="./patient-history.html" class="menu-item">
+                    <i class="fa-solid fa-hospital-user"></i>
+                    <span>Riwayat Pasien</span>
                 </a>
-                <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl transition-all text-slate-600">
-                    <i class="fas fa-chart-line w-5"></i> Statistik
+
+                <a href="./statistics.html" class="menu-item">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Statistik</span>
                 </a>
             </nav>
-
-            <div class="p-4 border-t border-slate-100">
-                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-all">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </a>
-            </div>
         </aside>
 
-        <!-- MAIN CONTENT -->
-        <main class="flex-1 p-6 md:p-10">
-            <!-- Header -->
-            <header class="flex justify-between items-center mb-8">
-                <div>
-                    <h1 class="text-2xl font-bold">Halo, Dr. Pratama!</h1>
-                    <p class="text-slate-500 text-sm">Berikut ringkasan klinik hari ini.</p>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div class="bg-white p-2 rounded-full border border-slate-200 card-shadow">
-                        <i class="fas fa-bell px-2 text-slate-400"></i>
+        <main class="main-content">
+
+            <header class="topbar">
+                <div class="topbar-left">
+                    <div class="topbar-icon">
+                        <i class="fa-solid fa-hospital"></i>
                     </div>
-                    <img src="https://ui-avatars.com/api/?name=Dr+Pratama&background=047857&color=fff" class="w-10 h-10 rounded-full border-2 border-white card-shadow" alt="Avatar">
+                    <div>
+                        <h2>Dashboard Klinik</h2>
+                        <p>Monitoring layanan kesehatan kampus</p>
+                    </div>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="user-profile">
+                        <div class="avatar">
+                            <i class="fa-solid fa-user-nurse"></i>
+                        </div>
+                        <div>
+                            <h4 id="userName">Petugas Klinik</h4>
+                            <p>Staf Klinik</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-down chevron"></i>
+                    </div>
+
+                    <button id="logoutButton" class="logout-btn">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        <span>Logout</span>
+                    </button>
                 </div>
             </header>
 
-            <!-- STATS CARDS -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-                <!-- Total Antrean -->
-                <div class="bg-white p-6 rounded-3xl border border-slate-100 card-shadow">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-3 bg-emerald-50 rounded-2xl text-[#047857]">
-                            <i class="fas fa-user-clock text-xl"></i>
-                        </div>
-                        <span class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">+12%</span>
-                    </div>
-                    <p class="text-slate-500 text-sm font-medium">Total Antrean</p>
-                    <h3 class="text-3xl font-bold mt-1">42</h3>
-                </div>
+            <section class="content">
 
-                <!-- Emergency -->
-                <div class="bg-white p-6 rounded-3xl border border-slate-100 card-shadow">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-3 bg-red-50 rounded-2xl text-red-500">
-                            <i class="fas fa-heartbeat text-xl"></i>
-                        </div>
-                        <span class="animate-pulse flex h-3 w-3 rounded-full bg-red-400 opacity-75"></span>
+                <div class="page-header">
+                    <div>
+                        <h1>Dashboard Klinik</h1>
+                        <p>Pantau seluruh aktivitas layanan kesehatan mahasiswa hari ini.</p>
                     </div>
-                    <p class="text-slate-500 text-sm font-medium">Emergency Aktif</p>
-                    <h3 class="text-3xl font-bold mt-1 text-red-600">03</h3>
-                </div>
 
-                <!-- Sedang Diperiksa -->
-                <div class="bg-white p-6 rounded-3xl border border-slate-100 card-shadow">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-3 bg-blue-50 rounded-2xl text-blue-500">
-                            <i class="fas fa-user-md text-xl"></i>
+                    <div class="date-card">
+                        <div class="date-icon">
+                            <i class="fa-regular fa-calendar"></i>
                         </div>
-                    </div>
-                    <p class="text-slate-500 text-sm font-medium">Sedang Diperiksa</p>
-                    <h3 class="text-3xl font-bold mt-1">08</h3>
-                </div>
-
-                <!-- Surat Izin -->
-                <div class="bg-white p-6 rounded-3xl border border-slate-100 card-shadow">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-3 bg-amber-50 rounded-2xl text-amber-500">
-                            <i class="fas fa-file-signature text-xl"></i>
-                        </div>
-                    </div>
-                    <p class="text-slate-500 text-sm font-medium">Surat Izin Hari Ini</p>
-                    <h3 class="text-3xl font-bold mt-1">15</h3>
-                </div>
-            </div>
-
-            <!-- LOWER SECTION -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Rekomendasi Lift (Priority Info) -->
-                <div class="lg:col-span-2 bg-white rounded-3xl border border-slate-100 card-shadow p-6">
-                    <div class="flex justify-between items-center mb-6">
-                        <h4 class="font-bold text-lg">Alokasi Pasien & Rekomendasi Lift</h4>
-                        <button class="text-[#047857] text-sm font-medium">Lihat Detail</button>
-                    </div>
-                    <div class="space-y-4">
-                        <div class="flex items-center p-4 bg-[#F8FAFC] rounded-2xl border border-slate-100">
-                            <div class="w-12 h-12 bg-[#22C55E] text-white rounded-xl flex items-center justify-center mr-4">
-                                <i class="fas fa-arrow-up"></i>
-                            </div>
-                            <div class="flex-1">
-                                <p class="font-bold">Lift A (Prioritas Medis)</p>
-                                <p class="text-sm text-slate-500">Status: Lancar - Rekomendasi untuk Pasien Emergency</p>
-                            </div>
-                            <span class="text-xs font-bold text-emerald-600">TERSSEDIA</span>
-                        </div>
-                        <div class="flex items-center p-4 bg-[#F8FAFC] rounded-2xl border border-slate-100">
-                            <div class="w-12 h-12 bg-amber-400 text-white rounded-xl flex items-center justify-center mr-4">
-                                <i class="fas fa-minus"></i>
-                            </div>
-                            <div class="flex-1">
-                                <p class="font-bold">Lift B (Umum)</p>
-                                <p class="text-sm text-slate-500">Status: Padat - Gunakan Tangga jika memungkinkan</p>
-                            </div>
-                            <span class="text-xs font-bold text-amber-600">ANTREAN</span>
+                        <div>
+                            <h4 id="todayDate">Hari Ini</h4>
+                            <p id="todayDay">CampusCare</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Recent Emergency -->
-                <div class="bg-white rounded-3xl border border-slate-100 card-shadow p-6">
-                    <h4 class="font-bold text-lg mb-6">Update Terkini</h4>
-                    <div class="space-y-6">
-                        <div class="flex gap-4">
-                            <div class="w-2 h-12 bg-red-500 rounded-full"></div>
-                            <div>
-                                <p class="text-sm font-bold">Pasien Gawat Darurat</p>
-                                <p class="text-xs text-slate-500">IGD - Kamar 04</p>
-                                <p class="text-[10px] text-slate-400 mt-1">2 Menit yang lalu</p>
-                            </div>
+                <div id="errorMessage" class="error-message"></div>
+                <div id="successMessage" class="badge badge-success" style="display:none; margin-bottom:16px;"></div>
+
+                <div class="status-card">
+                    <div class="status-header">
+                        <div>
+                            <h2 style="margin-bottom: 6px;">Status Operasional Klinik</h2>
+                            <p style="color: var(--muted);">
+                                Status buka/tutup ini akan menjadi acuan untuk web dan mobile mahasiswa.
+                            </p>
                         </div>
-                        <div class="flex gap-4">
-                            <div class="w-2 h-12 bg-[#22C55E] rounded-full"></div>
-                            <div>
-                                <p class="text-sm font-bold">Check-in Selesai</p>
-                                <p class="text-xs text-slate-500">Bpk. Slamet - Poli Gigi</p>
-                                <p class="text-[10px] text-slate-400 mt-1">10 Menit yang lalu</p>
-                            </div>
+
+                        <div>
+                            <span id="clinicStatusBadge" class="clinic-status-badge closed">
+                                <i class="fa-solid fa-circle"></i>
+                                Memuat...
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="setting-grid">
+                        <div class="form-group">
+                            <label>Status Klinik</label>
+                            <select id="clinicIsOpen" class="input">
+                                <option value="1">Buka</option>
+                                <option value="0">Tutup</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Jam Buka</label>
+                            <input id="clinicOpenTime" class="input" type="time" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Jam Tutup</label>
+                            <input id="clinicCloseTime" class="input" type="time" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Waktu Real-time</label>
+                            <input id="serverTimeDisplay" class="input" type="text" readonly />
+                        </div>
+
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label>Pesan Status</label>
+                            <input id="clinicMessage" class="input" type="text"
+                                placeholder="Contoh: Klinik sedang buka / Klinik tutup sementara" />
+                        </div>
+
+                        <div style="grid-column: 1 / -1; display:flex; gap:10px; flex-wrap:wrap;">
+                            <button id="saveClinicStatusButton" class="refresh-btn" type="button">
+                                <i class="fa-solid fa-floppy-disk"></i>
+                                Simpan Status Klinik
+                            </button>
+
+                            <button id="refreshButton" class="filter-btn" type="button">
+                                <i class="fa-solid fa-rotate-right"></i>
+                                Refresh
+                            </button>
                         </div>
                     </div>
                 </div>
-            </div>
+
+                <div class="dashboard-grid">
+                    <div class="stat-card green">
+                        <div class="stat-icon">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <div>
+                            <h2 id="totalPatientsToday">0</h2>
+                            <h4>Pasien Hari Ini</h4>
+                            <p>Total antrean hari ini</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card yellow">
+                        <div class="stat-icon">
+                            <i class="fa-regular fa-clock"></i>
+                        </div>
+                        <div>
+                            <h2 id="waitingQueues">0</h2>
+                            <h4>Antrean Menunggu</h4>
+                            <p>Waiting / dipanggil / menuju</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card blue">
+                        <div class="stat-icon">
+                            <i class="fa-solid fa-user-check"></i>
+                        </div>
+                        <div>
+                            <h2 id="checkedIn">0</h2>
+                            <h4>Sudah Check-in</h4>
+                            <p>Mahasiswa hadir</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card emerald">
+                        <div class="stat-icon">
+                            <i class="fa-solid fa-truck-medical"></i>
+                        </div>
+                        <div>
+                            <h2 id="emergencyCases">0</h2>
+                            <h4>Kasus Darurat</h4>
+                            <p>Hari ini</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card blue">
+                        <div class="stat-icon">
+                            <i class="fa-solid fa-stethoscope"></i>
+                        </div>
+                        <div>
+                            <h2 id="healthChecksToday">0</h2>
+                            <h4>Pemeriksaan</h4>
+                            <p>Hari ini</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card yellow">
+                        <div class="stat-icon">
+                            <i class="fa-solid fa-file-medical"></i>
+                        </div>
+                        <div>
+                            <h2 id="sickLettersToday">0</h2>
+                            <h4>Surat Sakit</h4>
+                            <p>Dibuat hari ini</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card green">
+                        <div class="stat-icon">
+                            <i class="fa-solid fa-file-signature"></i>
+                        </div>
+                        <div>
+                            <h2 id="waitingLetters">0</h2>
+                            <h4>Menunggu Validasi</h4>
+                            <p>Surat sakit</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card emerald">
+                        <div class="stat-icon">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                        <div>
+                            <h2 id="approvedLetters">0</h2>
+                            <h4>Surat Disetujui</h4>
+                            <p>Hari ini</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="activity-grid">
+                    <div class="table-card fade-in">
+                        <div class="table-header">
+                            <div class="table-title">
+                                <div class="table-icon">
+                                    <i class="fa-solid fa-list-check"></i>
+                                </div>
+                                <h2>Aktivitas Antrean Terbaru</h2>
+                            </div>
+                        </div>
+
+                        <div id="recentQueueList">
+                            <p style="color: var(--muted);">Memuat aktivitas antrean...</p>
+                        </div>
+                    </div>
+
+                    <div class="table-card fade-in">
+                        <div class="table-header">
+                            <div class="table-title">
+                                <div class="table-icon">
+                                    <i class="fa-solid fa-truck-medical"></i>
+                                </div>
+                                <h2>Emergency Terbaru</h2>
+                            </div>
+                        </div>
+
+                        <div id="recentEmergencyList">
+                            <p style="color: var(--muted);">Memuat data emergency...</p>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
         </main>
     </div>
 
+    <script src="../../assets/js/config.js"></script>
+    <script src="../../assets/js/api.js"></script>
+    <script src="../../assets/js/clinic/notification.js"></script>
+    <script src="../../assets/js/clinic/dashboard.js"></script>
 </body>
+
 </html>

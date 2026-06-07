@@ -15,6 +15,7 @@ const prescriptionRoutes = require('./routes/prescription.routes');
 const medicalRecordRoutes = require('./routes/medicalRecord.routes');
 const auditLogRoutes = require('./routes/auditLog.routes');
 const liftRecommendationRoutes = require('./routes/liftRecommendation.routes');
+const dashboardRoutes = require("./routes/dashboard.routes");
 
 
 const app = express();
@@ -33,7 +34,8 @@ app.get('/', (req, res) => {
   });
 });
 
-
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/sick-letters", sickLetterRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/queue', queueRoutes);
 app.use('/api/health-checks', healthCheckRoutes);
@@ -45,7 +47,7 @@ app.use('/api/medicines', medicineRoutes);
 app.use('/api/prescriptions', prescriptionRoutes);
 app.use('/api/medical-records', medicalRecordRoutes);
 app.use('/api/audit-logs', auditLogRoutes);
-app.use('/api/lift-recommendations', liftRecommendationRoutes); 
+app.use('/api/lift-recommendations', liftRecommendationRoutes);
 
 const PORT = process.env.PORT || 5000;
 

@@ -1,57 +1,77 @@
-const express = require('express');
+const express = require("express");
 
-const sickLetterController = require('../controllers/sickLetter.controller');
-const authMiddleware = require('../middlewares/auth.middleware');
-const roleMiddleware = require('../middlewares/role.middleware');
+const sickLetterController = require("../controllers/sickLetter.controller");
+const authMiddleware = require("../middlewares/auth.middleware");
+const roleMiddleware = require("../middlewares/role.middleware");
 
 const router = express.Router();
 
 router.post(
-  '/',
+  "/",
   authMiddleware,
-  roleMiddleware(['clinic_staff', 'clinic_admin', 'supervisor', 'super_admin']),
+  roleMiddleware(["clinic_staff", "clinic_admin", "supervisor", "super_admin"]),
   sickLetterController.createSickLetter
 );
 
-router.patch(
-  '/:id/submit-validation',
+router.get(
+  "/",
   authMiddleware,
-  roleMiddleware(['clinic_staff', 'clinic_admin', 'supervisor', 'super_admin']),
+  roleMiddleware([
+    "clinic_staff",
+    "clinic_admin",
+    "supervisor",
+    "student_affairs",
+    "super_admin",
+  ]),
+  sickLetterController.getAllSickLetters
+);
+
+router.patch(
+  "/:id/submit-validation",
+  authMiddleware,
+  roleMiddleware(["clinic_staff", "clinic_admin", "supervisor", "super_admin"]),
   sickLetterController.submitValidation
 );
 
 router.patch(
-  '/:id/approve',
+  "/:id/approve",
   authMiddleware,
-  roleMiddleware(['clinic_admin', 'supervisor', 'super_admin']),
+  roleMiddleware(["clinic_staff", "clinic_admin", "supervisor", "super_admin"]),
   sickLetterController.approveSickLetter
 );
 
 router.patch(
-  '/:id/reject',
+  "/:id/reject",
   authMiddleware,
-  roleMiddleware(['clinic_admin', 'supervisor', 'super_admin']),
+  roleMiddleware(["clinic_staff", "clinic_admin", "supervisor", "super_admin"]),
   sickLetterController.rejectSickLetter
 );
 
 router.get(
-  '/me',
+  "/me",
   authMiddleware,
-  roleMiddleware(['student']),
+  roleMiddleware(["student"]),
   sickLetterController.getMySickLetters
 );
 
 router.get(
-  '/student-affairs',
+  "/student-affairs",
   authMiddleware,
-  roleMiddleware(['student_affairs', 'super_admin']),
+  roleMiddleware(["student_affairs", "super_admin"]),
   sickLetterController.getStudentAffairsSickLetters
 );
 
 router.get(
-  '/:id',
+  "/:id",
   authMiddleware,
-  roleMiddleware(['student', 'clinic_staff', 'clinic_admin', 'supervisor', 'student_affairs', 'super_admin']),
+  roleMiddleware([
+    "student",
+    "clinic_staff",
+    "clinic_admin",
+    "supervisor",
+    "student_affairs",
+    "super_admin",
+  ]),
   sickLetterController.getSickLetterById
 );
 

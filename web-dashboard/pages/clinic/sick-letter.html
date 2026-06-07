@@ -1,5 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,18 +11,100 @@
   <link rel="stylesheet" href="../../assets/css/global.css" />
   <link rel="stylesheet" href="../../assets/css/clinic.css" />
 
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-  />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .form-grid .full {
+      grid-column: 1 / -1;
+    }
+
+    .input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 13px 14px;
+      font-family: inherit;
+      outline: none;
+      background: #ffffff;
+    }
+
+    .input:focus {
+      border-color: #047857;
+      box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.12);
+    }
+
+    .letter-preview-box {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px;
+      background: #ffffff;
+    }
+
+    .letter-kop {
+      text-align: center;
+      border-bottom: 2px solid #0f172a;
+      padding-bottom: 14px;
+      margin-bottom: 22px;
+    }
+
+    .letter-kop h2 {
+      margin: 0;
+      color: #0f172a;
+      font-size: 22px;
+    }
+
+    .letter-kop p {
+      margin: 4px 0 0;
+      color: #64748b;
+    }
+
+    .action-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-sm {
+      border: none;
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .btn-info {
+      background: #2563eb;
+      color: #ffffff;
+    }
+
+    .btn-success {
+      background: #16a34a;
+      color: #ffffff;
+    }
+
+    .btn-danger {
+      background: #dc2626;
+      color: #ffffff;
+    }
+
+    @media (max-width: 720px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -149,7 +232,7 @@
             <div class="table-actions">
               <button id="refreshButton" class="refresh-btn" type="button">
                 <i class="fa-solid fa-rotate-right"></i>
-                Refresh Pasien
+                Refresh Data
               </button>
             </div>
           </div>
@@ -159,9 +242,9 @@
 
           <form id="sickLetterForm">
             <div style="margin-bottom: 18px;">
-              <label style="display:block; font-weight:700; margin-bottom:8px;">Pilih Pasien</label>
-              <select id="queueSelect" class="input">
-                <option value="">Memuat pasien...</option>
+              <label style="display:block; font-weight:700; margin-bottom:8px;">Pilih Data Pemeriksaan</label>
+              <select id="healthCheckSelect" class="input">
+                <option value="">Memuat data pemeriksaan...</option>
               </select>
             </div>
 
@@ -176,24 +259,31 @@
                 <input id="endDate" class="input" type="date" />
               </div>
 
-              <div class="full">
-                <label style="display:block; font-weight:700; margin-bottom:8px;">Diagnosis / Keterangan Sakit</label>
-                <textarea
-                  id="diagnosis"
-                  class="input"
-                  rows="3"
-                  placeholder="Contoh: Demam, sakit kepala, dan perlu istirahat"
-                ></textarea>
+              <div>
+                <label style="display:block; font-weight:700; margin-bottom:8px;">Kelas Izin</label>
+                <input id="permissionClass" class="input" type="text" placeholder="Contoh: Informatika A Siang" />
+              </div>
+
+              <div>
+                <label style="display:block; font-weight:700; margin-bottom:8px;">Mata Kuliah</label>
+                <input id="courseName" class="input" type="text" placeholder="Contoh: NLP" />
               </div>
 
               <div class="full">
-                <label style="display:block; font-weight:700; margin-bottom:8px;">Catatan Petugas Klinik</label>
-                <textarea
-                  id="notes"
-                  class="input"
-                  rows="4"
-                  placeholder="Contoh: Mahasiswa disarankan istirahat dan tidak mengikuti aktivitas akademik sementara"
-                ></textarea>
+                <label style="display:block; font-weight:700; margin-bottom:8px;">Dosen / Keterangan</label>
+                <input id="lecturerName" class="input" type="text" placeholder="Contoh: Andre Pratama S.Kom., M.Kom." />
+              </div>
+
+              <div class="full">
+                <label style="display:block; font-weight:700; margin-bottom:8px;">Diagnosis / Keterangan Sakit</label>
+                <textarea id="diagnosis" class="input" rows="3"
+                  placeholder="Contoh: Demam, sakit kepala, dan perlu istirahat"></textarea>
+              </div>
+
+              <div class="full">
+                <label style="display:block; font-weight:700; margin-bottom:8px;">Catatan Tambahan</label>
+                <textarea id="notes" class="input" rows="4"
+                  placeholder="Contoh: Mahasiswa disarankan istirahat dan tidak mengikuti aktivitas akademik sementara"></textarea>
               </div>
             </div>
 
@@ -214,50 +304,66 @@
         <br />
 
         <div id="previewCard" class="table-card fade-in" style="display:none;">
-          <div style="text-align:center; margin-bottom: 20px;">
-            <h2 style="margin-bottom: 4px;">SURAT IZIN SAKIT</h2>
-            <p style="color: var(--muted);">CampusCare - Klinik Kampus</p>
-          </div>
+          <div class="letter-preview-box">
+            <div class="letter-kop">
+              <h2>KLINIK KESEHATAN KAMPUS</h2>
+              <p>Satya Terra Bhinneka - CampusCare</p>
+            </div>
 
-          <div class="table-wrapper">
-            <table>
-              <tbody>
-                <tr>
-                  <th>Nama</th>
-                  <td id="previewName">-</td>
-                </tr>
-                <tr>
-                  <th>NIM</th>
-                  <td id="previewNim">-</td>
-                </tr>
-                <tr>
-                  <th>Nomor Antrean</th>
-                  <td id="previewQueueNumber">-</td>
-                </tr>
-                <tr>
-                  <th>Diagnosis</th>
-                  <td id="previewDiagnosis">-</td>
-                </tr>
-                <tr>
-                  <th>Periode Izin</th>
-                  <td id="previewPeriod">-</td>
-                </tr>
-                <tr>
-                  <th>Catatan</th>
-                  <td id="previewNotes">-</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+            <div style="text-align:center; margin-bottom: 20px;">
+              <h2 style="margin-bottom: 4px;">SURAT IZIN SAKIT</h2>
+              <p style="color: var(--muted);">Nomor: <span id="previewLetterNumber">Draft</span></p>
+            </div>
 
-          <p style="margin-top: 22px; color: var(--dark);">
-            Demikian surat ini dibuat untuk digunakan sebagaimana mestinya.
-          </p>
+            <div class="table-wrapper">
+              <table>
+                <tbody>
+                  <tr>
+                    <th>Nama</th>
+                    <td id="previewName">-</td>
+                  </tr>
+                  <tr>
+                    <th>NIM</th>
+                    <td id="previewNim">-</td>
+                  </tr>
+                  <tr>
+                    <th>Kelas Izin</th>
+                    <td id="previewPermissionClass">-</td>
+                  </tr>
+                  <tr>
+                    <th>Mata Kuliah</th>
+                    <td id="previewCourseName">-</td>
+                  </tr>
+                  <tr>
+                    <th>Dosen / Keterangan</th>
+                    <td id="previewLecturerName">-</td>
+                  </tr>
+                  <tr>
+                    <th>Diagnosis</th>
+                    <td id="previewDiagnosis">-</td>
+                  </tr>
+                  <tr>
+                    <th>Periode Izin</th>
+                    <td id="previewPeriod">-</td>
+                  </tr>
+                  <tr>
+                    <th>Catatan</th>
+                    <td id="previewNotes">-</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
-          <div style="margin-top: 36px; text-align:right;">
-            <p>Petugas Klinik,</p>
-            <br /><br />
-            <p id="previewOfficerName">Petugas Klinik</p>
+            <p style="margin-top: 22px; color: var(--dark);">
+              Demikian surat ini dibuat untuk digunakan sebagaimana mestinya.
+            </p>
+
+            <div style="margin-top: 36px; text-align:right;">
+              <p>Petugas Klinik,</p>
+              <br /><br />
+              <p id="previewOfficerName">Petugas Klinik</p>
+              <p style="color: var(--muted);">Stempel Klinik bila dicetak</p>
+            </div>
           </div>
         </div>
 
@@ -273,25 +379,23 @@
             </div>
           </div>
 
-          <p style="color: var(--muted); margin-bottom: 16px;">
-            Data riwayat akan aktif setelah endpoint CP3 tersedia dari backend.
-          </p>
-
           <div class="table-wrapper">
             <table>
               <thead>
                 <tr>
+                  <th>No. Surat</th>
                   <th>Nama</th>
                   <th>NIM</th>
                   <th>Periode</th>
                   <th>Diagnosis</th>
                   <th>Status</th>
+                  <th>Aksi</th>
                 </tr>
               </thead>
 
               <tbody id="letterTableBody">
                 <tr>
-                  <td colspan="5">Belum ada data surat sakit.</td>
+                  <td colspan="7">Belum ada data surat sakit.</td>
                 </tr>
               </tbody>
             </table>
@@ -307,11 +411,5 @@
   <script src="../../assets/js/clinic/notification.js"></script>
   <script src="../../assets/js/clinic/sick-letter.js"></script>
 </body>
+
 </html>
-
-
-
-
-
-
-

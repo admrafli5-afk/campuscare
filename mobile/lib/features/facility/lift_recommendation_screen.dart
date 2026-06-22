@@ -42,6 +42,34 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
     super.dispose();
   }
 
+  // --- FUNGSI BARU: PEMANGGIL DATE PICKER ---
+  Future<void> _selectDate(BuildContext context, TextEditingController controller) async {
+    // Menutup keyboard jika user sedang mengetik di field lain
+    FocusScope.of(context).unfocus(); 
+
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(), // Mencegah pemilihan tanggal di masa lalu
+      lastDate: DateTime(DateTime.now().year + 1),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.primaryGreen, // Sesuaikan warna kalender dengan tema
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      // Set nilai ke controller yang dipassing
+      controller.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+    }
+  }
+
   // 1. MENGAMBIL DATA REKOMENDASI LIFT MILIK MAHASISWA
   Future<void> _fetchMyRecommendations() async {
     setState(() {
@@ -54,6 +82,7 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
       final token = await storage.getToken();
 
       if (token == null || token.isEmpty) {
+        if (!mounted) return;
         setState(() {
           _errorMessage = 'Sesi habis. Silakan login kembali.';
           _isLoading = false;
@@ -61,7 +90,6 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
         return;
       }
 
-      // GANTI DENGAN IP LAPTOP ANDA
       final url = Uri.parse('http://10.47.190.19:5000/api/lift-recommendations/me');
 
       final response = await http.get(
@@ -71,6 +99,8 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
           'Authorization': 'Bearer $token',
         },
       ).timeout(const Duration(seconds: 10));
+
+      if (!mounted) return; // KRUSIAL: Cek mounted setelah await
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -85,6 +115,7 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
         });
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = 'Gagal terhubung ke server. Periksa koneksi Anda.';
         _isLoading = false;
@@ -101,7 +132,7 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
       return;
     }
 
-    Navigator.pop(context); // Tutup dialog form
+    Navigator.pop(context); // Tutup dialog form sebelum memproses
 
     setState(() {
       _isLoading = true;
@@ -111,7 +142,6 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
       final storage = SecureStorageService();
       final token = await storage.getToken();
 
-      // GANTI DENGAN IP LAPTOP ANDA
       final url = Uri.parse('http://10.47.190.19:5000/api/lift-recommendations');
 
       final response = await http.post(
@@ -126,9 +156,11 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
           'medical_condition': _conditionController.text.trim(),
           'start_date': _startDateController.text.isEmpty ? null : _startDateController.text.trim(),
           'end_date': _endDateController.text.isEmpty ? null : _endDateController.text.trim(),
-          'status': 'waiting_validation' // Langsung masuk status 'Menunggu' di Web Admin
+          'status': 'waiting_validation'
         }),
       ).timeout(const Duration(seconds: 10));
+
+      if (!mounted) return; // KRUSIAL: Mencegah error 'Don't use BuildContext across async gaps'
 
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -142,7 +174,7 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
         _conditionController.clear();
         _startDateController.clear();
         _endDateController.clear();
-        _fetchMyRecommendations(); // Refresh tabel
+        _fetchMyRecommendations(); // Refresh tabel otomatis
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Gagal mengajukan (${response.statusCode})')),
@@ -150,6 +182,7 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
         setState(() => _isLoading = false);
       }
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Koneksi server terputus.')),
       );
@@ -184,14 +217,30 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
                   decoration: const InputDecoration(labelText: 'Kondisi Medis (misal: Cedera Kaki)', prefixIcon: Icon(Icons.accessible_forward)),
                 ),
                 const SizedBox(height: 10),
+                
+                // PERBAIKAN: Input Tanggal Mulai
                 TextField(
                   controller: _startDateController,
-                  decoration: const InputDecoration(labelText: 'Tgl Mulai (YYYY-MM-DD)', prefixIcon: Icon(Icons.calendar_today)),
+                  readOnly: true, // Cegah ketik manual
+                  onTap: () => _selectDate(context, _startDateController),
+                  decoration: const InputDecoration(
+                    labelText: 'Tgl Mulai', 
+                    hintText: 'Pilih Tanggal',
+                    prefixIcon: Icon(Icons.calendar_today)
+                  ),
                 ),
                 const SizedBox(height: 10),
+                
+                // PERBAIKAN: Input Tanggal Selesai
                 TextField(
                   controller: _endDateController,
-                  decoration: const InputDecoration(labelText: 'Tgl Selesai (YYYY-MM-DD)', prefixIcon: Icon(Icons.event_busy)),
+                  readOnly: true, // Cegah ketik manual
+                  onTap: () => _selectDate(context, _endDateController),
+                  decoration: const InputDecoration(
+                    labelText: 'Tgl Selesai', 
+                    hintText: 'Pilih Tanggal',
+                    prefixIcon: Icon(Icons.event_busy)
+                  ),
                 ),
               ],
             ),
@@ -219,7 +268,7 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
     if (dateStr == null || dateStr.isEmpty) return '-';
     try {
       final date = DateTime.parse(dateStr);
-      return "${date.day}-${date.month}-${date.year}";
+      return "${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}";
     } catch (e) {
       return dateStr.substring(0, 10);
     }
@@ -269,9 +318,9 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
       padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.surface ?? Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.border ?? Colors.grey.shade300),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -280,7 +329,7 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: AppColors.softMint,
+              color: AppColors.softMint ?? Colors.green.shade50,
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(icon, color: AppColors.primaryGreen, size: 22),
@@ -290,11 +339,11 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(color: AppColors.textGray, fontSize: 13)),
+                Text(title, style: const TextStyle(color: Colors.grey, fontSize: 13)),
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: const TextStyle(color: AppColors.textDark, fontWeight: FontWeight.w700, height: 1.35),
+                  style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.w700, height: 1.35),
                 ),
               ],
             ),
@@ -309,9 +358,9 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
       padding: const EdgeInsets.all(18),
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.surface ?? Colors.white,
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: AppColors.border ?? Colors.grey.shade300),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -321,7 +370,7 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
               Expanded(
                 child: Text(
                   data['recommendation_number'] ?? 'Pengajuan Baru',
-                  style: const TextStyle(color: AppColors.textDark, fontWeight: FontWeight.bold, fontSize: 18),
+                  style: const TextStyle(color: Colors.black87, fontWeight: FontWeight.bold, fontSize: 18),
                 ),
               ),
               StatusBadge(status: data['status'] ?? 'pending'),
@@ -351,9 +400,8 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.background ?? Colors.grey.shade50,
       appBar: AppBar(title: const Text('Rekomendasi Lift')),
-      // TOMBOL MELAYANG UNTUK MENGAJUKAN IZIN
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showRequestDialog,
         backgroundColor: AppColors.primaryGreen,
@@ -384,12 +432,12 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
                     const Center(
                       child: Padding(
                         padding: EdgeInsets.all(20.0),
-                        child: Text("Anda belum memiliki pengajuan lift.", style: TextStyle(color: AppColors.textGray)),
+                        child: Text("Anda belum memiliki pengajuan lift.", style: TextStyle(color: Colors.grey)),
                       ),
                     ),
 
                   ..._recommendations.map((item) => recommendationCard(item)).toList(),
-                  const SizedBox(height: 60), // Space for floating button
+                  const SizedBox(height: 60), 
                 ],
               ),
             ),

@@ -1,6 +1,7 @@
 class MedicalHistoryItem {
   final String type;
   final String title;
+  final String doctorName; // TAMBAHAN KRUSIAL: Penampung nama dokter
   final String queueNumber;
   final String complaint;
   final String chiefComplaint;
@@ -20,6 +21,7 @@ class MedicalHistoryItem {
   MedicalHistoryItem({
     required this.type,
     required this.title,
+    required this.doctorName, // Wajib diinisialisasi
     required this.queueNumber,
     required this.complaint,
     required this.chiefComplaint,
@@ -50,6 +52,13 @@ class MedicalHistoryItem {
     return MedicalHistoryItem(
       type: type,
       title: _resolveTitle(type, json),
+
+      // TAMBAHAN KRUSIAL: Parsing nama dokter dari JSON
+      doctorName: 
+          json['doctor_name']?.toString() ?? 
+          json['doctorName']?.toString() ?? 
+          json['doctor']?.toString() ?? 
+          '-',
 
       queueNumber:
           json['queue_number']?.toString() ??

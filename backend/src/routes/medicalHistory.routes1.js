@@ -1,11 +1,11 @@
 const express = require('express');
-const router = express.Router();
 
 const medicalHistoryController = require('../controllers/medicalHistory.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 const roleMiddleware = require('../middlewares/role.middleware');
 
-// [GET] Mengambil riwayat kesehatan
+const router = express.Router();
+
 router.get(
   '/me/medical-history',
   authMiddleware,
@@ -13,15 +13,6 @@ router.get(
   medicalHistoryController.getMyMedicalHistory
 );
 
-// [PUT] Memperbarui profil kesehatan (Menyimpan data)
-router.put(
-  '/me/medical-history',
-  authMiddleware,
-  roleMiddleware(['student']),
-  medicalHistoryController.updateMyHealthProfile
-);
-
-// [GET] Mengambil riwayat kesehatan mahasiswa tertentu (untuk petugas/admin)
 router.get(
   '/:id/medical-history',
   authMiddleware,
@@ -35,4 +26,4 @@ router.get(
   medicalHistoryController.getStudentMedicalHistory
 );
 
-module.exports = router;
+module.exports = router;medicalHistory.routes

@@ -55,7 +55,7 @@ class SickLetter {
 
 class SickLetterService {
   // GANTI IP kalau IP laptop berubah
-  static const String baseUrl = 'http://192.168.1.5:5000/api';
+  static const String baseUrl = 'http://10.47.190.19:5000/api';
 
   final SecureStorageService storage;
 

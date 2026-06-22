@@ -19,8 +19,7 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
   String? _errorMessage;
   List<dynamic> _recommendations = [];
 
-  // Controllers untuk Form Pengajuan
-  final _nimController = TextEditingController();
+  // Controller NIM sudah dihapus karena otomatis sesuai akun login
   final _reasonController = TextEditingController();
   final _conditionController = TextEditingController();
   final _startDateController = TextEditingController();
@@ -34,7 +33,6 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
 
   @override
   void dispose() {
-    _nimController.dispose();
     _reasonController.dispose();
     _conditionController.dispose();
     _startDateController.dispose();
@@ -42,21 +40,20 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
     super.dispose();
   }
 
-  // --- FUNGSI BARU: PEMANGGIL DATE PICKER ---
+  // --- FUNGSI DATE PICKER ---
   Future<void> _selectDate(BuildContext context, TextEditingController controller) async {
-    // Menutup keyboard jika user sedang mengetik di field lain
     FocusScope.of(context).unfocus(); 
 
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime.now(), // Mencegah pemilihan tanggal di masa lalu
+      firstDate: DateTime.now(), 
       lastDate: DateTime(DateTime.now().year + 1),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: AppColors.primaryGreen, // Sesuaikan warna kalender dengan tema
+              primary: AppColors.primaryGreen, 
             ),
           ),
           child: child!,
@@ -65,7 +62,6 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
     );
 
     if (picked != null) {
-      // Set nilai ke controller yang dipassing
       controller.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
     }
   }
@@ -90,7 +86,7 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
         return;
       }
 
-      final url = Uri.parse('http://10.47.190.19:5000/api/lift-recommendations/me');
+      final url = Uri.parse('http://192.168.1.116:5000/api/lift-recommendations/me');
 
       final response = await http.get(
         url,
@@ -100,7 +96,7 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
         },
       ).timeout(const Duration(seconds: 10));
 
-      if (!mounted) return; // KRUSIAL: Cek mounted setelah await
+      if (!mounted) return; 
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -123,16 +119,16 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
     }
   }
 
-  // 2. MENGIRIM PENGAJUAN BARU KE BACKEND
+  // 2. MENGIRIM PENGAJUAN BARU KE BACKEND (OTOMATIS SESUAI AKUN)
   Future<void> _submitRecommendation() async {
-    if (_nimController.text.isEmpty || _reasonController.text.isEmpty || _conditionController.text.isEmpty) {
+    if (_reasonController.text.isEmpty || _conditionController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('NIM, Alasan, dan Kondisi Medis wajib diisi')),
+        const SnackBar(content: Text('Alasan dan Kondisi Medis wajib diisi')),
       );
       return;
     }
 
-    Navigator.pop(context); // Tutup dialog form sebelum memproses
+    Navigator.pop(context); 
 
     setState(() {
       _isLoading = true;
@@ -142,7 +138,7 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
       final storage = SecureStorageService();
       final token = await storage.getToken();
 
-      final url = Uri.parse('http://10.47.190.19:5000/api/lift-recommendations');
+      final url = Uri.parse('http://192.168.1.116:5000/api/lift-recommendations');
 
       final response = await http.post(
         url,
@@ -151,7 +147,6 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
           'Authorization': 'Bearer $token',
         },
         body: json.encode({
-          'nim': _nimController.text.trim(),
           'reason': _reasonController.text.trim(),
           'medical_condition': _conditionController.text.trim(),
           'start_date': _startDateController.text.isEmpty ? null : _startDateController.text.trim(),
@@ -160,7 +155,7 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
         }),
       ).timeout(const Duration(seconds: 10));
 
-      if (!mounted) return; // KRUSIAL: Mencegah error 'Don't use BuildContext across async gaps'
+      if (!mounted) return; 
 
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -169,12 +164,11 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
             backgroundColor: AppColors.primaryGreen,
           ),
         );
-        _nimController.clear();
         _reasonController.clear();
         _conditionController.clear();
         _startDateController.clear();
         _endDateController.clear();
-        _fetchMyRecommendations(); // Refresh tabel otomatis
+        _fetchMyRecommendations(); 
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Gagal mengajukan (${response.statusCode})')),
@@ -190,7 +184,7 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
     }
   }
 
-  // UI FORM DIALOG (MUNCUL SAAT TOMBOL + DITEKAN)
+  // UI FORM DIALOG 
   void _showRequestDialog() {
     showDialog(
       context: context,
@@ -203,11 +197,6 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
-                  controller: _nimController,
-                  decoration: const InputDecoration(labelText: 'NIM Anda', prefixIcon: Icon(Icons.badge_outlined)),
-                ),
-                const SizedBox(height: 10),
-                TextField(
                   controller: _reasonController,
                   decoration: const InputDecoration(labelText: 'Diagnosa / Alasan Medis', prefixIcon: Icon(Icons.medical_information_outlined)),
                 ),
@@ -218,10 +207,9 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
                 ),
                 const SizedBox(height: 10),
                 
-                // PERBAIKAN: Input Tanggal Mulai
                 TextField(
                   controller: _startDateController,
-                  readOnly: true, // Cegah ketik manual
+                  readOnly: true, 
                   onTap: () => _selectDate(context, _startDateController),
                   decoration: const InputDecoration(
                     labelText: 'Tgl Mulai', 
@@ -231,10 +219,9 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
                 ),
                 const SizedBox(height: 10),
                 
-                // PERBAIKAN: Input Tanggal Selesai
                 TextField(
                   controller: _endDateController,
-                  readOnly: true, // Cegah ketik manual
+                  readOnly: true, 
                   onTap: () => _selectDate(context, _endDateController),
                   decoration: const InputDecoration(
                     labelText: 'Tgl Selesai', 
@@ -300,7 +287,7 @@ class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
                   'Rekomendasi Lift',
                   style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
                 ),
-                SizedBox(height: 6),
+                SizedBox(height: 6), // TYPO SUDAH DIPERBAIKI DI SINI
                 Text(
                   'Ajukan dan pantau status izin penggunaan lift medis Anda.',
                   style: TextStyle(color: Colors.white70, height: 1.35),

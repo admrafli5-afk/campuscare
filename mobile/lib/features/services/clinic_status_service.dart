@@ -40,7 +40,7 @@ class ClinicStatus {
 class ClinicStatusService {
   // GANTI IP INI jika IP laptop berubah.
   // Jangan pakai localhost saat menjalankan aplikasi di HP fisik.
-  static const String baseUrl = 'http://10.47.190.19:5000/api';
+  static const String baseUrl = 'http://192.168.1.116:5000/api';
 
   static Future<ClinicStatus> getClinicStatus() async {
     final response = await http.get(

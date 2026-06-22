@@ -174,7 +174,50 @@ async function getAllHealthChecks(req, res) {
     );
   }
 }
+async function getMyHealthChecks(req, res) {
+  try {
+    const [studentRows] = await pool.query(
+      `SELECT id FROM students WHERE user_id = ? LIMIT 1`,
+      [req.user.id]
+    );
 
+    if (studentRows.length === 0) {
+      return successResponse(res, 'Belum ada riwayat', []);
+    }
+
+    const [rows] = await pool.query(
+      `SELECT
+        hc.id,
+        'health_check' AS type,
+        'Pemeriksaan Klinik' AS title,
+        COALESCE(u.name, '-') AS doctor_name,
+        COALESCE(q.queue_number, '-') AS queue_number,
+        COALESCE(hc.complaint, '-') AS complaint,
+        COALESCE(hc.complaint, '-') AS chief_complaint,
+        '-' AS diagnosis,
+        '-' AS treatment,
+        COALESCE(hc.recommendation, '-') AS action_taken,
+        '-' AS medicine,
+        COALESCE(hc.notes, '-') AS notes,
+        COALESCE(q.status, '-') AS status,
+        hc.created_at AS date,
+        COALESCE(hc.temperature, '-') AS temperature,
+        COALESCE(hc.blood_pressure, '-') AS blood_pressure,
+        COALESCE(hc.pulse, '-') AS pulse,
+        COALESCE(hc.respiratory_rate, '-') AS respiration
+       FROM health_checks hc
+       LEFT JOIN queues q ON hc.queue_id = q.id
+       LEFT JOIN users u ON hc.staff_id = u.id
+       WHERE hc.student_id = ?
+       ORDER BY hc.created_at DESC`,
+      [studentRows[0].id]
+    );
+
+    return successResponse(res, 'Berhasil mengambil riwayat kesehatan', rows);
+  } catch (error) {
+    return errorResponse(res, 'Gagal mengambil riwayat', [error.message], 500);
+  }
+}
 async function getHealthCheckById(req, res) {
   try {
     const { id } = req.params;
@@ -234,4 +277,5 @@ module.exports = {
   createHealthCheck,
   getAllHealthChecks,
   getHealthCheckById,
+  getMyHealthChecks,
 };

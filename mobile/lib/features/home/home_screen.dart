@@ -1,14 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-
+import '../facility/medical_history_screen.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/network/api_client.dart';
 import '../../core/storage/secure_storage_service.dart';
 import '../auth/login_screen.dart';
 import '../facility/lift_recommendation_screen.dart';
 import '../health_profile/health_profile_screen.dart';
-import '../history/medical_history_screen.dart';
 import '../letters/sick_letters_screen.dart';
 import '../queue/queue_qr_screen.dart';
 import '../queue/queue_register_screen.dart';
@@ -479,7 +478,7 @@ void dispose() {
                         title: 'Riwayat Kesehatan',
                         subtitle: 'Kunjungan dan pemeriksaan.',
                         icon: Icons.history_outlined,
-                        onTap: () => openFeature(const MedicalHistoryScreen()),
+                        onTap: () => openFeature(MedicalHistoryScreen()),
                       ),
                     ),
                   ],
@@ -657,7 +656,7 @@ void dispose() {
                   title: 'Riwayat Kesehatan',
                   subtitle: 'Lihat riwayat kunjungan dan pemeriksaan klinik.',
                   icon: Icons.history_outlined,
-                  onTap: () => openFeature(const MedicalHistoryScreen()),
+                  onTap: () => openFeature(MedicalHistoryScreen()),
                 ),
                 const _DividerLine(),
                 _ProfileMenuCard(

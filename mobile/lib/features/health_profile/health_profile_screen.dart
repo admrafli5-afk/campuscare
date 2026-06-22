@@ -81,7 +81,7 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
       }
 
       // GANTI IP INI SESUAI ALAMAT LOKAL LAPTOP ANDA
-      final url = Uri.parse('http://10.47.190.19:5000/api/students/me/medical-history'); 
+      final url = Uri.parse('http://192.168.1.116:5000/api/students/me/medical-history'); 
 
       final response = await http.get(
         url,
@@ -147,7 +147,7 @@ class _HealthProfileScreenState extends State<HealthProfileScreen> {
       final token = await storage.getToken();
 
       // GANTI IP INI SESUAI ALAMAT LOKAL LAPTOP ANDA
-      final url = Uri.parse('http://10.47.190.19:5000/api/students/me/medical-history');
+      final url = Uri.parse('http://192.168.1.116:5000/api/students/me/medical-history');
 
       final response = await http.put(
         url,

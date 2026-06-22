@@ -43,7 +43,12 @@ router.get(
   ]),
   healthCheckController.getAllHealthChecks
 );
-
+router.get(
+  '/me',
+  authMiddleware,
+  roleMiddleware(['student']),
+  healthCheckController.getMyHealthChecks
+);
 router.get(
   "/:id",
   authMiddleware,

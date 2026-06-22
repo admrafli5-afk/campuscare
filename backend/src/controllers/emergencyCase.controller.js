@@ -26,7 +26,6 @@ async function findStudentByIdOrNim({ student_id, nim }) {
       `SELECT id FROM students WHERE id = ? LIMIT 1`,
       [student_id]
     );
-
     return rows[0] || null;
   }
 
@@ -35,7 +34,6 @@ async function findStudentByIdOrNim({ student_id, nim }) {
       `SELECT id FROM students WHERE nim = ? LIMIT 1`,
       [nim]
     );
-
     return rows[0] || null;
   }
 
@@ -68,21 +66,27 @@ async function createEmergencyCase(req, res) {
 
     let finalStudentId = null;
 
+    // 1. Cek identitas tanpa memblokir proses
     if (student_id || nim) {
       const student = await findStudentByIdOrNim({
         student_id,
         nim,
       });
 
-      if (!student) {
-        return errorResponse(res, "Data mahasiswa tidak ditemukan", [], 404);
+      // KUNCI PERBAIKAN: Tidak ada lagi return 404 di sini.
+      // Jika mahasiswa ditemukan, masukkan ID-nya. Jika tidak, biarkan finalStudentId = null
+      if (student) {
+        finalStudentId = student.id;
       }
-
-      finalStudentId = student.id;
     }
 
     const caseNumber = await generateEmergencyCaseNumber();
     const identityStatus = finalStudentId ? "identified" : "identity_pending";
+    
+    // Jika NIM diketik tapi tidak ada di DB, simpan NIM tersebut di nama sementara agar tidak hilang
+    const tempName = finalStudentId 
+        ? null 
+        : (temporary_patient_name || (nim ? `Pasien Tidak Dikenal (NIM: ${nim})` : "Pasien Darurat Sementara"));
 
     const [result] = await pool.query(
       `INSERT INTO emergency_cases
@@ -106,9 +110,7 @@ async function createEmergencyCase(req, res) {
       [
         caseNumber,
         finalStudentId,
-        finalStudentId
-          ? null
-          : temporary_patient_name || "Pasien Darurat Sementara",
+        tempName,
         identityStatus,
         condition_type,
         location || null,
@@ -281,8 +283,9 @@ async function updateEmergencyIdentity(req, res) {
       nim,
     });
 
+    // Di proses Update Identitas, 404 tetap ada karena tujuannya murni mencari data asli di DB
     if (!student) {
-      return errorResponse(res, "Data mahasiswa tidak ditemukan", [], 404);
+      return errorResponse(res, "Data mahasiswa tidak ditemukan di database. Pastikan NIM sudah benar.", [], 404);
     }
 
     await pool.query(

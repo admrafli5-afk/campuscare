@@ -1,12 +1,229 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 import '../../core/constants/app_colors.dart';
-import '../../models/facility_recommendation_model.dart';
+import '../../core/storage/secure_storage_service.dart';
 import '../../shared/widgets/info_banner.dart';
 import '../../shared/widgets/status_badge.dart';
 
-class LiftRecommendationScreen extends StatelessWidget {
+class LiftRecommendationScreen extends StatefulWidget {
   const LiftRecommendationScreen({super.key});
+
+  @override
+  State<LiftRecommendationScreen> createState() => _LiftRecommendationScreenState();
+}
+
+class _LiftRecommendationScreenState extends State<LiftRecommendationScreen> {
+  bool _isLoading = true;
+  String? _errorMessage;
+  List<dynamic> _recommendations = [];
+
+  // Controllers untuk Form Pengajuan
+  final _nimController = TextEditingController();
+  final _reasonController = TextEditingController();
+  final _conditionController = TextEditingController();
+  final _startDateController = TextEditingController();
+  final _endDateController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchMyRecommendations();
+  }
+
+  @override
+  void dispose() {
+    _nimController.dispose();
+    _reasonController.dispose();
+    _conditionController.dispose();
+    _startDateController.dispose();
+    _endDateController.dispose();
+    super.dispose();
+  }
+
+  // 1. MENGAMBIL DATA REKOMENDASI LIFT MILIK MAHASISWA
+  Future<void> _fetchMyRecommendations() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final storage = SecureStorageService();
+      final token = await storage.getToken();
+
+      if (token == null || token.isEmpty) {
+        setState(() {
+          _errorMessage = 'Sesi habis. Silakan login kembali.';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      // GANTI DENGAN IP LAPTOP ANDA
+      final url = Uri.parse('http://10.47.190.19:5000/api/lift-recommendations/me');
+
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          _recommendations = data['data'] ?? [];
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _errorMessage = 'Gagal memuat data (${response.statusCode})';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Gagal terhubung ke server. Periksa koneksi Anda.';
+        _isLoading = false;
+      });
+    }
+  }
+
+  // 2. MENGIRIM PENGAJUAN BARU KE BACKEND
+  Future<void> _submitRecommendation() async {
+    if (_nimController.text.isEmpty || _reasonController.text.isEmpty || _conditionController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('NIM, Alasan, dan Kondisi Medis wajib diisi')),
+      );
+      return;
+    }
+
+    Navigator.pop(context); // Tutup dialog form
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final storage = SecureStorageService();
+      final token = await storage.getToken();
+
+      // GANTI DENGAN IP LAPTOP ANDA
+      final url = Uri.parse('http://10.47.190.19:5000/api/lift-recommendations');
+
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: json.encode({
+          'nim': _nimController.text.trim(),
+          'reason': _reasonController.text.trim(),
+          'medical_condition': _conditionController.text.trim(),
+          'start_date': _startDateController.text.isEmpty ? null : _startDateController.text.trim(),
+          'end_date': _endDateController.text.isEmpty ? null : _endDateController.text.trim(),
+          'status': 'waiting_validation' // Langsung masuk status 'Menunggu' di Web Admin
+        }),
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Pengajuan berhasil! Menunggu persetujuan Admin.'),
+            backgroundColor: AppColors.primaryGreen,
+          ),
+        );
+        _nimController.clear();
+        _reasonController.clear();
+        _conditionController.clear();
+        _startDateController.clear();
+        _endDateController.clear();
+        _fetchMyRecommendations(); // Refresh tabel
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal mengajukan (${response.statusCode})')),
+        );
+        setState(() => _isLoading = false);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Koneksi server terputus.')),
+      );
+      setState(() => _isLoading = false);
+    }
+  }
+
+  // UI FORM DIALOG (MUNCUL SAAT TOMBOL + DITEKAN)
+  void _showRequestDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text('Ajukan Izin Lift', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryGreen)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: _nimController,
+                  decoration: const InputDecoration(labelText: 'NIM Anda', prefixIcon: Icon(Icons.badge_outlined)),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _reasonController,
+                  decoration: const InputDecoration(labelText: 'Diagnosa / Alasan Medis', prefixIcon: Icon(Icons.medical_information_outlined)),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _conditionController,
+                  decoration: const InputDecoration(labelText: 'Kondisi Medis (misal: Cedera Kaki)', prefixIcon: Icon(Icons.accessible_forward)),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _startDateController,
+                  decoration: const InputDecoration(labelText: 'Tgl Mulai (YYYY-MM-DD)', prefixIcon: Icon(Icons.calendar_today)),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _endDateController,
+                  decoration: const InputDecoration(labelText: 'Tgl Selesai (YYYY-MM-DD)', prefixIcon: Icon(Icons.event_busy)),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Batal', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: _submitRecommendation,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryGreen,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text('Kirim Pengajuan', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return '-';
+    try {
+      final date = DateTime.parse(dateStr);
+      return "${date.day}-${date.month}-${date.year}";
+    } catch (e) {
+      return dateStr.substring(0, 10);
+    }
+  }
 
   Widget headerCard() {
     return Container(
@@ -24,11 +241,7 @@ class LiftRecommendationScreen extends StatelessWidget {
       ),
       child: const Row(
         children: [
-          Icon(
-            Icons.accessible_forward_outlined,
-            color: Colors.white,
-            size: 42,
-          ),
+          Icon(Icons.accessible_forward_outlined, color: Colors.white, size: 42),
           SizedBox(width: 16),
           Expanded(
             child: Column(
@@ -36,15 +249,11 @@ class LiftRecommendationScreen extends StatelessWidget {
               children: [
                 Text(
                   'Rekomendasi Lift',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 6),
                 Text(
-                  'Lihat rekomendasi medis terkait penggunaan fasilitas kampus.',
+                  'Ajukan dan pantau status izin penggunaan lift medis Anda.',
                   style: TextStyle(color: Colors.white70, height: 1.35),
                 ),
               ],
@@ -55,11 +264,7 @@ class LiftRecommendationScreen extends StatelessWidget {
     );
   }
 
-  Widget detailItem({
-    required String title,
-    required String value,
-    required IconData icon,
-  }) {
+  Widget detailItem({required String title, required String value, required IconData icon}) {
     return Container(
       padding: const EdgeInsets.all(16),
       margin: const EdgeInsets.only(bottom: 12),
@@ -85,21 +290,11 @@ class LiftRecommendationScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: AppColors.textGray,
-                    fontSize: 13,
-                  ),
-                ),
+                Text(title, style: const TextStyle(color: AppColors.textGray, fontSize: 13)),
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: const TextStyle(
-                    color: AppColors.textDark,
-                    fontWeight: FontWeight.w700,
-                    height: 1.35,
-                  ),
+                  style: const TextStyle(color: AppColors.textDark, fontWeight: FontWeight.w700, height: 1.35),
                 ),
               ],
             ),
@@ -109,9 +304,10 @@ class LiftRecommendationScreen extends StatelessWidget {
     );
   }
 
-  Widget recommendationCard(FacilityRecommendationModel data) {
+  Widget recommendationCard(Map<String, dynamic> data) {
     return Container(
       padding: const EdgeInsets.all(18),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(22),
@@ -122,54 +318,30 @@ class LiftRecommendationScreen extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Rekomendasi Terbaru',
-                  style: TextStyle(
-                    color: AppColors.textDark,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
+                  data['recommendation_number'] ?? 'Pengajuan Baru',
+                  style: const TextStyle(color: AppColors.textDark, fontWeight: FontWeight.bold, fontSize: 18),
                 ),
               ),
-              StatusBadge(status: data.status),
+              StatusBadge(status: data['status'] ?? 'pending'),
             ],
           ),
           const SizedBox(height: 16),
           detailItem(
-            title: 'Nomor Rekomendasi',
-            value: data.recommendationNumber,
-            icon: Icons.numbers_outlined,
-          ),
-          detailItem(
-            title: 'Nama Mahasiswa',
-            value: data.studentName,
-            icon: Icons.person_outline,
-          ),
-          detailItem(
-            title: 'NIM / Kelas',
-            value: '${data.nim} • ${data.className}',
-            icon: Icons.school_outlined,
-          ),
-          detailItem(
-            title: 'Ringkasan Kondisi',
-            value: data.conditionSummary,
+            title: 'Kondisi Medis',
+            value: data['medical_condition'] ?? '-',
             icon: Icons.medical_information_outlined,
           ),
           detailItem(
-            title: 'Alasan Rekomendasi',
-            value: data.recommendationReason,
+            title: 'Alasan / Diagnosa',
+            value: data['reason'] ?? '-',
             icon: Icons.accessible_outlined,
           ),
           detailItem(
-            title: 'Masa Rekomendasi',
-            value: '${data.startDate} - ${data.endDate}',
+            title: 'Masa Berlaku',
+            value: '${_formatDate(data['start_date'])} s/d ${_formatDate(data['end_date'])}',
             icon: Icons.date_range_outlined,
-          ),
-          detailItem(
-            title: 'Dibuat Oleh',
-            value: data.createdBy,
-            icon: Icons.verified_user_outlined,
           ),
         ],
       ),
@@ -178,42 +350,49 @@ class LiftRecommendationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final recommendation = FacilityRecommendationModel.dummy();
-
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(title: const Text('Rekomendasi Lift')),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          headerCard(),
-          const SizedBox(height: 16),
-          const InfoBanner(
-            title: 'Bukan Izin Final',
-            message:
-                'Klinik hanya memberikan rekomendasi medis. Keputusan akses fasilitas tetap berada pada pihak kampus atau unit terkait.',
-            icon: Icons.info_outline,
-          ),
-          const SizedBox(height: 20),
-          recommendationCard(recommendation),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.softMint,
-              borderRadius: BorderRadius.circular(18),
-            ),
-            child: const Text(
-              'Gunakan rekomendasi ini sebagai dokumen pendukung untuk pengajuan pertimbangan akses fasilitas.',
-              style: TextStyle(
-                color: AppColors.primaryGreen,
-                fontWeight: FontWeight.w600,
-                height: 1.4,
+      // TOMBOL MELAYANG UNTUK MENGAJUKAN IZIN
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _showRequestDialog,
+        backgroundColor: AppColors.primaryGreen,
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text('Ajukan Izin', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator(color: AppColors.primaryGreen))
+          : RefreshIndicator(
+              onRefresh: _fetchMyRecommendations,
+              color: AppColors.primaryGreen,
+              child: ListView(
+                padding: const EdgeInsets.all(20),
+                children: [
+                  headerCard(),
+                  const SizedBox(height: 16),
+                  const InfoBanner(
+                    title: 'Bukan Izin Final',
+                    message: 'Klinik hanya memberikan rekomendasi medis. Setelah disetujui, tunjukkan ini ke petugas kampus.',
+                    icon: Icons.info_outline,
+                  ),
+                  const SizedBox(height: 20),
+                  
+                  if (_errorMessage != null)
+                    Center(child: Text(_errorMessage!, style: const TextStyle(color: Colors.red))),
+
+                  if (_recommendations.isEmpty && _errorMessage == null)
+                    const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(20.0),
+                        child: Text("Anda belum memiliki pengajuan lift.", style: TextStyle(color: AppColors.textGray)),
+                      ),
+                    ),
+
+                  ..._recommendations.map((item) => recommendationCard(item)).toList(),
+                  const SizedBox(height: 60), // Space for floating button
+                ],
               ),
             ),
-          ),
-        ],
-      ),
     );
   }
 }
